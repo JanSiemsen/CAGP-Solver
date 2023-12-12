@@ -29,7 +29,6 @@ def generate_visibility_graph(guards: list[Guard], witnesses: list[Witness]) -> 
         for point2 in guards:
             if point1 == point2:
                 continue
-            print(point1.id, point2.id)
             if not point1.visibility.difference(point2.visibility):
                 G.add_edge(point1.id, point2.id)
                 continue
