@@ -38,7 +38,7 @@ class CAGPSolverMIP:
 
     def __add_color_symmetry_constraints(self):
         for k in range(self.K - 1):
-            self.model_bottleneck.addConstr(0 <= self.color_vars[k] - self.chromatic_number[k + 1])
+            self.model_bottleneck.addConstr(0 <= self.color_vars[k] - self.color_vars[k + 1])
 
     def __add_guard_symmetry_constraints(self):
         for k in range(self.K - 1):
@@ -49,7 +49,7 @@ class CAGPSolverMIP:
         """
         Enforce the bottleneck constraints.
         """
-        self.model_bottleneck.addConstr(self.chromatic_number >= sum(self.colors.values()))
+        self.model_bottleneck.addConstr(self.chromatic_number >= sum(self.color_vars.values()))
 
     def __callback_integral(self):
         pass
@@ -66,11 +66,6 @@ class CAGPSolverMIP:
     def callback(self, where, model, varmap):
         if where == grb.GRB.Callback.MIPSOL:
             # we have an integral solution (potentially valid solution)
-            # solution_edges = []
-            # for e, xe in varmap.items():
-            #    if model.cbGetSolution(xe) >= 0.5:
-            #        solution_edges.append(e)
-            # draw_edges(self.all_edges, solution_edges)
             self.__callback_integral(model, varmap)
         elif where == grb.GRB.Callback.MIPNODE and \
                 model.cbGet(grb.GRB.Callback.MIPNODE_STATUS) == grb.GRB.OPTIMAL:
@@ -103,16 +98,16 @@ class CAGPSolverMIP:
     def __solve_bottleneck(self):
         # Find the optimal bottleneck
         cb_bn = lambda model, where: self.callback(where, model)
-        self.model_bottleneck.optimize(cb_bn)
+        self.model_bottleneck.optimize()
         if self.model_bottleneck.status != grb.GRB.OPTIMAL:
             raise RuntimeError("Unexpected status after optimization!")
         bottleneck = self.model_bottleneck.objVal
-        print(f"[DBST SOLVER]: Found the minimum amount of edges required: {bottleneck}")
+        print(f"[DBST SOLVER]: Found the minimum amount of colors required: {bottleneck}")
         return [gk for gk, x_gk in self.guard_vars.items() if x_gk.x >= 0.5]
 
     def solve(self):
-        dbst_edges = self.__solve_bottleneck()
-        return dbst_edges
+        guard_coloring = self.__solve_bottleneck()
+        return guard_coloring
 
     def __provide_init_solution(self, solution):
         for e, v in self.bnvars.items():
