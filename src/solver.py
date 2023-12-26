@@ -15,6 +15,9 @@ def generate_guard_set(polygon: PolygonWithHoles) -> list[Guard]:
     return guards
 
 def generate_witness_set(polygon: PolygonWithHoles)-> list[Witness]:
+
+    
+
     witnesses = []
     index = 0
     for point in polygon.outer_boundary().boundary():

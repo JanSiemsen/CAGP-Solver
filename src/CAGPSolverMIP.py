@@ -1,6 +1,8 @@
 import gurobipy as grb
 import math
 import networkx as nx
+from guard import Guard
+from pyvispoly import PolygonWithHoles
 
 class CAGPSolverMIP:
 
@@ -51,8 +53,21 @@ class CAGPSolverMIP:
         """
         self.model_bottleneck.addConstr(self.chromatic_number >= sum(self.color_vars.values()))
 
+    def __check_coverage(self):
+        solution = [gk for gk, x_gk in self.guard_vars.items() if x_gk.x >= 0.5]
+
+        
+
     def __callback_integral(self):
-        pass
+        uncovered_poly = self.__check_coverage()
+        for polygon in uncovered_poly:
+            for guard in self.G:
+                if guard[0] == 'g':
+                    for k in range(self.K):
+                        if self.guard_vars[f'{guard}k{k}'].x >= 0.5:
+                            if guard.visibility.difference(polygon):
+                                self.model_bottleneck.cbLazy(self.guard_vars[f'{guard}k{k}'] == 0)
+                                return
     
 
     def __callback_fractional(self):
@@ -73,9 +88,11 @@ class CAGPSolverMIP:
             # (intermediate solution with fractional values for all booleans)
             self.__callback_fractional(model, varmap)
 
-    def __init__(self, G: nx.graph, K: int, solution=None):
+    def __init__(self, G: nx.graph, K: int, poly: PolygonWithHoles, guards: list[Guard], solution=None):
         self.G = G
         self.K = K
+        self.poly = poly
+        self.guards = guards
         self.model_bottleneck = grb.Model()  # "First stage" model for finding the bottleneck edge
         self.model_bottleneck.Params.Timelimit = 300
         self.model_bottleneck.Params.MemLimit = 4
