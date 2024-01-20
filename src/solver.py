@@ -46,3 +46,9 @@ def generate_visibility_graph(guards: list[Guard], witnesses: list[Witness]) -> 
     nx.draw_networkx(G, with_labels = True, pos=nx.kamada_kawai_layout(G))
     plt.show()
     return G
+
+# def add_wittnesses_to_visibility_graph(G: nx.Graph, guards: list[Guard], witnesses: list[Witness]) -> nx.Graph:
+#     for witness in witnesses:
+#         for point in guards:
+#             if point.visibility.contains(witness.position):
+#                 G.add_edge(point.id, witness.id)
