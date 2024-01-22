@@ -1,7 +1,29 @@
 # Bachelorarbeit Jan Siemsen
 
+### Thesis Meetings and Communication
 
-#### Material for an Empirical Thesis with Python
+While your thesis requires a significant amount of independent work and self-guided research, regularly obtaining feedback is vital.
+Balancing your autonomy with insights from your supervisor can greatly enhance the quality and direction of your thesis.
+
+**Regular Meetings:**
+- **Frequency and Duration:** Aim to have a 45-minute meeting with your supervisor every two weeks. This frequency helps maintain steady progress and provides you with timely feedback.
+- **Structure of Meetings:** 
+  - **Show Your Progress:** Begin by presenting what you've achieved. Visual representations of your work are highly appreciated.
+  - **Discuss Next Steps:** After presenting, discuss your upcoming plans and any adjustments needed.
+  - **Prepare Questions:** If you have queries, it's best to compile a list and bring them to the meeting for discussion.
+
+**Initiating Meetings:**
+- **Your Responsibility:** It's important that you take the initiative to schedule these meetings. Don't wait for your supervisor to reach out.
+- **Assumptions of Progress:** If you don't schedule a meeting, your supervisor might assume you don't need one. However, it's often during times of less progress that a meeting can be most beneficial.
+- **Communicating No Progress:** Don't hesitate to arrange a meeting even if you haven't made significant progress. Discussing challenges can be just as important as sharing successes.
+
+**Digital Communication and Thesis Writing:**
+- **Ask Questions Online:** You're encouraged to ask questions or seek guidance digitally in addition to regular meetings.
+- **Start Writing Early:** Begin documenting your thesis in the repository as early as possible. This allows your supervisor to understand and follow your work more effectively.
+- **Timely Feedback:** Presenting your work only at the last moment limits the opportunity for constructive feedback. Continuous sharing is key for receiving valuable insights throughout your thesis journey.
+
+
+### Material for an Empirical Thesis with Python
 
 The following resources are useful when writing a thesis with an empirical evaluation,
 e.g., when your task is to implement a solver for some optimization problem.
