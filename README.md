@@ -8,8 +8,10 @@ Date: 2024-02-01 -- 2024-05-01
 
 Supervisors: PK,DK
 
-## Aufgabenbeschreibung
+### Aufgabenstellung
 
+*Bei der Abdeckung von Innenbereichen mit Funk- oder Infrarotsignalen ist es einerseits wichtig, dass tatsächlich jeder Bereich mit einem ausreichenden Signal versorgt ist; andererseits treten Probleme mit Interferenz zwischen den Signalen verschiedener Sender auf, solange deren Frequenzen zu ähnlich sind. Daher sollten Sender, deren Sendebereiche sich überschneiden, möglichst unterschiedliche Frequenzen verwenden (oder alternativ in jedem Bereich wenigstens ein ungestörter Sender verfügbar sein). Da das verfügbare Spektrum in der Regel nur wenige hinreichend verschiedene Frequenzen zulässt, ist es sinnvoll, die Anzahl genutzter Frequenzen zu minimieren, ohne dabei die vollständige Abdeckung aufzugeben. Die aus dieser Problemstellung resultierenden Optimierungsprobleme heißen Chromatic Art Gallery Problem oder Conflict-Free Chromatic Art Gallery Problem.*
+>
 *In dieser Bachelorarbeit soll Herr Siemsen sich mit dem Berechnen von optimalen Lösungen für das Chromatic Art Gallery Problem beschäftigen.
 Für dieses Problem gibt es bereits einen Algorithmus von Zembon et al., die jedoch ausschließlich die Nutzung von MIP-Solvern betrachtet und über keine freie Implementierung verfügt.*
 
