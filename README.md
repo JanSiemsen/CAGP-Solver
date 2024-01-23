@@ -5,7 +5,20 @@ Computing Optimal Solutions for the Chromatic Art Gallery Problem
 Berechnung optimaler Lösungen für das Chromatic Art Gallery Problem
 
 Date: 2024-02-01 -- 2024-05-01
+
 Supervisors: PK,DK
+
+## Aufgabenbeschreibung
+
+*In dieser Bachelorarbeit soll Herr Siemsen sich mit dem Berechnen von optimalen Lösungen für das Chromatic Art Gallery Problem beschäftigen.
+Für dieses Problem gibt es bereits einen Algorithmus von Zembon et al., die jedoch ausschließlich die Nutzung von MIP-Solvern betrachtet und über keine freie Implementierung verfügt.*
+
+*Daher soll Herr Siemsen zuerst den Ansatz von Zambon et al. impelementieren und versuchen die Ergebnisse zu rekonstruieren.
+Anschließend soll er andere Ansätze probieren, wie etwa einen SAT-solver anstelle eines MIP-solvers zu verwenden.
+Dies hat sich etwa beim verwandten Dispersive Art Gallery Problem als effizienter erwiesen.
+Zusätzlich können Heuristiken entwickelt werden, die als Startlösung genutzt werden können, sowie die Problemvariante des Conflict-Free Chromatic AGP untersucht werden.
+Die Evaluation der Arbeit muss der SIGPLAN Empirical Evaluation Checklist entsprechen und einer üblichen empirischen Auswertung folgen,
+die auf einer konkreten Fragestellung, einem Experimentdesign, der Vorstellung der Ergebnisse und der Beantwortung der Fragestellung basiert.*
 
 
 ### Thesis Meetings and Communication
