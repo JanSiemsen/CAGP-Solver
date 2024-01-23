@@ -1,0 +1,139 @@
+\documentclass[11pt,a4paper,twoside,titlepage]{scrbook}
+\usepackage[utf8]{inputenc}
+\usepackage[pdfborder={0 0 0}]{hyperref}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{tikz}
+\usepackage{amsthm}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{float}
+\usepackage{cleveref}
+
+\theoremstyle{thmstyleone}%
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newtheorem{proposition}[theorem]{Proposition}% 
+
+\theoremstyle{thmstyletwo}%
+\newtheorem{example}[theorem]{Example}%
+\newtheorem{remark}[theorem]{Remark}%
+\newtheorem{observation}[theorem]{Observation}% 
+\newtheorem{claim}[theorem]{Claim}% 
+
+\theoremstyle{thmstylethree}%
+\newtheorem{definition}[theorem]{Definition}%
+
+\crefname{figure}{Figure}{Figures}
+
+\crefname{theorem}{Theorem}{Theorems}
+\crefname{lemma}{Lemma}{Lemmas}
+\crefname{claim}{Claim}{Claims}
+\crefname{observation}{Observation}{Observations}
+\crefname{corollary}{Corollary}{Corollaries}
+\crefname{section}{Section}{Sections}
+\crefname{definition}{Definition}{Definitions}
+
+\begin{document}
+	
+	\frontmatter
+
+	%----- TITLE PAGE -----
+	
+	\begin{titlepage}
+		%\noindent\makebox[\linewidth]{\rule{\paperwidth}{0.4pt}}
+	
+		\begin{tikzpicture}[remember picture, overlay]
+		\node [anchor=north east, inner sep=0pt]  at (17.9,2)%(current page.north east)
+			{\includegraphics[height=3.5cm]{figures/tu-bs_logo.jpg}};
+		\end{tikzpicture}
+		
+		\centering
+		\vspace{4cm}
+		{\scshape\huge Bachelor/Master Thesis\par}
+		\vspace{1.5cm}
+		{\Huge\bfseries Write down your Title right here!\par}
+		\vspace{2cm}
+		{\huge $\ll$Full Name$\gg$\par}
+		{\Large$\ll$Matrikel$\gg$\par}
+		{\Large$\ll$Programme$\gg$\par}
+		
+		\vfill\vfill
+		Institute of Operating Systems and Computer Networks\\
+		Algorithms Division
+		
+		\vfill
+		
+		\textbf{First reviewer}\par
+		$\ll$Anon Anonymous, Institute of XY$\gg$\par
+		\vfill
+		
+		\textbf{Second reviewer}\par
+		$\ll$Anon Anonymous, Institute of YX$\gg$\par
+		\vfill
+		
+		\textbf{Supervised by}\par
+		$\ll$Anon Anonymous$\gg$\par
+		$\ll$tba$\gg$\par
+		\vfill
+%\begin{description}
+%	\item[Supervisor]
+%	\item[First Reviewer]
+%	\item[Second Reviewer]
+%\end{description}
+		
+		
+		% Bottom of the page
+		{\large \today\par}
+	\end{titlepage}
+	
+	\cleardoublepage
+	
+	% statement of originality
+	\thispagestyle{plain} % no header
+	\vspace*{7cm}
+	\centerline{\bfseries Statement of Originality}
+	\vspace*{1em}
+	\noindent
+	This thesis has been performed independently with the support of my supervisor/s.
+	To the best of the author's knowledge, this thesis contains no material previously
+	published or written by another person except where due reference is made in the text.
+	
+	\par
+	\bigskip\noindent Braunschweig, \today \par
+	\vspace*{10mm}
+	\hfill\hrulefill
+	\cleardoublepage
+	
+	
+	\chapter*{Aufgabenstellung}
+	Here comes your "Aufgabenstellung". You should get this from your supervisor!
+	
+	
+	%---------------------
+	\include{./chapters/00-abstract}
+	
+	\tableofcontents
+	
+	%% Remove listoffigures or listoftables if not needed!
+	\listoffigures
+	
+	\listoftables
+	
+	\mainmatter
+	
+	\include{./chapters/01-introduction}	
+	\include{./chapters/02-preliminaries}
+	\include{./chapters/03-content}
+	\include{./chapters/04-experiments}
+	\include{./chapters/05-conclusion}
+	
+	\bibliographystyle{abbrv}
+	\bibliography{bibliography.bib}
+
+\end{document}
