@@ -11,14 +11,13 @@ Supervisors: PK,DK
 ### Aufgabenstellung
 
 *Bei der Abdeckung von Innenbereichen mit Funk- oder Infrarotsignalen ist es einerseits wichtig, dass tatsächlich jeder Bereich mit einem ausreichenden Signal versorgt ist; andererseits treten Probleme mit Interferenz zwischen den Signalen verschiedener Sender auf, solange deren Frequenzen zu ähnlich sind. Daher sollten Sender, deren Sendebereiche sich überschneiden, möglichst unterschiedliche Frequenzen verwenden (oder alternativ in jedem Bereich wenigstens ein ungestörter Sender verfügbar sein). Da das verfügbare Spektrum in der Regel nur wenige hinreichend verschiedene Frequenzen zulässt, ist es sinnvoll, die Anzahl genutzter Frequenzen zu minimieren, ohne dabei die vollständige Abdeckung aufzugeben. Die aus dieser Problemstellung resultierenden Optimierungsprobleme heißen Chromatic Art Gallery Problem oder Conflict-Free Chromatic Art Gallery Problem.*
->
-*In dieser Bachelorarbeit soll Herr Siemsen sich mit dem Berechnen von optimalen Lösungen für das Chromatic Art Gallery Problem beschäftigen.
-Für dieses Problem gibt es bereits einen Algorithmus von Zembon et al., die jedoch ausschließlich die Nutzung von MIP-Solvern betrachtet und über keine freie Implementierung verfügt.*
 
-*Daher soll Herr Siemsen zuerst den Ansatz von Zambon et al. impelementieren und versuchen die Ergebnisse zu rekonstruieren.
-Anschließend soll er andere Ansätze probieren, wie etwa einen SAT-solver anstelle eines MIP-solvers zu verwenden.
-Dies hat sich etwa beim verwandten Dispersive Art Gallery Problem als effizienter erwiesen.
-Zusätzlich können Heuristiken entwickelt werden, die als Startlösung genutzt werden können, sowie die Problemvariante des Conflict-Free Chromatic AGP untersucht werden.
+*In seiner Bachelorarbeit wird sich Herr Siemsen mit der Berechnung optimaler Lösungen für das Chromatic Art Gallery Problem befassen.
+Ein existierender Ansatz von Zembon et al., der sich auf den Einsatz von MIP-Solvern konzentriert, dient als Ausgangspunkt.
+Da dieser Ansatz keine frei verfügbare Implementierung aufweist, besteht Herrn Siemsens erste Aufgabe darin, diesen Ansatz zu implementieren und die Ergebnisse zu reproduzieren.*
+
+*Anschließend soll er alternative Lösungsansätze erforschen, wie zum Beispiel den Einsatz eines SAT-Solvers anstelle eines MIP-Solvers, was sich beim ähnlichen Dispersive Art Gallery Problem als effektiv erwiesen hat.
+Darüber hinaus können Heuristiken entwickelt werden, die als Ausgangspunkt für Lösungen dienen, und die Variante des Conflict-Free Chromatic AGP untersucht werden.
 Die Evaluation der Arbeit muss der SIGPLAN Empirical Evaluation Checklist entsprechen und einer üblichen empirischen Auswertung folgen,
 die auf einer konkreten Fragestellung, einem Experimentdesign, der Vorstellung der Ergebnisse und der Beantwortung der Fragestellung basiert.*
 
