@@ -1,5 +1,13 @@
 # Bachelorarbeit Jan Siemsen
 
+Computing Optimal Solutions for the Chromatic Art Gallery Problem
+
+Berechnung optimaler Lösungen für das Chromatic Art Gallery Problem
+
+Date: 2024-02-01 -- 2024-05-01
+Supervisors: PK,DK
+
+
 ### Thesis Meetings and Communication
 
 While your thesis requires a significant amount of independent work and self-guided research, regularly obtaining feedback is vital.
