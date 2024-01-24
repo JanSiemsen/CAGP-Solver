@@ -1,5 +1,4 @@
 import gurobipy as grb
-import math
 import networkx as nx
 from guard import Guard
 from witness import Witness
@@ -18,7 +17,7 @@ class CAGPSolverMIP:
             if guard[0] == 'g':
                 for k in range(self.K):
                     self.guard_vars[f'{guard}k{k}'] = self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY)
-        # Create a integer variable (vtype=grb.GRB.INTEGER) for the amount of colors used
+        # Create an integer variable (vtype=grb.GRB.INTEGER) for the amount of colors used
         self.chromatic_number = self.model.addVar(lb=0, ub=self.K, vtype=grb.GRB.INTEGER)
 
     def __add_witness_covering_constraints(self):
@@ -52,26 +51,30 @@ class CAGPSolverMIP:
 
     def __add_bottleneck_constraint(self):
         """
-        Enforce the bottleneck constraints.
+        Enforce the bottleneck constraint.
         """
         self.model.addConstr(self.chromatic_number >= sum(self.color_vars.values()))
 
     def __check_coverage(self, model, guard_vars):
         solution = [gk.split('k')[0] for gk, x_gk in guard_vars.items() if model.cbGetSolution(x_gk) >= 0.5]
         solution = list(set(solution))
-        print("List of colored guards: {solution}")
-        fig, ax = plt.subplots()
+
+        # print("List of colored guards: {solution}")
+        # fig, ax = plt.subplots()
+
         missing_area = [self.poly]
         for guard in solution:
-            guardpos = next((x.position for x in self.guards if x.id == guard), None)
-            plt.scatter(guardpos.x(), guardpos.y(), color='black', s=10)
             coverage = next((x.visibility for x in self.guards if x.id == guard), None)
-            #plot_polygon(coverage, None), ax=ax, color='green', alpha=0.5)
             missing_area = sum((poly.difference(coverage) for poly in missing_area), [])
+
+            # guardpos = next((x.position for x in self.guards if x.id == guard), None)
+            # plt.scatter(guardpos.x(), guardpos.y(), color='black', s=10)
+        
         # plot_polygon(self.poly, ax=ax, color='gray', alpha=0.5)
-        for polygon in missing_area:
-            plot_polygon(polygon, ax=ax, color='green', alpha=0.5)
-        plt.show()
+        # for polygon in missing_area:
+        #     plot_polygon(polygon, ax=ax, color='green', alpha=0.5)
+        # plt.show()
+        
         return missing_area
 
     def __callback_integral(self, model, guard_vars):
@@ -80,9 +83,7 @@ class CAGPSolverMIP:
         new_witnesses = []
         index = len(self.witnesses)
         for polygon in uncovered_poly:
-            print(polygon)
             for point in polygon.interior_sample_points():
-                print(point)
                 new_witnesses.append(f'w{index}')
                 self.witnesses.append(Witness(f'w{index}', point))
                 index += 1
@@ -97,11 +98,9 @@ class CAGPSolverMIP:
             model.cbLazy(1 <= sum(guard_vars[x] for x in subset))
 
     def __callback_fractional(self, model, varmap):
-        # Nothing has to be done in here.
+        # Nothing is being done here yet.
         # Some more advanced techniques can be used to add helpful constraints
-        # just from looking at a fractional solution, but this exceeds the scope
-        # of this course. It can still be interesting to analyze fractional solutions
-        # that the solver comes up with.
+        # just from looking at a fractional solution.
         pass
 
     def callback(self, where, model, varmap):
@@ -114,13 +113,13 @@ class CAGPSolverMIP:
             # (intermediate solution with fractional values for all booleans)
             self.__callback_fractional(model, varmap)
 
-    def __init__(self, K: int, poly: PolygonWithHoles, guards: list[Guard], witnesses: list[Witness], solution=None):
+    def __init__(self, K: int, poly: PolygonWithHoles, guards: list[Guard], witnesses: list[Witness], solution: list[list[Guard]]=None) -> list[str]:
         self.G = solver.generate_visibility_graph(guards, witnesses)
         self.K = K
         self.poly = poly
         self.guards = guards
         self.witnesses = witnesses
-        self.model = grb.Model()  # "First stage" model for finding the bottleneck edge
+        self.model = grb.Model()
         self.model.Params.Timelimit = 300
         self.model.Params.MemLimit = 16
 
@@ -132,8 +131,8 @@ class CAGPSolverMIP:
         self.__add_guard_symmetry_constraints()
         self.__add_bottleneck_constraint()
 
-        if solution:
-            self.__provide_init_solution(solution)
+        # if solution:
+        #     self.__provide_init_solution(solution)
         # Give the solver a heads up that lazy constraints will be utilized
         self.model.Params.lazyConstraints = 1
         # Set the objective

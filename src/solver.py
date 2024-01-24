@@ -1,9 +1,8 @@
-from pyvispoly import FieldNumber, Point, Polygon, PolygonWithHoles, VisibilityPolygonCalculator, plot_polygon
+from pyvispoly import PolygonWithHoles, VisibilityPolygonCalculator, plot_polygon
 from guard import Guard
 from witness import Witness
 import networkx as nx
 import matplotlib.pyplot as plt
-import numpy as np
 
 def generate_guard_set(polygon: PolygonWithHoles) -> list[Guard]:
     vis_calculator = VisibilityPolygonCalculator(polygon)
@@ -15,9 +14,6 @@ def generate_guard_set(polygon: PolygonWithHoles) -> list[Guard]:
     return guards
 
 def generate_witness_set(polygon: PolygonWithHoles)-> list[Witness]:
-
-    
-
     witnesses = []
     index = 0
     for point in polygon.outer_boundary().boundary():
@@ -43,8 +39,9 @@ def generate_visibility_graph(guards: list[Guard], witnesses: list[Witness]) -> 
             if point.visibility.contains(witness.position):
                 G.add_edge(point.id, witness.id)
 
-    nx.draw_networkx(G, with_labels = True, pos=nx.kamada_kawai_layout(G))
-    plt.show()
+    # nx.draw_networkx(G, with_labels = True, pos=nx.kamada_kawai_layout(G))
+    # plt.show()
+    
     return G
 
 # def add_wittnesses_to_visibility_graph(G: nx.Graph, guards: list[Guard], witnesses: list[Witness]) -> nx.Graph:
