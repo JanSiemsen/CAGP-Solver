@@ -34,6 +34,14 @@ class CAGPSolverMIP:
             if e[0][0] == 'g' and e[1][0] == 'g':
                 for k in range(self.K):
                     self.model.addConstr(0 >= self.guard_vars[f'{e[0]}k{k}'] + self.guard_vars[f'{e[1]}k{k}'] - self.color_vars[k])
+                
+    def __add_edge_clique_cover_constraints(self):
+        edge_clique_covers = solver.generate_edge_clique_covers(solver.generate_visibility_graph(self.guards), self.K)
+        color = 0
+        for cover in edge_clique_covers:
+            for clique in cover:
+                self.model.addConstr(self.color_vars[color] >= sum(self.guard_vars[f'{x}k{color}'] for x in clique))
+            color += 1
 
     def __add_guard_coloring_constraints(self):
         for guard in self.G:
@@ -88,7 +96,7 @@ class CAGPSolverMIP:
                 self.witnesses.append(Witness(f'w{index}', point))
                 index += 1
 
-        self.G = solver.generate_visibility_graph(self.guards, self.witnesses)
+        self.G = nx.compose(solver.generate_visibility_graph(self.guards), solver.generate_covering_graph(self.guards, self.witnesses))
 
         for witness in new_witnesses:
             subset = []
@@ -114,7 +122,7 @@ class CAGPSolverMIP:
             self.__callback_fractional(model, varmap)
 
     def __init__(self, K: int, poly: PolygonWithHoles, guards: list[Guard], witnesses: list[Witness], solution: list[list[Guard]]=None) -> list[str]:
-        self.G = solver.generate_visibility_graph(guards, witnesses)
+        self.G = nx.compose(solver.generate_visibility_graph(guards), solver.generate_covering_graph(guards, witnesses))
         self.K = K
         self.poly = poly
         self.guards = guards
@@ -125,7 +133,8 @@ class CAGPSolverMIP:
 
         self.__make_vars()
         self.__add_witness_covering_constraints()
-        self.__add_conflicting_guards_constraints()
+        # self.__add_conflicting_guards_constraints()
+        self.__add_edge_clique_cover_constraints()
         self.__add_guard_coloring_constraints()
         self.__add_color_symmetry_constraints()
         self.__add_guard_symmetry_constraints()
@@ -145,7 +154,7 @@ class CAGPSolverMIP:
         if self.model.status != grb.GRB.OPTIMAL:
             raise RuntimeError("Unexpected status after optimization!")
         obj_val = self.model.objVal
-        print(f"[DBST SOLVER]: Found the minimum amount of colors required: {obj_val}")
+        print(f"[CAGP SOLVER]: Found the minimum amount of colors required: {obj_val}")
         return [gk for gk, x_gk in self.guard_vars.items() if x_gk.x >= 0.5]
 
     def solve(self):
