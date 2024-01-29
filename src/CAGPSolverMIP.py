@@ -92,17 +92,21 @@ class CAGPSolverMIP:
         index = len(self.witnesses)
         for polygon in uncovered_poly:
             for point in polygon.interior_sample_points():
-                new_witnesses.append(f'w{index}')
-                self.witnesses.append(Witness(f'w{index}', point))
+                new_witnesses.append(Witness(f'w{index}', point))
+                # self.witnesses.append(Witness(f'w{index}', point))
                 index += 1
 
-        self.G = nx.compose(solver.generate_visibility_graph(self.guards), solver.generate_covering_graph(self.guards, self.witnesses))
+        # self.G = nx.compose(solver.generate_visibility_graph(self.guards), solver.generate_covering_graph(self.guards, self.witnesses))
 
         for witness in new_witnesses:
             subset = []
-            for guard in self.G.neighbors(witness):
-                for k in range(self.K):
-                    subset.append(f'{guard}k{k}')
+            # for guard in self.G.neighbors(witness):
+            #     for k in range(self.K):
+            #         subset.append(f'{guard}k{k}')
+            for guard in self.guards:
+                if guard.visibility.contains(witness.position):
+                    for k in range(self.K):
+                        subset.append(f'{guard.id}k{k}')
             model.cbLazy(1 <= sum(guard_vars[x] for x in subset))
 
     def __callback_fractional(self, model, varmap):
