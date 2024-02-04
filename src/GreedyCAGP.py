@@ -1,9 +1,9 @@
 from guard import Guard
 from witness import Witness
-import networkx as nx
-from ISSolverMIP import ISSolverMIP
+import rustworkx as rx
+from ISSolverMIP2 import ISSolverMIP
 
-def get_greedy_solution(guards: list[Guard], witnesses: list[Witness], G: nx.Graph) -> list[list[Guard]]:
+def get_greedy_solution(guards: list[Guard], witnesses: list[Witness], G: rx.PyGraph) -> list[list[Guard]]:
     solution = []
     uncovered = witnesses
     while (uncovered):

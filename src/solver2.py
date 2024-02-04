@@ -2,8 +2,9 @@ from itertools import combinations
 from pyvispoly import PolygonWithHoles, VisibilityPolygonCalculator, plot_polygon
 from guard import Guard
 from witness import Witness
-import networkx as nx
+import rustworkx as rx
 import matplotlib.pyplot as plt
+from itertools import combinations
 
 def generate_guard_set(polygon: PolygonWithHoles) -> list[Guard]:
     vis_calculator = VisibilityPolygonCalculator(polygon)
@@ -22,44 +23,53 @@ def generate_witness_set(polygon: PolygonWithHoles)-> list[Witness]:
         index += 1
     return witnesses
 
-def generate_visibility_graph(guards: list[Guard]) -> nx.Graph:
-    G = nx.Graph()
+def generate_visibility_graph(guards: list[Guard]) -> rx.PyGraph:
+    G = rx.PyGraph()
 
-    for point1 in guards:
-        for point2 in guards:
-            if point1 == point2:
-                continue
-            # If the visibility of point1 is fully contained in the visibility of point2, add an edge between them
-            if not point1.visibility.difference(point2.visibility):
-                G.add_edge(point1.id, point2.id)
-                continue
-            # If the visibility of point1 minus the visibility of point1 is smaller than the visibility of point 1, add an edge between them
-            if point1.visibility.difference(point2.visibility)[0].outer_boundary().area() < point1.visibility.outer_boundary().area():
-                G.add_edge(point1.id, point2.id)
+    for guard in guards:
+        G.add_node(guard.id)
+
+    for guard1, guard2 in combinations(G.node_indices(), 2):
+        g1 = next((x for x in guards if x.id == G[guard1]), None)
+        g2 = next((x for x in guards if x.id == G[guard2]), None)
+
+        # if the intersection between two guards in not empty, add an edge between them
+        if g1.visibility.intersection(g2.visibility):
+            G.add_edge(guard1, guard2, None)
 
     # nx.draw_networkx(G, with_labels = True, pos=nx.kamada_kawai_layout(G))
     # plt.show()
     
     return G
 
-def generate_covering_graph(guards: list[Guard], witnesses: list[Witness]) -> nx.Graph:
-    G = nx.Graph()
+def generate_covering_graph(guards: list[Guard], witnesses: list[Witness]) -> rx.PyGraph:
+    G = rx.PyGraph()
+
+    for guard in guards:
+        G.add_node(guard.id)
 
     for witness in witnesses:
-        for point in guards:
-            if point.visibility.contains(witness.position):
-                G.add_edge(point.id, witness.id)
+        G.add_node(witness.id)
+
+    for witness in G.node_indices():
+        if G[witness][0] == 'w':
+            for guard in G.node_indices():
+                if G[guard][0] == 'g':
+                    w = next((x for x in witnesses if x.id == G[witness]), None)
+                    g = next((x for x in guards if x.id == G[guard]), None)
+                    if g.visibility.contains(w.position):
+                        G.add_edge(guard, witness, None)
     
     # nx.draw_networkx(G, with_labels = True, pos=nx.kamada_kawai_layout(G))
     # plt.show()
     
     return G
 
-def generate_edge_clique_covers(G: nx.Graph, K: int) -> list[list[list[str]]]:
+def generate_edge_clique_covers(G: rx.PyGraph, K: int) -> list[list[list[str]]]:
     edge_clique_covers = []
 
     # Construct a matching composed of K edges with the lowest sum of degrees of their vertices
-    sorted_edges = iter(sorted(G.edges, key=lambda x: G.degree(x[0]) + G.degree(x[1])))
+    sorted_edges = iter(sorted(G.edge_index_map().values(), key=lambda x: G.degree(x[0]) + G.degree(x[1])))
     matching = []
     covered_vertices = set()
     for i in range(K):
@@ -75,28 +85,21 @@ def generate_edge_clique_covers(G: nx.Graph, K: int) -> list[list[list[str]]]:
         clique = build_clique(matching[i], G)
         uncovered_graph = G.copy()
         uncovered_graph.remove_edges_from(list(combinations(clique, 2)))
-        edge_clique_cover = [clique]
-        while len(uncovered_graph.edges) > 0:
-            sorted_edges = iter(sorted(uncovered_graph.edges, key=lambda x: G.degree(x[0]) + G.degree(x[1])))
+        edge_clique_cover = [[G[v] for v in clique]]
+        while len(uncovered_graph.edge_indices()) > 0:
+            sorted_edges = iter(sorted(uncovered_graph.edge_index_map().values(), key=lambda x: G.degree(x[0]) + G.degree(x[1])))
             clique = build_clique(next(sorted_edges), uncovered_graph)
             uncovered_graph.remove_edges_from(list(combinations(clique, 2)))
-            edge_clique_cover.append(clique)
+            edge_clique_cover.append([G[v] for v in clique])
         edge_clique_covers.append(edge_clique_cover)
-
     return edge_clique_covers
 
-def build_clique(e: (str, str), G: nx.Graph) -> list[list[str]]:
+def build_clique(e: (str, str), G: rx.PyGraph) -> list[list[str]]:
     clique = [e[0], e[1]]
-    candidates = set(G[e[0]]) & set(G[e[1]])
+    candidates = set(G.neighbors(e[0])) & set(G.neighbors(e[1]))
     while len(candidates) > 0:
         v = candidates.pop()
-        if all(v in G[u] for u in clique):
-            candidates &= set(G[v])
+        if all(v in G.neighbors(u) for u in clique):
+            candidates &= set(G.neighbors(v))
             clique.append(v)
     return clique
-
-# def add_wittnesses_to_visibility_graph(G: nx.Graph, guards: list[Guard], witnesses: list[Witness]) -> nx.Graph:
-#     for witness in witnesses:
-#         for point in guards:
-#             if point.visibility.contains(witness.position):
-#                 G.add_edge(point.id, witness.id)
