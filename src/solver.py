@@ -5,6 +5,8 @@ from witness import Witness
 import networkx as nx
 import matplotlib.pyplot as plt
 
+# This version uses the networkx library to create graphs
+
 def generate_guard_set(polygon: PolygonWithHoles) -> list[Guard]:
     vis_calculator = VisibilityPolygonCalculator(polygon)
     guards = []

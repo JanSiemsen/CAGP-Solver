@@ -1,10 +1,11 @@
 from itertools import combinations
-from pyvispoly import PolygonWithHoles, VisibilityPolygonCalculator, plot_polygon
+from pyvispoly import PolygonWithHoles, VisibilityPolygonCalculator
 from guard import Guard
 from witness import Witness
 import rustworkx as rx
-import matplotlib.pyplot as plt
 from itertools import combinations
+
+# This version uses the rustworkx library to create graphs
 
 def generate_guard_set(polygon: PolygonWithHoles) -> list[Guard]:
     vis_calculator = VisibilityPolygonCalculator(polygon)
@@ -36,9 +37,6 @@ def generate_visibility_graph(guards: list[Guard]) -> rx.PyGraph:
         # if the intersection between two guards in not empty, add an edge between them
         if g1.visibility.intersection(g2.visibility):
             G.add_edge(guard1, guard2, None)
-
-    # nx.draw_networkx(G, with_labels = True, pos=nx.kamada_kawai_layout(G))
-    # plt.show()
     
     return G
 
@@ -60,10 +58,37 @@ def generate_covering_graph(guards: list[Guard], witnesses: list[Witness]) -> rx
                     if g.visibility.contains(w.position):
                         G.add_edge(guard, witness, None)
     
-    # nx.draw_networkx(G, with_labels = True, pos=nx.kamada_kawai_layout(G))
-    # plt.show()
-    
     return G
+
+def generate_visibility_and_full_graph(guards: list[Guard], witnesses: list[Witness]) -> rx.PyGraph:
+    GC = rx.PyGraph()
+
+    for guard in guards:
+        GC.add_node(guard.id)
+
+    for guard1, guard2 in combinations(GC.node_indices(), 2):
+        g1 = next((x for x in guards if x.id == GC[guard1]), None)
+        g2 = next((x for x in guards if x.id == GC[guard2]), None)
+
+        # if the intersection between two guards in not empty, add an edge between them
+        if g1.visibility.intersection(g2.visibility):
+            GC.add_edge(guard1, guard2, None)
+
+    G = GC.copy()
+
+    for witness in witnesses:
+        G.add_node(witness.id)
+
+    for witness in G.node_indices():
+        if G[witness][0] == 'w':
+            for guard in G.node_indices():
+                if G[guard][0] == 'g':
+                    w = next((x for x in witnesses if x.id == G[witness]), None)
+                    g = next((x for x in guards if x.id == G[guard]), None)
+                    if g.visibility.contains(w.position):
+                        G.add_edge(guard, witness, None)
+    
+    return GC, G
 
 def generate_edge_clique_covers(G: rx.PyGraph, K: int) -> list[list[list[str]]]:
     edge_clique_covers = []

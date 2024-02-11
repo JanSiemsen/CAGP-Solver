@@ -6,6 +6,7 @@ import solver2
 from pyvispoly import PolygonWithHoles, plot_polygon
 import matplotlib.pyplot as plt
 
+# This version creates its constraints directly from the set of guards and witnesses
 class CAGPSolverMIP:
 
     def __make_vars(self):
@@ -27,12 +28,6 @@ class CAGPSolverMIP:
                     for k in range(self.K):
                         subset.append(f'{guard}k{k}')
             self.model.addConstr(1 <= sum(self.guard_vars[x] for x in subset))
-
-    def __add_conflicting_guards_constraints(self):
-        for e in self.G.edges():
-            if e[0][0] == 'g' and e[1][0] == 'g':
-                for k in range(self.K):
-                    self.model.addConstr(0 >= self.guard_vars[f'{e[0]}k{k}'] + self.guard_vars[f'{e[1]}k{k}'] - self.color_vars[k])
                 
     def __add_edge_clique_cover_constraints(self):
         edge_clique_covers = solver2.generate_edge_clique_covers(solver2.generate_visibility_graph(self.guards), self.K)
@@ -96,13 +91,8 @@ class CAGPSolverMIP:
                 # self.witnesses.append(Witness(f'w{index}', point))
                 index += 1
 
-        # self.G = nx.compose(solver.generate_visibility_graph(self.guards), solver.generate_covering_graph(self.guards, self.witnesses))
-
         for witness in new_witnesses:
             subset = []
-            # for guard in self.G.neighbors(witness):
-            #     for k in range(self.K):
-            #         subset.append(f'{guard}k{k}')
             for guard in self.guards:
                 if guard.visibility.contains(witness.position):
                     for k in range(self.K):
@@ -136,7 +126,6 @@ class CAGPSolverMIP:
 
         self.__make_vars()
         self.__add_witness_covering_constraints()
-        # self.__add_conflicting_guards_constraints()
         self.__add_edge_clique_cover_constraints()
         self.__add_guard_coloring_constraints()
         self.__add_color_symmetry_constraints()
