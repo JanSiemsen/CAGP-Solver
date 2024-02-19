@@ -2,7 +2,6 @@ import gurobipy as grb
 import rustworkx as rx
 from guard import Guard
 from witness import Witness
-import solver2
 from pyvispoly import PolygonWithHoles, plot_polygon
 import matplotlib.pyplot as plt
 
@@ -128,7 +127,7 @@ class CAGPSolverMIP:
         self.witnesses = witnesses
         self.edge_clique_covers = edge_clique_covers
         self.model = grb.Model()
-        self.model.Params.Timelimit = 300
+        # self.model.Params.Timelimit = 300
         self.model.Params.MemLimit = 16
 
         self.__make_vars()
