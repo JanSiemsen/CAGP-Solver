@@ -87,7 +87,7 @@ def generate_edge_clique_covers(G: nx.Graph, K: int) -> list[list[list[str]]]:
 
     return edge_clique_covers
 
-def build_clique(e: (str, str), G: nx.Graph) -> list[list[str]]:
+def build_clique(e: tuple[str, str], G: nx.Graph) -> list[list[str]]:
     clique = [e[0], e[1]]
     candidates = set(G[e[0]]) & set(G[e[1]])
     while len(candidates) > 0:

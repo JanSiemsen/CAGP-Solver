@@ -119,7 +119,7 @@ def generate_edge_clique_covers(G: rx.PyGraph, K: int) -> list[list[list[str]]]:
         edge_clique_covers.append(edge_clique_cover)
     return edge_clique_covers
 
-def build_clique(e: (str, str), G: rx.PyGraph) -> list[list[str]]:
+def build_clique(e: tuple[str, str], G: rx.PyGraph) -> list[list[str]]:
     clique = [e[0], e[1]]
     candidates = set(G.neighbors(e[0])) & set(G.neighbors(e[1]))
     while len(candidates) > 0:
