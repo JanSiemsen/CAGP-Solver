@@ -1,9 +1,10 @@
-from itertools import combinations
+from itertools import chain, combinations
 from pyvispoly import PolygonWithHoles, VisibilityPolygonCalculator
 from guard import Guard
 from witness import Witness
 import rustworkx as rx
 from itertools import combinations
+from heapq import heapify, heappop, heappush
 
 # This version uses the rustworkx library to create graphs
 
@@ -90,6 +91,7 @@ def generate_visibility_and_full_graph(guards: list[Guard], witnesses: list[Witn
     
     return GC, G
 
+'''
 def generate_edge_clique_covers(G: rx.PyGraph, K: int) -> list[list[list[str]]]:
     edge_clique_covers = []
 
@@ -111,14 +113,99 @@ def generate_edge_clique_covers(G: rx.PyGraph, K: int) -> list[list[list[str]]]:
         uncovered_graph = G.copy()
         uncovered_graph.remove_edges_from(list(combinations(clique, 2)))
         edge_clique_cover = [[G[v] for v in clique]]
+
+        # Build a priority queue of edges, with priority being the negative sum of degrees
+        # We use negative values to get a max-heap, as Python's heapq module only provides a min-heap
+        edge_queue = [(-uncovered_graph.degree(e[0]) - uncovered_graph.degree(e[1]), e) for e in uncovered_graph.edge_index_map().values()]
+        heapify(edge_queue)
+
         while len(uncovered_graph.edge_indices()) > 0:
-            sorted_edges = iter(sorted(uncovered_graph.edge_index_map().values(), key=lambda x: G.degree(x[0]) + G.degree(x[1])))
-            clique = build_clique(next(sorted_edges), uncovered_graph)
+
+            # Get the edge with highest priority
+            _, edge = heappop(edge_queue)
+
+            # sorted_edges = iter(sorted(uncovered_graph.edge_index_map().values(), key=lambda x: G.degree(x[0]) + G.degree(x[1])))
+            # clique = build_clique(next(sorted_edges), uncovered_graph)
+            
+            clique = build_clique(edge, uncovered_graph)
             uncovered_graph.remove_edges_from(list(combinations(clique, 2)))
             edge_clique_cover.append([G[v] for v in clique])
+
+            # Update the priority queue
+            edge_queue = [(-uncovered_graph.degree(x[0]) - uncovered_graph.degree(x[1]), x) for x in uncovered_graph.edge_index_map().values()]
+            heapify(edge_queue)
+
         edge_clique_covers.append(edge_clique_cover)
     return edge_clique_covers
+'''
 
+def sort_edge(e: tuple[int, int]):
+    return (min(e[0], e[1]), max(e[0], e[1]))
+
+REMOVED = '<removed-task>'  # placeholder for a removed task
+
+def generate_edge_clique_covers(G: rx.PyGraph, K: int) -> list[list[list[str]]]:
+    edge_clique_covers = []
+
+    # Construct a matching composed of K edges with the lowest sum of degrees of their vertices
+    sorted_edges = iter(sorted(G.edge_index_map().values(), key=lambda x: G.degree(x[0]) + G.degree(x[1])))
+    matching = []
+    covered_vertices = set()
+    for i in range(K):
+        edge = next(sorted_edges)
+        while(edge[0] in covered_vertices or edge[1] in covered_vertices):
+            edge = next(sorted_edges)
+        matching.append(edge)
+        covered_vertices.add(edge[0])
+        covered_vertices.add(edge[1])
+
+    # Construct a clique cover for each edge in the matching
+    for i in range(K):
+        clique = build_clique(matching[i], G)
+        uncovered_graph = G.copy()
+        uncovered_graph.remove_edges_from(list(combinations(clique, 2)))
+        edge_clique_cover = [[G[v] for v in clique]]
+
+        # Build a priority queue of edges, with priority being the negative sum of degrees
+        edge_map = {sort_edge((e[0], e[1])): [-uncovered_graph.degree(e[0]) - uncovered_graph.degree(e[1]), sort_edge((e[0], e[1]))] for e in uncovered_graph.edge_index_map().values()}
+        edge_queue = list(edge_map.values())
+        heapify(edge_queue)
+
+        while len(uncovered_graph.edge_indices()) > 0:
+            # Get the edge with highest priority
+            while True:
+                neg_degree, edge = heappop(edge_queue)
+                if edge is not REMOVED:
+                    current_neg_degree = -uncovered_graph.degree(edge[0]) - uncovered_graph.degree(edge[1])
+                    if neg_degree == current_neg_degree:
+                        break
+
+            clique = build_clique(edge, uncovered_graph)
+            edges_to_remove = list(combinations(clique, 2))
+            uncovered_graph.remove_edges_from(edges_to_remove)
+            edge_clique_cover.append([G[v] for v in clique])
+
+            # Mark the removed edges as "REMOVED" in the queue and keep track of the affected edges
+            affected_edges = set()
+            for e in edges_to_remove:
+                e = sort_edge((e[0], e[1]))
+                if e in edge_map:
+                    edge_map[e][1] = REMOVED
+                affected_edges.update([G.get_edge_endpoints_by_index(i) for i in G.incident_edges(e[0])])
+                affected_edges.update([G.get_edge_endpoints_by_index(i) for i in G.incident_edges(e[1])])
+
+            # Update the degrees in the queue for the affected edges
+            for e in affected_edges:
+                if e in edge_map and edge_map[e][1] is not REMOVED:
+                    edge_map[e][0] = -uncovered_graph.degree(e[0]) - uncovered_graph.degree(e[1])
+            
+            # Reorder the queue
+            edge_queue = [e for e in edge_queue if e[1] is not REMOVED]
+            heapify(edge_queue)
+
+        edge_clique_covers.append(edge_clique_cover)
+    return edge_clique_covers
+    
 def build_clique(e: tuple[str, str], G: rx.PyGraph) -> list[list[str]]:
     clique = [e[0], e[1]]
     candidates = set(G.neighbors(e[0])) & set(G.neighbors(e[1]))
