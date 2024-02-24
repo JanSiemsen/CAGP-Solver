@@ -6,7 +6,7 @@ from pyvispoly import PolygonWithHoles
 
 class CAGPSolverSAT:
     
-    def __init__(self, K: int, poly: PolygonWithHoles, guards: list[Guard], witnesses: list[Witness], G: rx.PyGraph, edge_clique_covers: list[list[list[str]]]) -> list[str]:
+    def __init__(self, K: int, poly: PolygonWithHoles, guards: list[Guard], witnesses: list[Witness], G: rx.PyGraph, edge_clique_covers: list[list[list[str]]]=None) -> list[str]:
         self.G = G
         self.K = K
         self.poly = poly
@@ -23,11 +23,12 @@ class CAGPSolverSAT:
         self.guard_to_var = {}
         self.var_to_guard = {}
         id = 1
-        for guard in self.guards:
-            for i in range(self.K):
-                self.guard_to_var[(guard.id, i)] = id
-                self.var_to_guard[id] = (guard.id, i)
-                id += 1
+        for guard in self.G.node_indices():
+            if self.G[guard][0] == 'g':
+                for i in range(self.K):
+                    self.guard_to_var[(guard, i)] = id
+                    self.var_to_guard[id] = (guard, i)
+                    id += 1
 
     def __add_witness_covering_constraints(self):
         for witness in self.G.node_indices():
@@ -35,14 +36,14 @@ class CAGPSolverSAT:
                 subset = []
                 for guard in self.G.neighbors(witness):
                     for k in range(self.K):
-                        subset.append((self.G[guard], k))
+                        subset.append((guard, k))
                 self.solver.add_clause([self.guard_to_var[guard] for guard in subset])
 
     def __add_conflicting_guards_constraints(self):
         for e in self.G.edge_index_map().values():
             if self.G[e[0]][0] == 'g' and self.G[e[1]][0] == 'g':
                 for k in range(self.K):
-                    self.solver.add_clause([-self.guard_to_var[(self.G[e[0]], k)], -self.guard_to_var[(self.G[e[1]], k)]])
+                    self.solver.add_clause([-self.guard_to_var[(e[0], k)], -self.guard_to_var[(e[1], k)]])
 
     # These constraints are being replaced by the conflicting guards constraints
     def __add_edge_clique_cover_constraints(self):
@@ -50,10 +51,7 @@ class CAGPSolverSAT:
             self.solver.add_clause([self.guard_to_var[guard] for guard in edge_clique])
 
     def __deactivate_guards(self, color_lim: int):
-        return [-self.guard_to_var[(guard.id, k)] for guard in self.guards for k in range(color_lim, self.K)]
-    
-    def __deactivated_guards(self, color_lim: int):
-        return [(guard.id, k) for guard in self.guards for k in range(color_lim, self.K)]
+        return [-self.guard_to_var[(guard, k)] for guard in self.G.node_indices() if self.G[guard][0] == 'g' for k in range(color_lim, self.K)]
     
     def __check_coverage(self, solution: list[int]):
         solution = [guard[0] for guard in solution]
@@ -62,7 +60,7 @@ class CAGPSolverSAT:
         missing_area = [self.poly]
         for guard in solution:
             # get the coverage of the guard
-            coverage = next((x.visibility for x in self.guards if x.id == guard), None)
+            coverage = next((x.visibility for x in self.guards if x.id == self.G[guard]), None)
             # remove the coverage from each polygon in the missing area
             missing_area = sum((poly.difference(coverage) for poly in missing_area), [])
 
@@ -81,10 +79,17 @@ class CAGPSolverSAT:
             color_lim, solution = self.binary_search()
         else:
             solution = self.linear_search(color_lim)
+
         missing_area = self.__check_coverage(solution)
+
+        iteration = 0
         while(missing_area):
+            iteration += 1
+            print('Adding new witnesses for missing area ({iteration})')
+
             new_witnesses = []
             index = len(self.witnesses)
+
             for polygon in missing_area:
                 new_witnesses.append(Witness(f'w{index}', polygon.interior_sample_points()[0]))
 
@@ -93,7 +98,7 @@ class CAGPSolverSAT:
                 for guard in self.guards:
                     if guard.visibility.contains(witness.position):
                         for k in range(self.K):
-                            subset.append((guard.id, k))
+                            subset.append((self.__get_node_index_by_data(guard.id), k))
                 self.solver.add_clause([self.guard_to_var[guard] for guard in subset])
 
             solution = self.linear_search(color_lim)
@@ -125,6 +130,12 @@ class CAGPSolverSAT:
             print(f'Checking for {color_lim} colors')
             solution = self.__solve(assumptions=self.__deactivate_guards(color_lim))
         return self.__solve(assumptions=self.__deactivate_guards(color_lim))
+    
+    def __get_node_index_by_data(self, data: str):
+        for node_index in self.G.node_indices():
+            if self.G.get_node_data(node_index) == data:
+                return node_index
+        return None
 
     def __del__(self):
         """

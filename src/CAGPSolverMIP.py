@@ -8,6 +8,33 @@ import matplotlib.pyplot as plt
 # This version of the solver takes in a precomputed visibility and covering graph to create its constraints
 class CAGPSolverMIP:
 
+    def __init__(self, K: int, poly: PolygonWithHoles, guards: list[Guard], witnesses: list[Witness], G: rx.PyGraph, edge_clique_covers: list[list[list[int]]], solution: list[list[Guard]]=None) -> list[str]:
+        self.G = G
+        self.K = K
+        self.poly = poly
+        self.guards = guards
+        self.witnesses = witnesses
+        self.edge_clique_covers = edge_clique_covers
+        self.model = grb.Model()
+        # self.model.Params.Timelimit = 300
+        self.model.Params.MemLimit = 16
+
+        self.__make_vars()
+        self.__add_witness_covering_constraints()
+        self.__add_edge_clique_cover_constraints()
+        self.__add_guard_coloring_constraints()
+        self.__add_color_symmetry_constraints()
+        self.__add_guard_symmetry_constraints()
+        self.__add_bottleneck_constraint()
+
+        # if solution:
+        #     self.__provide_init_solution(solution)
+
+        # Give the solver a heads up that lazy constraints will be utilized
+        self.model.Params.lazyConstraints = 1
+        # Set the objective
+        self.model.setObjective(self.chromatic_number, grb.GRB.MINIMIZE)
+
     def __make_vars(self):
         # Create binary variables for every color
         self.color_vars = {i: self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY) for i in range(self.K)}
@@ -120,46 +147,40 @@ class CAGPSolverMIP:
             # (intermediate solution with fractional values for all booleans)
             self.__callback_fractional(model, varmap)
 
-    def __init__(self, K: int, poly: PolygonWithHoles, guards: list[Guard], witnesses: list[Witness], G: rx.PyGraph, edge_clique_covers: list[list[list[int]]], solution: list[list[Guard]]=None) -> list[str]:
-        self.G = G
-        self.K = K
-        self.poly = poly
-        self.guards = guards
-        self.witnesses = witnesses
-        self.edge_clique_covers = edge_clique_covers
-        self.model = grb.Model()
-        # self.model.Params.Timelimit = 300
-        self.model.Params.MemLimit = 16
-
-        self.__make_vars()
-        self.__add_witness_covering_constraints()
-        self.__add_edge_clique_cover_constraints()
-        self.__add_guard_coloring_constraints()
-        self.__add_color_symmetry_constraints()
-        self.__add_guard_symmetry_constraints()
-        self.__add_bottleneck_constraint()
-
-        # if solution:
-        #     self.__provide_init_solution(solution)
-
-        # Give the solver a heads up that lazy constraints will be utilized
-        self.model.Params.lazyConstraints = 1
-        # Set the objective
-        self.model.setObjective(self.chromatic_number, grb.GRB.MINIMIZE)
-
-    def __solve_bottleneck(self):
-        # Find the optimal bottleneck
+    def solve(self):
         callback = lambda model, where: self.callback(where, model, self.guard_vars)
         self.model.optimize(callback)
         if self.model.status != grb.GRB.OPTIMAL:
             raise RuntimeError("Unexpected status after optimization!")
+        
+        # missing_area = self.__check_coverage()
+
+        # while(missing_area):
+        #     print('Adding new witnesses for the missing area')
+        #     new_witnesses = []
+        #     index = len(self.witnesses)
+        #     for polygon in missing_area:
+        #         for point in polygon.interior_sample_points():
+        #             new_witnesses.append(Witness(f'w{index}', point))
+        #             index += 1
+
+        #     for witness in new_witnesses:
+        #         subset = []
+        #         for guard in self.guards:
+        #             if guard.visibility.contains(witness.position):
+        #                 for k in range(self.K):
+        #                     subset.append((self.__get_node_index_by_data(guard.id), k))
+        #         self.model.addConstr(1 <= sum(self.guard_vars[x] for x in subset))
+            
+        #     self.model.optimize()
+        #     if self.model.status != grb.GRB.OPTIMAL:
+        #         raise RuntimeError("Unexpected status after optimization!")
+        
+        #     missing_area = self.__check_coverage()
+
         obj_val = self.model.objVal
         print(f"[CAGP SOLVER]: Found the minimum amount of colors required: {obj_val}")
         return [gk for gk, x_gk in self.guard_vars.items() if x_gk.x >= 0.5]
-
-    def solve(self):
-        guard_coloring = self.__solve_bottleneck()
-        return guard_coloring
 
     def __provide_init_solution(self, solution):
         for e, v in self.bnvars.items():

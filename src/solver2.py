@@ -1,10 +1,9 @@
 from itertools import combinations
-from pydoc import cli
 from pyvispoly import PolygonWithHoles, VisibilityPolygonCalculator
 from guard import Guard
 from witness import Witness
 import rustworkx as rx
-from heapq import heapify, heappop, heappush
+from heapq import heappop, heappush
 from collections import defaultdict
 
 # This version uses the rustworkx library to create graphs
@@ -109,7 +108,7 @@ def generate_visibility_and_full_graph(guards: list[Guard], witnesses: list[Witn
         g2 = guard_dict[GC[guard2]]
 
         # if the intersection between two guards in not empty, add an edge between them
-        if g1.visibility.intersection(g2.visibility):
+        if g1.visibility.do_intersect(g2.visibility):
             GC.add_edge(guard1, guard2, None)
 
     G = GC.copy()
@@ -226,14 +225,15 @@ def generate_edge_clique_covers(G: rx.PyGraph, K: int) -> list[list[list[str]]]:
             # Mark the removed edges as "REMOVED" in the queue and keep track of the affected edges
             affected_edges = set()
             for e in edges_to_remove:
-                e = sort_edge((e[0], e[1]))
+                e = (min(e[0], e[1]), max(e[0], e[1]))
                 if e in edge_map:
                     edge_map[e][1] = REMOVED
-                affected_edges.update([sort_edge(G.get_edge_endpoints_by_index(i)) for i in G.incident_edges(e[0])])
-                affected_edges.update([sort_edge(G.get_edge_endpoints_by_index(i)) for i in G.incident_edges(e[1])])
+                affected_edges.update([(n, e[0]) for n in G.neighbors(e[0])])
+                affected_edges.update([(n, e[1]) for n in G.neighbors(e[1])])
 
             # Update the degrees in the queue for the affected edges
             for e in affected_edges:
+                e = (min(e[0], e[1]), max(e[0], e[1]))
                 if e in edge_map and edge_map[e][1] is not REMOVED:
                     edge_map[e][0] = -uncovered_graph.degree(e[0]) - uncovered_graph.degree(e[1])
                     heappush(edge_queue, edge_map[e].copy())
