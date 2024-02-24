@@ -13,9 +13,10 @@ class CAGPSolverMIP:
         self.color_vars = {i: self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY) for i in range(self.K)}
         # Create binary variables for every guard color assignment
         self.guard_vars = {}
-        for guard in self.guards:
-            for k in range(self.K):
-                self.guard_vars[f'{guard.id}k{k}'] = self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY)
+        for guard in self.G.node_indices():
+            if self.G[guard][0] == 'g':
+                for k in range(self.K):
+                    self.guard_vars[(guard, k)] = self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY)
         # Create an integer variable (vtype=grb.GRB.INTEGER) for the amount of colors used
         self.chromatic_number = self.model.addVar(lb=0, ub=self.K, vtype=grb.GRB.INTEGER)
 
@@ -25,7 +26,7 @@ class CAGPSolverMIP:
                 subset = []
                 for guard in self.G.neighbors(witness):
                     for k in range(self.K):
-                        subset.append(f'{self.G[guard]}k{k}')
+                        subset.append((guard, k))
                 self.model.addConstr(1 <= sum(self.guard_vars[x] for x in subset))
 
     # These constraints are being replaced by the edge clique cover constraints
@@ -33,19 +34,19 @@ class CAGPSolverMIP:
         for e in self.G.edge_index_map().values():
             if self.G[e[0]][0] == 'g' and self.G[e[1]][0] == 'g':
                 for k in range(self.K):
-                    self.model.addConstr(0 >= self.guard_vars[f'{self.G[e[0]]}k{k}'] + self.guard_vars[f'{self.G[e[1]]}k{k}'] - self.color_vars[k])
+                    self.model.addConstr(0 >= self.guard_vars[(e[0], k)] + self.guard_vars[(e[1], k)] - self.color_vars[k])
                 
     def __add_edge_clique_cover_constraints(self):
         color = 0
         for cover in self.edge_clique_covers:
             for clique in cover:
-                self.model.addConstr(self.color_vars[color] >= sum(self.guard_vars[f'{x}k{color}'] for x in clique))
+                self.model.addConstr(self.color_vars[color] >= sum(self.guard_vars[(x, color)] for x in clique))
             color += 1
 
     def __add_guard_coloring_constraints(self):
         for guard in self.G.node_indices():
             if self.G[guard][0] == 'g':
-                self.model.addConstr(1 >= sum(self.guard_vars[x] if x.split('k')[0] == self.G[guard] else 0 for x in self.guard_vars.keys()))
+                self.model.addConstr(1 >= sum(self.guard_vars[x] if x[0] == guard else 0 for x in self.guard_vars.keys()))
 
     def __add_color_symmetry_constraints(self):
         for k in range(self.K - 1):
@@ -53,8 +54,8 @@ class CAGPSolverMIP:
 
     def __add_guard_symmetry_constraints(self):
         for k in range(self.K - 1):
-            self.model.addConstr(0 <= sum(self.guard_vars[x] if x.split('k')[1] == f'{k}' else 0 for x in self.guard_vars.keys())
-                                            - sum(self.guard_vars[x] if x.split('k')[1] == f'{k + 1}' else 0 for x in self.guard_vars.keys()))
+            self.model.addConstr(0 <= sum(self.guard_vars[x] if x[1] == k else 0 for x in self.guard_vars.keys())
+                                            - sum(self.guard_vars[x] if x[1] == k + 1 else 0 for x in self.guard_vars.keys()))
 
     def __add_bottleneck_constraint(self):
         """
@@ -63,7 +64,7 @@ class CAGPSolverMIP:
         self.model.addConstr(self.chromatic_number >= sum(self.color_vars.values()))
 
     def __check_coverage(self, model, guard_vars):
-        solution = [gk.split('k')[0] for gk, x_gk in guard_vars.items() if model.cbGetSolution(x_gk) >= 0.5]
+        solution = [gk[0] for gk, x_gk in guard_vars.items() if model.cbGetSolution(x_gk) >= 0.5]
         solution = list(set(solution))
 
         # print("List of colored guards: {solution}")
@@ -71,7 +72,7 @@ class CAGPSolverMIP:
 
         missing_area = [self.poly]
         for guard in solution:
-            coverage = next((x.visibility for x in self.guards if x.id == guard), None)
+            coverage = next((x.visibility for x in self.guards if x.id == self.G[guard]), None)
             missing_area = sum((poly.difference(coverage) for poly in missing_area), [])
 
             # guardpos = next((x.position for x in self.guards if x.id == guard), None)
@@ -100,7 +101,7 @@ class CAGPSolverMIP:
             for guard in self.guards:
                 if guard.visibility.contains(witness.position):
                     for k in range(self.K):
-                        subset.append(f'{guard.id}k{k}')
+                        subset.append((self.__get_node_index_by_data(guard.id), k))
             model.cbLazy(1 <= sum(guard_vars[x] for x in subset))
 
     def __callback_fractional(self, model, varmap):
@@ -119,7 +120,7 @@ class CAGPSolverMIP:
             # (intermediate solution with fractional values for all booleans)
             self.__callback_fractional(model, varmap)
 
-    def __init__(self, K: int, poly: PolygonWithHoles, guards: list[Guard], witnesses: list[Witness], G: rx.PyGraph, edge_clique_covers: list[list[list[str]]], solution: list[list[Guard]]=None) -> list[str]:
+    def __init__(self, K: int, poly: PolygonWithHoles, guards: list[Guard], witnesses: list[Witness], G: rx.PyGraph, edge_clique_covers: list[list[list[int]]], solution: list[list[Guard]]=None) -> list[str]:
         self.G = G
         self.K = K
         self.poly = poly
@@ -148,8 +149,8 @@ class CAGPSolverMIP:
 
     def __solve_bottleneck(self):
         # Find the optimal bottleneck
-        cb_bn = lambda model, where: self.callback(where, model, self.guard_vars)
-        self.model.optimize(cb_bn)
+        callback = lambda model, where: self.callback(where, model, self.guard_vars)
+        self.model.optimize(callback)
         if self.model.status != grb.GRB.OPTIMAL:
             raise RuntimeError("Unexpected status after optimization!")
         obj_val = self.model.objVal
@@ -166,3 +167,9 @@ class CAGPSolverMIP:
                 v.Start = 1
             else:
                 v.Start = 0
+
+    def __get_node_index_by_data(self, data: str):
+        for node_index in self.G.node_indices():
+            if self.G.get_node_data(node_index) == data:
+                return node_index
+        return None
