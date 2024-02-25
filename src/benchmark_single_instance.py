@@ -34,6 +34,11 @@ guards = solver2.generate_guard_set(poly)
 print('Creating witness set...')
 witnesses = solver2.generate_witness_set(poly)
 
+print('Creating AVP list...')
+avp_list = solver2.generate_AVP_list_recursive(guards)
+for avp in avp_list.face_to_guards():
+    print(avp[1])
+
 print('Creating visibility and full graph...')
 GC, G = solver2.generate_visibility_and_full_graph(guards, witnesses)
 

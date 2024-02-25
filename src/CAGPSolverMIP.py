@@ -32,6 +32,7 @@ class CAGPSolverMIP:
 
         # Give the solver a heads up that lazy constraints will be utilized
         self.model.Params.lazyConstraints = 1
+        self.model.Params.LogFile = 'mip.log'
         # Set the objective
         self.model.setObjective(self.chromatic_number, grb.GRB.MINIMIZE)
 
@@ -90,8 +91,9 @@ class CAGPSolverMIP:
         """
         self.model.addConstr(self.chromatic_number >= sum(self.color_vars.values()))
 
-    def __check_coverage(self, model, guard_vars):
-        solution = [gk[0] for gk, x_gk in guard_vars.items() if model.cbGetSolution(x_gk) >= 0.5]
+    def __check_coverage(self):
+        # solution = [gk[0] for gk, x_gk in guard_vars.items() if model.cbGetSolution(x_gk) >= 0.5]
+        solution = [gk[0] for gk, x_gk in self.guard_vars.items() if x_gk.x >= 0.5]
         solution = list(set(solution))
 
         # print("List of colored guards: {solution}")
@@ -113,23 +115,26 @@ class CAGPSolverMIP:
         return missing_area
 
     def __callback_integral(self, model, guard_vars):
-        uncovered_poly = self.__check_coverage(model, guard_vars)
+        # uncovered_poly = self.__check_coverage(model, guard_vars)
 
-        new_witnesses = []
-        index = len(self.witnesses)
-        for polygon in uncovered_poly:
-            for point in polygon.interior_sample_points():
-                new_witnesses.append(Witness(f'w{index}', point))
-                # self.witnesses.append(Witness(f'w{index}', point))
-                index += 1
+        # new_witnesses = []
+        # index = len(self.witnesses)
+        # for polygon in uncovered_poly:
+        #     for point in polygon.interior_sample_points():
+        #         new_witnesses.append(Witness(f'w{index}', point))
+        #         # self.witnesses.append(Witness(f'w{index}', point))
+        #         index += 1
 
-        for witness in new_witnesses:
-            subset = []
-            for guard in self.guards:
-                if guard.visibility.contains(witness.position):
-                    for k in range(self.K):
-                        subset.append((self.__get_node_index_by_data(guard.id), k))
-            model.cbLazy(1 <= sum(guard_vars[x] for x in subset))
+        # for witness in new_witnesses:
+        #     subset = []
+        #     for guard in self.guards:
+        #         if guard.visibility.contains(witness.position):
+        #             for k in range(self.K):
+        #                 subset.append((self.__get_node_index_by_data(guard.id), k))
+        #     model.cbLazy(1 <= sum(guard_vars[x] for x in subset))
+        # if(uncovered_poly):
+        #     self.iteration += 1
+        pass
 
     def __callback_fractional(self, model, varmap):
         # Nothing is being done here yet.
@@ -148,38 +153,41 @@ class CAGPSolverMIP:
             self.__callback_fractional(model, varmap)
 
     def solve(self):
-        callback = lambda model, where: self.callback(where, model, self.guard_vars)
-        self.model.optimize(callback)
+        self.iteration = 0
+        # callback = lambda model, where: self.callback(where, model, self.guard_vars)
+        self.model.optimize()
         if self.model.status != grb.GRB.OPTIMAL:
             raise RuntimeError("Unexpected status after optimization!")
         
-        # missing_area = self.__check_coverage()
+        missing_area = self.__check_coverage()
 
-        # while(missing_area):
-        #     print('Adding new witnesses for the missing area')
-        #     new_witnesses = []
-        #     index = len(self.witnesses)
-        #     for polygon in missing_area:
-        #         for point in polygon.interior_sample_points():
-        #             new_witnesses.append(Witness(f'w{index}', point))
-        #             index += 1
+        while(missing_area):
+            self.iteration += 1
+            print('Adding new witnesses for the missing area')
+            new_witnesses = []
+            index = len(self.witnesses)
+            for polygon in missing_area:
+                for point in polygon.interior_sample_points():
+                    new_witnesses.append(Witness(f'w{index}', point))
+                    index += 1
 
-        #     for witness in new_witnesses:
-        #         subset = []
-        #         for guard in self.guards:
-        #             if guard.visibility.contains(witness.position):
-        #                 for k in range(self.K):
-        #                     subset.append((self.__get_node_index_by_data(guard.id), k))
-        #         self.model.addConstr(1 <= sum(self.guard_vars[x] for x in subset))
+            for witness in new_witnesses:
+                subset = []
+                for guard in self.guards:
+                    if guard.visibility.contains(witness.position):
+                        for k in range(self.K):
+                            subset.append((self.__get_node_index_by_data(guard.id), k))
+                self.model.addConstr(1 <= sum(self.guard_vars[x] for x in subset))
             
-        #     self.model.optimize()
-        #     if self.model.status != grb.GRB.OPTIMAL:
-        #         raise RuntimeError("Unexpected status after optimization!")
+            self.model.optimize()
+            if self.model.status != grb.GRB.OPTIMAL:
+                raise RuntimeError("Unexpected status after optimization!")
         
-        #     missing_area = self.__check_coverage()
+            missing_area = self.__check_coverage()
 
         obj_val = self.model.objVal
         print(f"[CAGP SOLVER]: Found the minimum amount of colors required: {obj_val}")
+        print(f"[CAGP SOLVER]: Iterations: {self.iteration}")
         return [gk for gk, x_gk in self.guard_vars.items() if x_gk.x >= 0.5]
 
     def __provide_init_solution(self, solution):

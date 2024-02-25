@@ -1,5 +1,5 @@
 from itertools import combinations
-from pyvispoly import PolygonWithHoles, VisibilityPolygonCalculator
+from pyvispoly import PolygonWithHoles, VisibilityPolygonCalculator, AVP_Arrangement
 from guard import Guard
 from witness import Witness
 import rustworkx as rx
@@ -24,6 +24,25 @@ def generate_witness_set(polygon: PolygonWithHoles)-> list[Witness]:
         witnesses.append(Witness(f'w{index}', point))
         index += 1
     return witnesses
+
+def generate_AVP_list(guards: list[Guard]):
+    guards = guards.copy()
+    avp = AVP_Arrangement(guards[0].visibility, {guards[0].id})
+    guards.pop(0)
+    for guard in guards:
+        print(guard.id)
+        avp = avp.overlay(AVP_Arrangement(guard.visibility, {guard.id}))
+    return avp.face_to_guards()
+
+def generate_AVP_list_recursive(guards: list[Guard]) -> list[list[str]]:
+    half = len(guards)//2
+    leftHalf = guards[half:]
+    rightHalf = guards[:half]
+    if len(guards) == 1:
+        print(guards[0].id)
+        return AVP_Arrangement(guards[0].visibility, {guards[0].id})
+    else:
+        return generate_AVP_list_recursive(leftHalf).overlay(generate_AVP_list_recursive(rightHalf))
 
 def generate_visibility_graph(guards: list[Guard]) -> rx.PyGraph:
     G = rx.PyGraph()
