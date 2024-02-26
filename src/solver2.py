@@ -25,24 +25,22 @@ def generate_witness_set(polygon: PolygonWithHoles)-> list[Witness]:
         index += 1
     return witnesses
 
-def generate_AVP_list(guards: list[Guard]):
+def generate_AVP_list(guards: list[Guard]) -> AVP_Arrangement:
     guards = guards.copy()
     avp = AVP_Arrangement(guards[0].visibility, {guards[0].id})
     guards.pop(0)
     for guard in guards:
-        print(guard.id)
         avp = avp.overlay(AVP_Arrangement(guard.visibility, {guard.id}))
-    return avp.face_to_guards()
+    return avp
 
-def generate_AVP_list_recursive(guards: list[Guard]) -> list[list[str]]:
+def generate_AVP_recursive(guards: list[Guard]) -> AVP_Arrangement:
     half = len(guards)//2
     leftHalf = guards[half:]
     rightHalf = guards[:half]
     if len(guards) == 1:
-        print(guards[0].id)
         return AVP_Arrangement(guards[0].visibility, {guards[0].id})
     else:
-        return generate_AVP_list_recursive(leftHalf).overlay(generate_AVP_list_recursive(rightHalf))
+        return generate_AVP_recursive(leftHalf).overlay(generate_AVP_recursive(rightHalf))
 
 def generate_visibility_graph(guards: list[Guard]) -> rx.PyGraph:
     G = rx.PyGraph()
