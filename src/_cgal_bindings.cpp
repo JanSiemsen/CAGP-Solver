@@ -30,6 +30,9 @@
 #include <CGAL/create_straight_skeleton_2.h>
 #include <CGAL/Arr_overlay_2.h>
 #include <CGAL/Arr_default_overlay_traits.h>
+#include <CGAL/centroid.h>
+#include <CGAL/Arr_trapezoid_ric_point_location.h>
+#include "point_location_utils.h"
 //  fmt
 #include <fmt/core.h>
 
@@ -48,6 +51,7 @@ using PointLocation = CGAL::Arr_naive_point_location<Arrangement_2>;
 
 using Arr_face_extended_dcel = CGAL::Arr_face_extended_dcel<Traits_2, std::set<std::string>>;
 using Ex_arrangement = CGAL::Arrangement_2<Traits_2, Arr_face_extended_dcel>;
+using Arr_point_location = CGAL::Arr_trapezoid_ric_point_location<Ex_arrangement>;
 
 struct Guard_overlay {
   std::set<std::string> operator()(const std::set<std::string>& set1, const std::set<std::string>& set2) const {
@@ -650,7 +654,41 @@ PYBIND11_MODULE(_cgal_bindings, m) {
             }
             return result;
           },
-          "Returns a list of polygons that represent the shadow AVPs.");
+          "Returns a list of polygons that represent the shadow AVPs.")
+      .def("get_shadow_witnesses",
+          [](Ex_arrangement &self) {
+            std::vector<Point> result;
+            for (auto f = self.faces_begin(); f != self.faces_end(); ++f) {
+              if (f->is_unbounded() || f->data().empty())
+                continue;
+              bool is_shadow = true;
+              for (auto half_edge = f->outer_ccbs_begin(); half_edge != f->outer_ccbs_end(); ++half_edge) {
+                Ex_arrangement::Ccb_halfedge_circulator curr = *half_edge;
+                if (curr->twin()->face()->is_unbounded())
+                  continue;
+                if (std::includes(f->data().begin(), f->data().end(), curr->twin()->face()->data().begin(), curr->twin()->face()->data().end())) {
+                  is_shadow = false;
+                  break;
+                }
+              }
+              if (is_shadow) {
+                result.push_back(CGAL::centroid(_face_to_polygon(f)));
+              }
+            }
+            return result;
+          },
+          "Returns a list of points that represent the shadow witnesses.");
+
+  .py::class_<Arr_point_location>(m, "Arr_PointLocation",
+                            "A class to represent a point location structure with operations in log(n).")
+      .def(py::init<>([](const Ex_arrangement &arr) {
+            return Arr_point_location(arr);
+          }))
+      .def("locate",
+           [](Arr_point_location &self, const Point &p) {
+             return locate_point(self, p);
+           },
+           "Locate a point in the arrangement.");
 
   m.def("repair", &repair,
         "Repair a polygon with holes that is self "
