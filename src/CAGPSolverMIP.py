@@ -6,6 +6,7 @@ from pyvispoly import PolygonWithHoles, plot_polygon
 import matplotlib.pyplot as plt
 
 # This version of the solver takes in a precomputed visibility and covering graph to create its constraints
+# New witnesses are added whenever an optimal solution is found
 class CAGPSolverMIP:
 
     def __init__(self, K: int, poly: PolygonWithHoles, guards: list[Guard], witnesses: list[Witness], G: rx.PyGraph, edge_clique_covers: list[list[list[int]]], solution: list[list[Guard]]=None) -> list[str]:

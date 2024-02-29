@@ -1,81 +1,44 @@
 import gurobipy as grb
-import rustworkx as rx
 from guard import Guard
 from witness import Witness
+import solver2
 from pyvispoly import PolygonWithHoles, plot_polygon
 import matplotlib.pyplot as plt
 
-# This version of the solver takes in a precomputed visibility and covering graph to create its constraints
-# New witnesses are added whenever a valid integer solution is found
+# This version creates its constraints directly from the set of guards and witnesses
 class CAGPSolverMIP:
-
-    def __init__(self, K: int, poly: PolygonWithHoles, guards: list[Guard], witnesses: list[Witness], G: rx.PyGraph, edge_clique_covers: list[list[list[int]]], solution: list[list[Guard]]=None) -> list[str]:
-        self.G = G
-        self.K = K
-        self.poly = poly
-        self.guards = guards
-        self.witnesses = witnesses
-        self.edge_clique_covers = edge_clique_covers
-        self.model = grb.Model()
-        # self.model.Params.Timelimit = 300
-        self.model.Params.MemLimit = 16
-
-        self.__make_vars()
-        self.__add_witness_covering_constraints()
-        self.__add_edge_clique_cover_constraints()
-        self.__add_guard_coloring_constraints()
-        self.__add_color_symmetry_constraints()
-        self.__add_guard_symmetry_constraints()
-        self.__add_bottleneck_constraint()
-
-        # if solution:
-        #     self.__provide_init_solution(solution)
-
-        # Give the solver a heads up that lazy constraints will be utilized
-        self.model.Params.lazyConstraints = 1
-        self.model.Params.LogFile = 'mip.log'
-        # Set the objective
-        self.model.setObjective(self.chromatic_number, grb.GRB.MINIMIZE)
 
     def __make_vars(self):
         # Create binary variables for every color
         self.color_vars = {i: self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY) for i in range(self.K)}
         # Create binary variables for every guard color assignment
         self.guard_vars = {}
-        for guard in self.G.node_indices():
-            if self.G[guard][0] == 'g':
-                for k in range(self.K):
-                    self.guard_vars[(guard, k)] = self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY)
+        for guard in self.guards:
+            for k in range(self.K):
+                self.guard_vars[(guard.id, k)] = self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY)
         # Create an integer variable (vtype=grb.GRB.INTEGER) for the amount of colors used
         self.chromatic_number = self.model.addVar(lb=0, ub=self.K, vtype=grb.GRB.INTEGER)
 
     def __add_witness_covering_constraints(self):
-        for witness in self.G.node_indices():
-            if self.G[witness][0] == 'w':
-                subset = []
-                for guard in self.G.neighbors(witness):
+        for witness in self.witnesses:
+            subset = []
+            for guard in self.guards:
+                if guard.visibility.contains(witness.position):
                     for k in range(self.K):
-                        subset.append((guard, k))
-                self.model.addConstr(1 <= sum(self.guard_vars[x] for x in subset))
-
-    # These constraints are being replaced by the edge clique cover constraints
-    def __add_conflicting_guards_constraints(self):
-        for e in self.G.edge_index_map().values():
-            if self.G[e[0]][0] == 'g' and self.G[e[1]][0] == 'g':
-                for k in range(self.K):
-                    self.model.addConstr(0 >= self.guard_vars[(e[0], k)] + self.guard_vars[(e[1], k)] - self.color_vars[k])
+                        subset.append((guard.id, k))
+            self.model.addConstr(1 <= sum(self.guard_vars[x] for x in subset))
                 
     def __add_edge_clique_cover_constraints(self):
+        edge_clique_covers = solver2.generate_edge_clique_covers(solver2.generate_visibility_graph(self.guards), self.K)
         color = 0
-        for cover in self.edge_clique_covers:
+        for cover in edge_clique_covers:
             for clique in cover:
                 self.model.addConstr(self.color_vars[color] >= sum(self.guard_vars[(x, color)] for x in clique))
             color += 1
 
     def __add_guard_coloring_constraints(self):
-        for guard in self.G.node_indices():
-            if self.G[guard][0] == 'g':
-                self.model.addConstr(1 >= sum(self.guard_vars[x] if x[0] == guard else 0 for x in self.guard_vars.keys()))
+        for guard in self.guards:
+            self.model.addConstr(1 >= sum(self.guard_vars[x] if x[0] == guard.id else 0 for x in self.guard_vars.keys()))
 
     def __add_color_symmetry_constraints(self):
         for k in range(self.K - 1):
@@ -101,7 +64,9 @@ class CAGPSolverMIP:
 
         missing_area = [self.poly]
         for guard in solution:
-            coverage = next((x.visibility for x in self.guards if x.id == self.G[guard]), None)
+            # get the coverage of the guard
+            coverage = next((x.visibility for x in self.guards if x.id == guard), None)
+            # remove the coverage from each polygon in the missing area
             missing_area = sum((poly.difference(coverage) for poly in missing_area), [])
 
             # guardpos = next((x.position for x in self.guards if x.id == guard), None)
@@ -130,10 +95,8 @@ class CAGPSolverMIP:
             for guard in self.guards:
                 if guard.visibility.contains(witness.position):
                     for k in range(self.K):
-                        subset.append((self.__get_node_index_by_data(guard.id), k))
+                        subset.append((guard.id, k))
             model.cbLazy(1 <= sum(guard_vars[x] for x in subset))
-        if(uncovered_poly):
-            self.iteration += 1
 
     def __callback_fractional(self, model, varmap):
         # Nothing is being done here yet.
@@ -151,17 +114,43 @@ class CAGPSolverMIP:
             # (intermediate solution with fractional values for all booleans)
             self.__callback_fractional(model, varmap)
 
-    def solve(self):
-        self.iteration = 0
+    def __init__(self, K: int, poly: PolygonWithHoles, guards: list[Guard], witnesses: list[Witness], solution: list[list[Guard]]=None) -> list[str]:
+        self.K = K
+        self.poly = poly
+        self.guards = guards
+        self.witnesses = witnesses
+        self.model = grb.Model()
+        self.model.Params.Timelimit = 300
+        self.model.Params.MemLimit = 16
+
+        self.__make_vars()
+        self.__add_witness_covering_constraints()
+        self.__add_edge_clique_cover_constraints()
+        self.__add_guard_coloring_constraints()
+        self.__add_color_symmetry_constraints()
+        self.__add_guard_symmetry_constraints()
+        self.__add_bottleneck_constraint()
+
+        # if solution:
+        #     self.__provide_init_solution(solution)
+        # Give the solver a heads up that lazy constraints will be utilized
+        self.model.Params.lazyConstraints = 1
+        # Set the objective
+        self.model.setObjective(self.chromatic_number, grb.GRB.MINIMIZE)
+
+    def __solve_bottleneck(self):
+        # Find the optimal bottleneck
         callback = lambda model, where: self.callback(where, model, self.guard_vars)
         self.model.optimize(callback)
         if self.model.status != grb.GRB.OPTIMAL:
             raise RuntimeError("Unexpected status after optimization!")
-
         obj_val = self.model.objVal
         print(f"[CAGP SOLVER]: Found the minimum amount of colors required: {obj_val}")
-        print(f"[CAGP SOLVER]: Iterations: {self.iteration}")
         return [gk for gk, x_gk in self.guard_vars.items() if x_gk.x >= 0.5]
+
+    def solve(self):
+        guard_coloring = self.__solve_bottleneck()
+        return guard_coloring
 
     def __provide_init_solution(self, solution):
         for e, v in self.bnvars.items():
@@ -169,9 +158,3 @@ class CAGPSolverMIP:
                 v.Start = 1
             else:
                 v.Start = 0
-
-    def __get_node_index_by_data(self, data: str):
-        for node_index in self.G.node_indices():
-            if self.G.get_node_data(node_index) == data:
-                return node_index
-        return None

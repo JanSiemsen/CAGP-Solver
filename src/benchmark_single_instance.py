@@ -36,18 +36,26 @@ witnesses = solver2.generate_witness_set(poly)
 
 print('Creating AVP list...')
 avp = solver2.generate_AVP_recursive(guards)
-for face in avp.face_to_guards():
-    print(face[1])
 
-print('Creating visibility and full graph...')
-GC, G = solver2.generate_visibility_and_full_graph(guards, witnesses)
+# for p in avp.get_shadow_avps():
+#     print(p)
 
-print('Calculating greedy solution...')
-greedySolution = get_greedy_solution(guards, witnesses, GC)
-print("size of greedy solution: ", len(greedySolution))
+print('Generating shadow witness list...')
+for witness in avp.get_shadow_witnesses()[:10]:
+    print(witness)
 
-print('Generating edge clique covers...')
-edge_clique_covers = solver2.generate_edge_clique_covers(GC, len(greedySolution))
+# for face in avp.face_to_guards():
+#     print(face[1])
+
+# print('Creating visibility and full graph...')
+# GC, G = solver2.generate_visibility_and_full_graph(guards, witnesses)
+
+# print('Calculating greedy solution...')
+# greedySolution = get_greedy_solution(guards, witnesses, GC)
+# print("size of greedy solution: ", len(greedySolution))
+
+# print('Generating edge clique covers...')
+# edge_clique_covers = solver2.generate_edge_clique_covers(GC, len(greedySolution))
 
 # print('Creating MIP solver...')
 # solverMIP = CAGPSolverMIP(len(greedySolution), poly, guards, witnesses, G, edge_clique_covers)
