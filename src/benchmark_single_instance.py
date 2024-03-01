@@ -1,8 +1,8 @@
 from pyvispoly import Point, PolygonWithHoles, plot_polygon
-import solver2
+import solver
 from CAGPSolverMIP import CAGPSolverMIP
 from CAGPSolverSAT import CAGPSolverSAT
-from GreedyCAGP import get_greedy_solution
+from GreedyCAGP2 import get_greedy_solution
 import networkx as nx
 import matplotlib.pyplot as plt
 import distinctipy as distcolors
@@ -19,7 +19,7 @@ def convert_to_LinearRing(edges: list, pos: dict) -> list[Point]:
         edges.remove(cur_edge)
     return ring
 
-G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000001000.graphml.xz').read())
+G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000000100.graphml.xz').read())
 pos = {}
 for node in G.nodes(data=True):
     node_location = tuple(node[1].values())
@@ -29,40 +29,39 @@ for node in G.nodes(data=True):
 ring = convert_to_LinearRing(list(G.edges()), pos)
 poly = PolygonWithHoles(ring)
 
+# print('Creating guard set...')
+# guards = solver.generate_guard_set(poly)
+# print('Creating witness set...')
+# witnesses = solver.generate_witness_set(poly)
+
 print('Creating guard set...')
-guards = solver2.generate_guard_set(poly)
+guards = solver.generate_guard_set2(poly)
+
+print('Creating AVP arrangement...')
+avp = solver.generate_AVP_recursive2(list(guards.items()))
+
 print('Creating witness set...')
-witnesses = solver2.generate_witness_set(poly)
-
-print('Creating AVP list...')
-avp = solver2.generate_AVP_recursive(guards)
-
-# for p in avp.get_shadow_avps():
-#     print(p)
-
-print('Generating shadow witness list...')
-for witness in avp.get_shadow_witnesses()[:10]:
-    print(witness)
-
-# for face in avp.face_to_guards():
-#     print(face[1])
+initial_witnesses, remaining_witnesses = solver.generate_witness_set2(avp, len(guards))
 
 # print('Creating visibility and full graph...')
-# GC, G = solver2.generate_visibility_and_full_graph(guards, witnesses)
+# GC, G = solver.generate_visibility_and_full_graph(guards, witnesses)
 
-# print('Calculating greedy solution...')
-# greedySolution = get_greedy_solution(guards, witnesses, GC)
-# print("size of greedy solution: ", len(greedySolution))
+print('Creating visibility and full graph...')
+GC, G = solver.generate_visibility_and_full_graph2(guards, initial_witnesses)
 
-# print('Generating edge clique covers...')
-# edge_clique_covers = solver2.generate_edge_clique_covers(GC, len(greedySolution))
+print('Calculating greedy solution...')
+greedySolution = get_greedy_solution(guards, initial_witnesses, GC)
+print("size of greedy solution: ", len(greedySolution))
 
-# print('Creating MIP solver...')
-# solverMIP = CAGPSolverMIP(len(greedySolution), poly, guards, witnesses, G, edge_clique_covers)
-# print('Solving MIP...')
-# solution = solverMIP.solve()
-# print([(G[guard], color) for guard, color in solution])
-# print(solver2.verify_solver_solution(solution, GC))
+print('Generating edge clique covers...')
+edge_clique_covers = solver.generate_edge_clique_covers(GC, len(greedySolution))
+
+print('Creating MIP solver...')
+solverMIP = CAGPSolverMIP(len(greedySolution), poly, guards, initial_witnesses, G, edge_clique_covers)
+print('Solving MIP...')
+solution = solverMIP.solve()
+print([(G[guard], color) for guard, color in solution])
+print(solver.verify_solver_solution(solution, GC))
 
 # print('Creating SAT solver...')
 # solverSAT = CAGPSolverSAT(len(greedySolution), poly, guards, witnesses, G)
@@ -70,4 +69,4 @@ for witness in avp.get_shadow_witnesses()[:10]:
 # solution = solverSAT.solve()
 # solverSAT.__del__()
 # print([(G[guard], color) for guard, color in solution])
-# print(solver2.verify_solver_solution(solution, GC))
+# print(solve.verify_solver_solution(solution, GC))

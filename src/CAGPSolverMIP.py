@@ -2,14 +2,14 @@ import gurobipy as grb
 import rustworkx as rx
 from guard import Guard
 from witness import Witness
-from pyvispoly import PolygonWithHoles, plot_polygon
+from pyvispoly import Point, PolygonWithHoles, plot_polygon
 import matplotlib.pyplot as plt
 
 # This version of the solver takes in a precomputed visibility and covering graph to create its constraints
 # New witnesses are added whenever an optimal solution is found
 class CAGPSolverMIP:
 
-    def __init__(self, K: int, poly: PolygonWithHoles, guards: list[Guard], witnesses: list[Witness], G: rx.PyGraph, edge_clique_covers: list[list[list[int]]], solution: list[list[Guard]]=None) -> list[str]:
+    def __init__(self, K: int, poly: PolygonWithHoles, guards: dict[int, tuple[Point, PolygonWithHoles]], witnesses: dict[int, Point], G: rx.PyGraph, edge_clique_covers: list[list[list[int]]], solution: list[list[Guard]]=None) -> list[str]:
         self.G = G
         self.K = K
         self.poly = poly
@@ -42,26 +42,24 @@ class CAGPSolverMIP:
         self.color_vars = {i: self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY) for i in range(self.K)}
         # Create binary variables for every guard color assignment
         self.guard_vars = {}
-        for guard in self.G.node_indices():
-            if self.G[guard][0] == 'g':
-                for k in range(self.K):
-                    self.guard_vars[(guard, k)] = self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY)
+        for guard in self.G.node_indices()[:len(self.guards)]:
+            for k in range(self.K):
+                self.guard_vars[(guard, k)] = self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY)
         # Create an integer variable (vtype=grb.GRB.INTEGER) for the amount of colors used
         self.chromatic_number = self.model.addVar(lb=0, ub=self.K, vtype=grb.GRB.INTEGER)
 
     def __add_witness_covering_constraints(self):
-        for witness in self.G.node_indices():
-            if self.G[witness][0] == 'w':
-                subset = []
-                for guard in self.G.neighbors(witness):
-                    for k in range(self.K):
-                        subset.append((guard, k))
-                self.model.addConstr(1 <= sum(self.guard_vars[x] for x in subset))
+        for witness in self.G.node_indices()[len(self.guards):]:
+            subset = []
+            for guard in self.G.neighbors(witness):
+                for k in range(self.K):
+                    subset.append((guard, k))
+            self.model.addConstr(1 <= sum(self.guard_vars[x] for x in subset))
 
     # These constraints are being replaced by the edge clique cover constraints
     def __add_conflicting_guards_constraints(self):
         for e in self.G.edge_index_map().values():
-            if self.G[e[0]][0] == 'g' and self.G[e[1]][0] == 'g':
+            if self.G[e[0]] < len(self.guards) and self.G[e[1]] < len(self.guards):
                 for k in range(self.K):
                     self.model.addConstr(0 >= self.guard_vars[(e[0], k)] + self.guard_vars[(e[1], k)] - self.color_vars[k])
                 
@@ -73,9 +71,8 @@ class CAGPSolverMIP:
             color += 1
 
     def __add_guard_coloring_constraints(self):
-        for guard in self.G.node_indices():
-            if self.G[guard][0] == 'g':
-                self.model.addConstr(1 >= sum(self.guard_vars[x] if x[0] == guard else 0 for x in self.guard_vars.keys()))
+        for guard in self.G.node_indices()[:len(self.guards)]:
+            self.model.addConstr(1 >= sum(self.guard_vars[x] if x[0] == guard else 0 for x in self.guard_vars.keys()))
 
     def __add_color_symmetry_constraints(self):
         for k in range(self.K - 1):

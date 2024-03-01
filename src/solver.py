@@ -1,5 +1,7 @@
 from itertools import combinations
-from pyvispoly import PolygonWithHoles, VisibilityPolygonCalculator, AVP_Arrangement
+from operator import index
+from turtle import left
+from pyvispoly import Point, PolygonWithHoles, VisibilityPolygonCalculator, AVP_Arrangement
 from guard import Guard
 from witness import Witness
 import rustworkx as rx
@@ -17,6 +19,15 @@ def generate_guard_set(polygon: PolygonWithHoles) -> list[Guard]:
         index += 1
     return guards
 
+def generate_guard_set2(polygon: PolygonWithHoles) -> dict[int, tuple[Point, PolygonWithHoles]]:
+    vis_calculator = VisibilityPolygonCalculator(polygon)
+    guards = {}
+    index = 0
+    for point in polygon.outer_boundary().boundary():
+        guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
+        index += 1
+    return guards
+
 def generate_witness_set(polygon: PolygonWithHoles)-> list[Witness]:
     witnesses = []
     index = 0
@@ -24,6 +35,18 @@ def generate_witness_set(polygon: PolygonWithHoles)-> list[Witness]:
         witnesses.append(Witness(f'w{index}', point))
         index += 1
     return witnesses
+
+def generate_witness_set2(avp: AVP_Arrangement, offset: int)-> dict[int, Point]:
+    initial_witnesses = {}
+    remaining_witnesses = []
+    index = 0
+    for point in avp.get_shadow_witnesses():
+        if index < offset:
+            initial_witnesses[index + offset] = point
+            index += 1
+        else:
+            remaining_witnesses.append(point)
+    return initial_witnesses, remaining_witnesses
 
 def generate_AVP_list(guards: list[Guard]) -> AVP_Arrangement:
     guards = guards.copy()
@@ -34,13 +57,22 @@ def generate_AVP_list(guards: list[Guard]) -> AVP_Arrangement:
     return avp
 
 def generate_AVP_recursive(guards: list[Guard]) -> AVP_Arrangement:
-    half = len(guards)//2
-    leftHalf = guards[half:]
-    rightHalf = guards[:half]
+    half = int(len(guards)//2)
+    leftHalf = guards[:half]
+    rightHalf = guards[half:]
     if len(guards) == 1:
         return AVP_Arrangement(guards[0].visibility, {guards[0].id})
     else:
         return generate_AVP_recursive(leftHalf).overlay(generate_AVP_recursive(rightHalf))
+    
+def generate_AVP_recursive2(guards: list[tuple[int, tuple[Point, PolygonWithHoles]]]) -> AVP_Arrangement:
+    half = int(len(guards)//2)
+    leftHalf = guards[:half]
+    rightHalf = guards[half:]
+    if len(guards) == 1:
+        return AVP_Arrangement(guards[0][1][1], {guards[0][0]})
+    else:
+        return generate_AVP_recursive2(leftHalf).overlay(generate_AVP_recursive2(rightHalf))
 
 def generate_visibility_graph(guards: list[Guard]) -> rx.PyGraph:
     G = rx.PyGraph()
@@ -78,38 +110,6 @@ def generate_covering_graph(guards: list[Guard], witnesses: list[Witness]) -> rx
     
     return G
 
-'''
-def generate_visibility_and_full_graph(guards: list[Guard], witnesses: list[Witness]) -> rx.PyGraph:
-    GC = rx.PyGraph()
-
-    for guard in guards:
-        GC.add_node(guard.id)
-
-    for guard1, guard2 in combinations(GC.node_indices(), 2):
-        g1 = next((x for x in guards if x.id == GC[guard1]), None)
-        g2 = next((x for x in guards if x.id == GC[guard2]), None)
-
-        # if the intersection between two guards in not empty, add an edge between them
-        if g1.visibility.intersection(g2.visibility):
-            GC.add_edge(guard1, guard2, None)
-
-    G = GC.copy()
-
-    for witness in witnesses:
-        G.add_node(witness.id)
-
-    for witness in G.node_indices():
-        if G[witness][0] == 'w':
-            for guard in G.node_indices():
-                if G[guard][0] == 'g':
-                    w = next((x for x in witnesses if x.id == G[witness]), None)
-                    g = next((x for x in guards if x.id == G[guard]), None)
-                    if g.visibility.contains(w.position):
-                        G.add_edge(guard, witness, None)
-    
-    return GC, G
-'''
-
 def generate_visibility_and_full_graph(guards: list[Guard], witnesses: list[Witness]) -> rx.PyGraph:
     GC = rx.PyGraph()
 
@@ -141,6 +141,35 @@ def generate_visibility_and_full_graph(guards: list[Guard], witnesses: list[Witn
                     g = guard_dict[G[guard]]
                     if g.visibility.contains(w.position):
                         G.add_edge(guard, witness, None)
+    
+    return GC, G
+
+def generate_visibility_and_full_graph2(guards: dict[int, tuple[Point, PolygonWithHoles]], witnesses: dict[int, Point]) -> rx.PyGraph:
+    GC = rx.PyGraph()
+
+    for guard in guards.keys():
+        GC.add_node(guard)
+
+    for guard1, guard2 in combinations(GC.node_indices(), 2):
+        g1 = guards[GC[guard1]]
+        g2 = guards[GC[guard2]]
+
+        # if the intersection between two guards in not empty, add an edge between them
+        if g1[1].do_intersect(g2[1]):
+            GC.add_edge(guard1, guard2, None)
+
+    G = GC.copy()
+
+    # Only add as many witnesses as guards from the shadow AVP witnesses
+    for witness in witnesses.keys():
+        G.add_node(witness)
+
+    for witness in G.node_indices()[len(guards):]:
+        for guard in G.node_indices()[:len(guards)]:
+            w = witnesses[G[witness]]
+            g = guards[G[guard]]
+            if g[1].contains(w):
+                G.add_edge(guard, witness, None)
     
     return GC, G
 
@@ -254,10 +283,6 @@ def generate_edge_clique_covers(G: rx.PyGraph, K: int) -> list[list[list[str]]]:
                 if e in edge_map and edge_map[e][1] is not REMOVED:
                     edge_map[e][0] = -uncovered_graph.degree(e[0]) - uncovered_graph.degree(e[1])
                     heappush(edge_queue, edge_map[e].copy())
-            
-            # Reorder the queue
-            # edge_queue = [e for e in edge_queue if e[1] is not REMOVED]
-            # heapify(edge_queue)
 
         edge_clique_covers.append(edge_clique_cover)
     return edge_clique_covers

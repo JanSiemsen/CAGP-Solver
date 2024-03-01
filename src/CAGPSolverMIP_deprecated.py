@@ -1,7 +1,7 @@
 import gurobipy as grb
 from guard import Guard
 from witness import Witness
-import solver2
+import solver
 from pyvispoly import PolygonWithHoles, plot_polygon
 import matplotlib.pyplot as plt
 
@@ -29,7 +29,7 @@ class CAGPSolverMIP:
             self.model.addConstr(1 <= sum(self.guard_vars[x] for x in subset))
                 
     def __add_edge_clique_cover_constraints(self):
-        edge_clique_covers = solver2.generate_edge_clique_covers(solver2.generate_visibility_graph(self.guards), self.K)
+        edge_clique_covers = solver.generate_edge_clique_covers(solver.generate_visibility_graph(self.guards), self.K)
         color = 0
         for cover in edge_clique_covers:
             for clique in cover:

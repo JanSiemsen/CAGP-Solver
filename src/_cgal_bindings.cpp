@@ -48,13 +48,13 @@ using Halfedge_const_handle = Arrangement_2::Halfedge_const_handle;
 using Face_handle = Arrangement_2::Face_handle;
 using PointLocation = CGAL::Arr_naive_point_location<Arrangement_2>;
 
-using Arr_face_extended_dcel = CGAL::Arr_face_extended_dcel<Traits_2, std::set<std::string>>;
+using Arr_face_extended_dcel = CGAL::Arr_face_extended_dcel<Traits_2, std::set<int>>;
 using Ex_arrangement = CGAL::Arrangement_2<Traits_2, Arr_face_extended_dcel>;
 using Arr_point_location = CGAL::Arr_trapezoid_ric_point_location<Arrangement_2>;
 
 struct Guard_overlay {
-  std::set<std::string> operator()(const std::set<std::string>& set1, const std::set<std::string>& set2) const {
-    std::set<std::string> result;
+  std::set<int> operator()(const std::set<int>& set1, const std::set<int>& set2) const {
+    std::set<int> result;
     std::set_union(set1.begin(), set1.end(), set2.begin(), set2.end(), std::inserter(result, result.begin()));
     return result;
   }
@@ -627,7 +627,7 @@ PYBIND11_MODULE(_cgal_bindings, m) {
 
   py::class_<Ex_arrangement>(m, "AVP_Arrangement",
                             "A class to represent a guard arrangement.")
-      .def(py::init<>([](const Polygon2WithHoles &poly, std::set<std::string> guard) {
+      .def(py::init<>([](const Polygon2WithHoles &poly, std::set<int> guard) {
             Ex_arrangement arr = _polygon_to_ex_arrangement(poly);
             for (auto f = arr.faces_begin(); f != arr.faces_end(); ++f) {
               if (f->is_unbounded())
@@ -646,7 +646,7 @@ PYBIND11_MODULE(_cgal_bindings, m) {
            "Computes the overlay of two arrangements.")
       .def("face_to_guards",
             [](Ex_arrangement &self) {
-              std::vector<std::tuple<Polygon2WithHoles, std::set<std::string>>> face_to_guard_map;
+              std::vector<std::tuple<Polygon2WithHoles, std::set<int>>> face_to_guard_map;
               for (auto f = self.faces_begin(); f != self.faces_end(); ++f) {
                 if (f->is_unbounded())
                   continue;
@@ -737,6 +737,19 @@ PYBIND11_MODULE(_cgal_bindings, m) {
             return result;
           },
           "Returns a list of points that represent the shadow witnesses.");
+
+  py::class_<Arrangement_2>(m, "Arrangement",
+                            "A class to represent an arrangement.")
+      .def(py::init<>([](const Polygon2WithHoles &poly) {
+            return _polygon_to_arrangement(poly);
+          }))
+      .def("overlay",
+           [](Arrangement_2 &self, const Arrangement_2 &other) {
+             Arrangement_2 result;
+             CGAL::overlay(self, other, result);
+             return result;
+           },
+           "Computes the overlay of two arrangements.");
 
   py::class_<MoveableArrTrapezoidRicPointLocation>(m, "Arr_PointLocation",
                             "A class to represent a point location structure with operations in log(n).")
