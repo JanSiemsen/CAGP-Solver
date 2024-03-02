@@ -757,8 +757,13 @@ PYBIND11_MODULE(_cgal_bindings, m) {
             return MoveableArrTrapezoidRicPointLocation(arr);
           }))
       .def("locate",
-           [](MoveableArrTrapezoidRicPointLocation &self, const Point &p) {
-             return self.locate(p);
+          [](MoveableArrTrapezoidRicPointLocation &self, const Point &p) {
+            auto location = self.locate(p);
+            const Arrangement_2::Face_const_handle *f;
+            if ((f = boost::get<Arrangement_2::Face_const_handle>(&location))) {
+              return (!((*f)->is_unbounded()));
+            }
+            return false;
            },
            "Locate a point in the arrangement.");
 
