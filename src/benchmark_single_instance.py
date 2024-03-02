@@ -1,6 +1,6 @@
 from pyvispoly import Point, PolygonWithHoles, plot_polygon
 import solver
-from CAGPSolverMIP import CAGPSolverMIP
+from CAGPSolverMIP_integral import CAGPSolverMIP
 from CAGPSolverSAT import CAGPSolverSAT
 from GreedyCAGP2 import get_greedy_solution
 import networkx as nx
@@ -19,7 +19,7 @@ def convert_to_LinearRing(edges: list, pos: dict) -> list[Point]:
         edges.remove(cur_edge)
     return ring
 
-G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000000100.graphml.xz').read())
+G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000001000.graphml.xz').read())
 pos = {}
 for node in G.nodes(data=True):
     node_location = tuple(node[1].values())
@@ -57,7 +57,7 @@ print('Generating edge clique covers...')
 edge_clique_covers = solver.generate_edge_clique_covers(GC, len(greedySolution))
 
 print('Creating MIP solver...')
-solverMIP = CAGPSolverMIP(len(greedySolution), poly, guards, initial_witnesses, G, edge_clique_covers)
+solverMIP = CAGPSolverMIP(len(greedySolution), poly, guards, initial_witnesses, remaining_witnesses, G, edge_clique_covers)
 print('Solving MIP...')
 solution = solverMIP.solve()
 print([(G[guard], color) for guard, color in solution])
