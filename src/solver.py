@@ -1,6 +1,4 @@
 from itertools import combinations
-from operator import index
-from turtle import left
 from pyvispoly import Point, PolygonWithHoles, VisibilityPolygonCalculator, AVP_Arrangement
 from guard import Guard
 from witness import Witness
@@ -172,6 +170,46 @@ def generate_visibility_and_full_graph2(guards: dict[int, tuple[Point, PolygonWi
                 G.add_edge(guard, witness, None)
     
     return GC, G
+
+def generate_solver_input(polygon: PolygonWithHoles) -> rx.PyGraph:
+    GC = rx.PyGraph()
+
+    print('Creating guard set...')
+    vis_calculator = VisibilityPolygonCalculator(polygon)
+    guards = {}
+    for point in polygon.outer_boundary().boundary():
+        index = GC.add_node(None)
+        guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
+
+    print('Creating visibility graph...')
+    for (g1_id, (g1_point, g1_vis)), (g2_id, (g2_point, g2_vis)) in combinations(guards.items(), 2):
+        if g1_vis.do_intersect(g2_vis):
+            GC.add_edge(g1_id, g2_id, None)
+    
+    print('Creating AVP arrangement...')
+    avp = generate_AVP_recursive2(list(guards.items()))
+
+    print('Creating witness set...')
+    initial_witnesses = {}
+    remaining_witnesses = []
+    all_witnesses = []
+    amount = 0
+    for point in avp.get_shadow_witnesses():
+        all_witnesses.append(point)
+        if amount < len(guards):
+            index = GC.add_node(None)
+            initial_witnesses[index] = point
+        else:
+            remaining_witnesses.append(point)
+
+    print('Creating visibility covering graph...')
+    G = GC.copy()
+    for w_id, w_point in initial_witnesses.items():
+        for g_id, (g_point, g_vis) in guards.items():
+            if g_vis.contains(w_point):
+                G.add_edge(w_id, g_id, None)
+
+    return guards, initial_witnesses, remaining_witnesses, all_witnesses, GC, G
 
 '''
 def generate_edge_clique_covers(G: rx.PyGraph, K: int) -> list[list[list[str]]]:

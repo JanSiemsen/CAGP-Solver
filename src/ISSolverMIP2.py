@@ -17,7 +17,7 @@ class ISSolverMIP:
 
     def __add_conflicting_guards_constraints(self):
         for e in self.G.edge_index_map().values():
-            self.model.addConstr(1 >= self.guard_vars[self.G[e[0]]] + self.guard_vars[self.G[e[1]]])
+            self.model.addConstr(1 >= self.guard_vars[e[0]] + self.guard_vars[e[1]])
 
     def solve(self):
         self.model.optimize()
