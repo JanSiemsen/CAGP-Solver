@@ -1,7 +1,7 @@
 from pyvispoly import Point, PolygonWithHoles, plot_polygon
 import solver_utils as solver_utils
 from CAGPSolverMIP import CAGPSolverMIP
-from CAGPSolverSAT import CAGPSolverSAT
+# from CAGPSolverSAT import CAGPSolverSAT
 from GreedyCAGP import get_greedy_solution
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -19,24 +19,24 @@ def convert_to_LinearRing(edges: list, pos: dict) -> list[Point]:
         edges.remove(cur_edge)
     return ring
 
-G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000000500.graphml.xz').read())
-pos = {}
-for node in G.nodes(data=True):
-    node_location = tuple(node[1].values())
-    node_location = (float(node_location[0]), float(node_location[1]))
-    pos[node[0]] = node_location
-ring = convert_to_LinearRing(list(G.edges()), pos)
-poly = PolygonWithHoles(ring)
+# G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000002500.graphml.xz').read())
+# pos = {}
+# for node in G.nodes(data=True):
+#     node_location = tuple(node[1].values())
+#     node_location = (float(node_location[0]), float(node_location[1]))
+#     pos[node[0]] = node_location
+# ring = convert_to_LinearRing(list(G.edges()), pos)
+# poly = PolygonWithHoles(ring)
 
-# with open('/home/yanyan/PythonProjects/CAGP-Solver/agp2009a-simplerand/randsimple-2500-30.pol') as f:
-#     vertices = f.readline().split()
-#     vertices = vertices[1:]
-#     linear_ring = []
-#     for i in range(0, len(vertices), 2):
-#         x = int(vertices[i].split('/')[0])/int(vertices[i].split('/')[1])
-#         y = int(vertices[i+1].split('/')[0])/int(vertices[i+1].split('/')[1])
-#         linear_ring.append(Point(x, y))
-#     poly = PolygonWithHoles(linear_ring)
+with open('/home/yanyan/PythonProjects/CAGP-Solver/agp2009a-simplerand/randsimple-2500-30.pol') as f:
+    vertices = f.readline().split()
+    vertices = vertices[1:]
+    linear_ring = []
+    for i in range(0, len(vertices), 2):
+        x = int(vertices[i].split('/')[0])/int(vertices[i].split('/')[1])
+        y = int(vertices[i+1].split('/')[0])/int(vertices[i+1].split('/')[1])
+        linear_ring.append(Point(x, y))
+    poly = PolygonWithHoles(linear_ring)
 
 # fig, ax = plt.subplots()
 # plot_polygon(poly, ax=ax, color="lightgrey")
@@ -68,3 +68,17 @@ print('Density of the graph:', (2 * len(GC.edge_indices())) / len(GC.node_indice
 # solverSAT.__del__()
 # print([(G[guard], color) for guard, color in solution])
 # print(solve.verify_solver_solution(solution, GC))
+
+# fig, ax = plt.subplots()
+# plot_polygon(poly, ax=ax, color="lightgrey")
+
+# print('Plotting...')
+# colors = distcolors.get_colors(len(guards))
+# fig, ax = plt.subplots()
+# plot_polygon(poly, ax=ax, color="lightgrey")
+# for s in solution:
+#     for id, (point, visibility) in guards.items():
+#         if s[0] == id:
+#             plot_polygon(visibility, ax=ax, color=colors[s[1]], alpha=0.1)
+#             plt.scatter(point.x(), point.y(), color='black', s=10)
+# plt.show()

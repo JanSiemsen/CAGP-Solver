@@ -29,24 +29,29 @@ class CAGPSolverMIP:
             self.__provide_init_solution(solution)
 
         # Set solver parameters for faster computation
-        # Settings for DCAGP paper benchmark
-        # self.model.Params.lazyConstraints = 1
-        # self.model.Params.Method = 0
-        # self.model.Params.Heuristics = 0
-        # self.model.Params.MIPFocus = 2 # important
-        # self.model.Params.Cuts = 0
-        # self.model.Params.AggFill = 0
-        # self.model.Params.PrePasses = 1 # important
+        # parameters generated from DCAGP paper benchmark instance
+        self.model.Params.lazyConstraints = 1
+        self.model.Params.Method = 0
+        self.model.Params.Heuristics = 0
+        self.model.Params.MIPFocus = 2 # important
+        self.model.Params.Cuts = 0
+        self.model.Params.AggFill = 0
+        self.model.Params.PrePasses = 1 # important
 
-        self.model.Params.MIPFocus = 2
-        self.model.Params.PrePasses = 1
+        # parameters generated from salzburg benchmark instance
+        # self.model.Params.lazyConstraints = 1
+        # self.model.Params.MIPFocus = 2
+        # self.model.Params.PrePasses = 1
+        # self.model.Params.Method = 0
+        # self.model.Params.DegenMoves = 2
+        # self.model.Params.Cuts = 1
         self.model.Params.LogFile = 'mip.log'
 
         # Set the objective
         self.model.setObjective(sum(self.color_vars.values()), grb.GRB.MINIMIZE)
 
         # Tune the solver
-        # self.model.Params.TuneTimeLimit = 10000
+        # self.model.Params.TuneTimeLimit = 30000
         # self.model.tune()
 
     def __make_vars(self):
@@ -118,11 +123,6 @@ class CAGPSolverMIP:
     def __callback_integral(self, model, guard_vars):
         print('Checking coverage...')
         missing_area = self.__check_coverage(model, guard_vars)
-
-        # new_witnesses = []
-        # for polygon in missing_area:
-        #     for point in polygon.interior_sample_points():
-        #         new_witnesses.append(point)
 
         if(missing_area):
             print('Adding new witnesses...')

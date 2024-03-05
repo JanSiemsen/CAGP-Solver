@@ -702,9 +702,45 @@ PYBIND11_MODULE(_cgal_bindings, m) {
       //       return result;
       //     },
       //     "Returns a list of points that represent the shadow witnesses.");
+      // .def("get_shadow_witnesses",
+      //     [](Ex_arrangement &self) {
+      //       std::vector<Point> result;
+      //       std::vector<Ex_arrangement::Face_handle> faces;
+
+      //       for (auto fit = self.faces_begin(); fit != self.faces_end(); ++fit) {
+      //         faces.push_back(fit);
+      //       }
+
+      //       // Sort the faces by the size of their data
+      //       std::sort(faces.begin(), faces.end(), [](const Ex_arrangement::Face_handle &a, const Ex_arrangement::Face_handle &b) {
+      //         return a->data().size() < b->data().size();
+      //       });
+
+      //       for (auto f : faces) {
+      //         if (f->is_unbounded() || f->data().empty())
+      //           continue;
+      //         bool is_shadow = true;
+      //         for (auto half_edge = f->outer_ccbs_begin(); half_edge != f->outer_ccbs_end(); ++half_edge) {
+      //           Ex_arrangement::Ccb_halfedge_circulator curr = *half_edge;
+      //           if (curr->twin()->face()->is_unbounded())
+      //             continue;
+      //           if (std::includes(f->data().begin(), f->data().end(), curr->twin()->face()->data().begin(), curr->twin()->face()->data().end())) {
+      //             is_shadow = false;
+      //             break;
+      //           }
+      //         }
+      //         if (is_shadow) {
+      //           Polygon2 poly = _face_to_polygon(f);
+      //           result.push_back(CGAL::centroid(poly.vertices_begin(), poly.vertices_end()));
+      //         }
+      //       }
+      //       return result;
+      //     },
+      //     "Returns a list of points that represent the shadow witnesses.");
       .def("get_shadow_witnesses",
-          [](Ex_arrangement &self) {
-            std::vector<Point> result;
+          [](Ex_arrangement &self, std::list<int> &guard) {
+            std::map<int, std::set<int>> witness_to_guards;
+            std::map<int, std::set<int>> guard_to_witnesses;
             std::vector<Ex_arrangement::Face_handle> faces;
 
             for (auto fit = self.faces_begin(); fit != self.faces_end(); ++fit) {
@@ -715,6 +751,8 @@ PYBIND11_MODULE(_cgal_bindings, m) {
             std::sort(faces.begin(), faces.end(), [](const Ex_arrangement::Face_handle &a, const Ex_arrangement::Face_handle &b) {
               return a->data().size() < b->data().size();
             });
+
+            int index = guard.size();
 
             for (auto f : faces) {
               if (f->is_unbounded() || f->data().empty())
@@ -730,10 +768,16 @@ PYBIND11_MODULE(_cgal_bindings, m) {
                 }
               }
               if (is_shadow) {
-                Polygon2 poly = _face_to_polygon(f);
-                result.push_back(CGAL::centroid(poly.vertices_begin(), poly.vertices_end()));
+                witness_to_guards.insert({index, f->data()});
+                for (auto g : f->data()) {
+                  guard_to_witnesses[g].insert(index);
+                }
               }
+              index++;
             }
+
+            std::tuple<std::map<int, std::set<int>>, std::map<int, std::set<int>>> result;
+            result = std::make_tuple(witness_to_guards, guard_to_witnesses);
             return result;
           },
           "Returns a list of points that represent the shadow witnesses.");

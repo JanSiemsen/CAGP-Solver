@@ -1,8 +1,11 @@
 from itertools import combinations
+from re import A
 from pyvispoly import Point, PolygonWithHoles, VisibilityPolygonCalculator, AVP_Arrangement
 import rustworkx as rx
 from heapq import heappop, heappush
 from collections import defaultdict
+
+from sympy import E
 
 # This version uses the rustworkx library to create graphs
     
@@ -15,6 +18,46 @@ def generate_AVP_recursive(guards: list[tuple[int, tuple[Point, PolygonWithHoles
     else:
         return generate_AVP_recursive(leftHalf).overlay(generate_AVP_recursive(rightHalf))
 
+# def generate_solver_input(polygon: PolygonWithHoles) -> rx.PyGraph:
+#     GC = rx.PyGraph()
+
+#     print('Creating guard set...')
+#     vis_calculator = VisibilityPolygonCalculator(polygon)
+#     guards = {}
+#     for point in polygon.outer_boundary().boundary():
+#         index = GC.add_node(None)
+#         guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
+
+#     print('Creating AVP arrangement...')
+#     avp = generate_AVP_recursive(list(guards.items()))
+
+#     print('Creating visibility graph...')
+#     for (g1_id, (g1_point, g1_vis)), (g2_id, (g2_point, g2_vis)) in combinations(guards.items(), 2):
+#         if g1_vis.do_intersect(g2_vis):
+#             GC.add_edge(g1_id, g2_id, None)
+
+#     print('Creating witness set...')
+#     initial_witnesses = {}
+#     remaining_witnesses = []
+#     all_witnesses = []
+#     amount = 0
+#     for point in avp.get_shadow_witnesses():
+#         all_witnesses.append(point)
+#         if amount < len(guards):
+#             index = GC.add_node(None)
+#             initial_witnesses[index] = point
+#         else:
+#             remaining_witnesses.append(point)
+
+#     print('Creating visibility covering graph...')
+#     G = GC.copy()
+#     for w_id, w_point in initial_witnesses.items():
+#         for g_id, (g_point, g_vis) in guards.items():
+#             if g_vis.contains(w_point):
+#                 G.add_edge(w_id, g_id, None)
+
+#     return guards, initial_witnesses, remaining_witnesses, all_witnesses, GC, G
+
 def generate_solver_input(polygon: PolygonWithHoles) -> rx.PyGraph:
     GC = rx.PyGraph()
 
@@ -25,35 +68,37 @@ def generate_solver_input(polygon: PolygonWithHoles) -> rx.PyGraph:
         index = GC.add_node(None)
         guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
 
-    print('Creating visibility graph...')
-    for (g1_id, (g1_point, g1_vis)), (g2_id, (g2_point, g2_vis)) in combinations(guards.items(), 2):
-        if g1_vis.do_intersect(g2_vis):
-            GC.add_edge(g1_id, g2_id, None)
-    
     print('Creating AVP arrangement...')
     avp = generate_AVP_recursive(list(guards.items()))
+    witness_to_guards, guard_to_witnesses = avp.get_shadow_witnesses()
+
+    print('Creating visibility graph...')
+    for set in witness_to_guards.values():
+        for g1, g2 in combinations(set, 2):
+            GC.add_edge(g1, g2, None)
 
     print('Creating witness set...')
-    initial_witnesses = {}
+    initial_witnesses = []
     remaining_witnesses = []
-    all_witnesses = []
+    all_witnesses = sorted(witness_to_guards.keys(), key=lambda x: len(witness_to_guards[x]))
     amount = 0
-    for point in avp.get_shadow_witnesses():
-        all_witnesses.append(point)
+    for witness in all_witnesses:
         if amount < len(guards):
             index = GC.add_node(None)
-            initial_witnesses[index] = point
+            if index != witness:
+                Exception("Witness index does not match the index returned by the graph")
+            initial_witnesses.append(witness)
         else:
-            remaining_witnesses.append(point)
+            remaining_witnesses.append(witness)
 
     print('Creating visibility covering graph...')
     G = GC.copy()
-    for w_id, w_point in initial_witnesses.items():
-        for g_id, (g_point, g_vis) in guards.items():
-            if g_vis.contains(w_point):
-                G.add_edge(w_id, g_id, None)
+    for witness in initial_witnesses:
+        for guard, witness_set in guard_to_witnesses.items():
+            if witness in witness_set:
+                G.add_edge(witness, guard, None)
 
-    return guards, initial_witnesses, remaining_witnesses, all_witnesses, GC, G
+    return guard_to_witnesses, initial_witnesses, remaining_witnesses, all_witnesses, GC, G
 
 def sort_edge(e: tuple[int, int]):
     return (min(e[0], e[1]), max(e[0], e[1]))
