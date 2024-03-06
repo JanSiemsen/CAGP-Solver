@@ -738,7 +738,7 @@ PYBIND11_MODULE(_cgal_bindings, m) {
       //     },
       //     "Returns a list of points that represent the shadow witnesses.");
       .def("get_shadow_witnesses",
-          [](Ex_arrangement &self, std::list<int> &guard) {
+          [](Ex_arrangement &self, const std::list<int> &guard) {
             std::map<int, std::set<int>> witness_to_guards;
             std::map<int, std::set<int>> guard_to_witnesses;
             std::vector<Ex_arrangement::Face_handle> faces;
@@ -772,8 +772,8 @@ PYBIND11_MODULE(_cgal_bindings, m) {
                 for (auto g : f->data()) {
                   guard_to_witnesses[g].insert(index);
                 }
+                index++;
               }
-              index++;
             }
 
             std::tuple<std::map<int, std::set<int>>, std::map<int, std::set<int>>> result;

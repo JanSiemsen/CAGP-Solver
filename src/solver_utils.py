@@ -70,7 +70,7 @@ def generate_solver_input(polygon: PolygonWithHoles) -> rx.PyGraph:
 
     print('Creating AVP arrangement...')
     avp = generate_AVP_recursive(list(guards.items()))
-    witness_to_guards, guard_to_witnesses = avp.get_shadow_witnesses()
+    witness_to_guards, guard_to_witnesses = avp.get_shadow_witnesses(list(guards.keys()))
 
     print('Creating visibility graph...')
     for set in witness_to_guards.values():
