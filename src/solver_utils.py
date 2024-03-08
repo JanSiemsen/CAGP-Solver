@@ -59,7 +59,7 @@ def generate_AVP_recursive(guards: list[tuple[int, tuple[Point, PolygonWithHoles
 #     return guards, initial_witnesses, remaining_witnesses, all_witnesses, GC, G
 
 def generate_solver_input(polygon: PolygonWithHoles) -> rx.PyGraph:
-    GC = rx.PyGraph()
+    GC = rx.PyGraph(multigraph=False)
 
     print('Creating guard set...')
     vis_calculator = VisibilityPolygonCalculator(polygon)
@@ -73,13 +73,12 @@ def generate_solver_input(polygon: PolygonWithHoles) -> rx.PyGraph:
     witness_to_guards, guard_to_witnesses = avp.get_shadow_witnesses(list(guards.keys()))
 
     print('Creating visibility graph...')
-    for set in witness_to_guards.values():
-        for g1, g2 in combinations(set, 2):
+    for witness_set in witness_to_guards.values():
+        for g1, g2 in combinations(witness_set, 2):
             GC.add_edge(g1, g2, None)
 
     print('Creating witness set...')
     initial_witnesses = []
-    remaining_witnesses = []
     all_witnesses = sorted(witness_to_guards.keys(), key=lambda x: len(witness_to_guards[x]))
     amount = 0
     for witness in all_witnesses:
@@ -88,8 +87,6 @@ def generate_solver_input(polygon: PolygonWithHoles) -> rx.PyGraph:
             if index != witness:
                 Exception("Witness index does not match the index returned by the graph")
             initial_witnesses.append(witness)
-        else:
-            remaining_witnesses.append(witness)
 
     print('Creating visibility covering graph...')
     G = GC.copy()
@@ -98,7 +95,7 @@ def generate_solver_input(polygon: PolygonWithHoles) -> rx.PyGraph:
             if witness in witness_set:
                 G.add_edge(witness, guard, None)
 
-    return guard_to_witnesses, initial_witnesses, remaining_witnesses, all_witnesses, GC, G
+    return guards, guard_to_witnesses, initial_witnesses, set(all_witnesses), GC, G
 
 def sort_edge(e: tuple[int, int]):
     return (min(e[0], e[1]), max(e[0], e[1]))

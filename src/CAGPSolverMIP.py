@@ -1,4 +1,5 @@
 import gurobipy as grb
+from numpy import cov
 import rustworkx as rx
 from pyvispoly import Point, PolygonWithHoles, Arrangement, Arr_PointLocation, plot_polygon
 import matplotlib.pyplot as plt
@@ -7,13 +8,13 @@ import matplotlib.pyplot as plt
 # New witnesses are added whenever an optimal solution is found
 class CAGPSolverMIP:
 
-    def __init__(self, K: int, poly: PolygonWithHoles, guards: dict[int, tuple[Point, PolygonWithHoles]], initial_witnesses: dict[int, Point], remaining_witnesses: list[Point], G: rx.PyGraph, edge_clique_covers: list[list[list[int]]], solution: list[list[int]]=None) -> list[tuple[int, int]]:
+    def __init__(self, K: int, poly: PolygonWithHoles, guard_to_witnesses: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], G: rx.PyGraph, edge_clique_covers: list[list[list[int]]], solution: list[list[int]]=None) -> list[tuple[int, int]]:
         self.G = G
         self.K = K
         self.poly = poly
-        self.guards = guards
-        self.witnesses = initial_witnesses
-        self.remaining_witnesses = remaining_witnesses
+        self.guard_to_witnesses = guard_to_witnesses
+        self.initial_witnesses = initial_witnesses
+        self.all_witnesses = all_witnesses
         self.edge_clique_covers = edge_clique_covers
         self.model = grb.Model()
         # self.model.Params.MemLimit = 16
@@ -58,18 +59,20 @@ class CAGPSolverMIP:
         # Create binary variables for every color
         self.color_vars = {i: self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY) for i in range(self.K)}
         # Create binary variables for every guard color assignment
-        self.guard_vars = {}
-        for guard in self.guards.keys():
+        self.guard_vars = dict()
+        for guard in self.guard_to_witnesses.keys():
+            guard_dict = dict()
             for k in range(self.K):
-                self.guard_vars[(guard, k)] = self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY)
+                guard_dict[k] = self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY)
+            self.guard_vars[guard] = guard_dict
 
     def __add_witness_covering_constraints(self):
-        for witness in self.witnesses.keys():
+        for witness in self.initial_witnesses:
             subset = []
             for guard in self.G.neighbors(witness):
                 for k in range(self.K):
                     subset.append((guard, k))
-            self.model.addConstr(1 <= sum(self.guard_vars[x] for x in subset))
+            self.model.addConstr(1 <= sum(self.guard_vars[guard][k] for guard, k in subset))
 
     # These constraints are being replaced by the edge clique cover constraints
     def __add_conflicting_guards_constraints(self):
@@ -82,12 +85,12 @@ class CAGPSolverMIP:
         color = 0
         for cover in self.edge_clique_covers:
             for clique in cover:
-                self.model.addConstr(self.color_vars[color] >= sum(self.guard_vars[(x, color)] for x in clique))
+                self.model.addConstr(self.color_vars[color] >= sum(self.guard_vars[guard][color] for guard in clique))
             color += 1
 
     def __add_guard_coloring_constraints(self):
-        for guard in self.guards.keys():
-            self.model.addConstr(1 >= sum(self.guard_vars[x] if x[0] == guard else 0 for x in self.guard_vars.keys()))
+        for guard, color_dict in self.guard_vars.items():
+            self.model.addConstr(1 >= sum(color_dict.values()))
 
     def __add_color_symmetry_constraints(self):
         for k in range(self.K - 1):
@@ -95,53 +98,35 @@ class CAGPSolverMIP:
 
     def __add_guard_symmetry_constraints(self):
         for k in range(self.K - 1):
-            self.model.addConstr(0 <= sum(self.guard_vars[x] if x[1] == k else 0 for x in self.guard_vars.keys())
-                                            - sum(self.guard_vars[x] if x[1] == k + 1 else 0 for x in self.guard_vars.keys()))
+            self.model.addConstr(0 <= sum(color_dict[k] for color_dict in self.guard_vars.values())
+                                            - sum(color_dict[k + 1] for color_dict in self.guard_vars.values()))
 
     def __check_coverage(self, model, guard_vars):
-        solution = [gk[0] for gk, x_gk in guard_vars.items() if model.cbGetSolution(x_gk) >= 0.5]
+        solution = [guard for guard, color_dict in guard_vars.items() for variable in color_dict.values() if model.cbGetSolution(variable) >= 0.5]
         solution = list(set(solution))
 
-        # print("List of colored guards: {solution}")
-        # fig, ax = plt.subplots()
-
-        missing_area = [self.poly]
+        covered_witnesses = set()
         for guard in solution:
-            coverage = self.guards[guard][1]
-            missing_area = sum((poly.difference(coverage) for poly in missing_area), [])
+            covered_witnesses = covered_witnesses.union(self.guard_to_witnesses[guard])
 
-            # guardpos = next((x.position for x in self.guards if x.id == guard), None)
-            # plt.scatter(guardpos.x(), guardpos.y(), color='black', s=10)
+        missing_witnesses = self.all_witnesses.difference(covered_witnesses)
         
-        # plot_polygon(self.poly, ax=ax, color='gray', alpha=0.5)
-        # for polygon in missing_area:
-        #     plot_polygon(polygon, ax=ax, color='green', alpha=0.5)
-        # plt.show()
-        
-        return missing_area
+        return missing_witnesses
 
     def __callback_integral(self, model, guard_vars):
         print('Checking coverage...')
-        missing_area = self.__check_coverage(model, guard_vars)
+        missing_witnesses = self.__check_coverage(model, guard_vars)
 
-        if(missing_area):
+        if(missing_witnesses):
             print('Adding new witnesses...')
-            arr = Arrangement(missing_area[0])
-            for polygon in missing_area[0:]:
-                arr = arr.overlay(Arrangement(polygon))
-
-            point_locator = Arr_PointLocation(arr)
-
-            for witness in self.remaining_witnesses:
-                if point_locator.locate(witness) == 1:
-                    self.remaining_witnesses.remove(witness)
-                    subset = []
-                    for g_id, guard in self.guards.items():
-                        if guard[1].contains(witness):
-                            for k in range(self.K):
-                                subset.append((g_id, k))
-                    self.model.cbLazy(1 <= sum(self.guard_vars[x] for x in subset))
-                    self.lazy_witnesses += 1
+            for witness in missing_witnesses:
+                subset = []
+                for guard, witness_set in self.guard_to_witnesses.items():
+                    if witness_set.contains(witness):
+                        for k in range(self.K):
+                            subset.append((guard, k))
+                self.model.cbLazy(1 <= sum(self.guard_vars[x] for x in subset))
+                self.lazy_witnesses += 1
             self.iteration += 1
 
     def __callback_fractional(self, model, varmap):
@@ -172,12 +157,9 @@ class CAGPSolverMIP:
         print(f"[CAGP SOLVER]: Found the minimum amount of colors required: {obj_val}")
         print(f"[CAGP SOLVER]: Iterations: {self.iteration}")
         print(f"[CAGP SOLVER]: Lazy witnesses: {self.lazy_witnesses}")
-        return [gk for gk, x_gk in self.guard_vars.items() if x_gk.x >= 0.5]
+        return [(guard, color) for guard, color_dict in self.guard_vars.items() for color, variable in color_dict.items() if variable.x >= 0.5]
 
     def __provide_init_solution(self, solution):
-        for e in self.guard_vars.keys():
-            v = self.guard_vars[e]
-            if e in solution:
-                v.Start = 1
-            else:
-                v.Start = 0
+        for (guard, color) in solution:
+            self.guard_vars[guard][color].Start = 1
+            self.color_vars[color].Start = 1
