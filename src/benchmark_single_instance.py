@@ -19,7 +19,7 @@ def convert_to_LinearRing(edges: list, pos: dict) -> list[Point]:
         edges.remove(cur_edge)
     return ring
 
-G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000002500.graphml.xz').read())
+G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000010000.graphml.xz').read())
 pos = {}
 for node in G.nodes(data=True):
     node_location = tuple(node[1].values())

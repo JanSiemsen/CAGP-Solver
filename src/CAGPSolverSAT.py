@@ -1,17 +1,17 @@
 from pysat.solvers import Solver
 import rustworkx as rx
-from guard import Guard
-from witness import Witness
 from pyvispoly import PolygonWithHoles
 
 class CAGPSolverSAT:
     
-    def __init__(self, K: int, poly: PolygonWithHoles, guards: list[Guard], witnesses: list[Witness], G: rx.PyGraph, edge_clique_covers: list[list[list[str]]]=None) -> list[str]:
+    def __init__(self, K: int, poly: PolygonWithHoles, guard_to_witnesses: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], G: rx.PyGraph, GC: rx.PyGraph, edge_clique_covers: list[list[list[int]]], solution: list[list[int]]=None) -> list[tuple[int, int]]:
         self.G = G
+        self.GC = GC
         self.K = K
         self.poly = poly
-        self.guards = guards
-        self.witnesses = witnesses
+        self.guard_to_witnesses = guard_to_witnesses
+        self.witnesses = initial_witnesses
+        self.all_witnesses = all_witnesses
         self.edge_clique_covers = edge_clique_covers
         self.solver = Solver(name='Gluecard4', with_proof=False)
         self.__make_vars()
@@ -23,27 +23,24 @@ class CAGPSolverSAT:
         self.guard_to_var = {}
         self.var_to_guard = {}
         id = 1
-        for guard in self.G.node_indices():
-            if self.G[guard][0] == 'g':
-                for i in range(self.K):
-                    self.guard_to_var[(guard, i)] = id
-                    self.var_to_guard[id] = (guard, i)
-                    id += 1
+        for guard in self.guard_to_witnesses.keys():
+            for i in range(self.K):
+                self.guard_to_var[(guard, i)] = id
+                self.var_to_guard[id] = (guard, i)
+                id += 1
 
     def __add_witness_covering_constraints(self):
-        for witness in self.G.node_indices():
-            if self.G[witness][0] == 'w':
-                subset = []
-                for guard in self.G.neighbors(witness):
-                    for k in range(self.K):
-                        subset.append((guard, k))
-                self.solver.add_clause([self.guard_to_var[guard] for guard in subset])
+        for witness in self.witnesses():
+            subset = []
+            for guard in self.G.neighbors(witness):
+                for k in range(self.K):
+                    subset.append((guard, k))
+            self.solver.add_clause([self.guard_to_var[guard] for guard in subset])
 
     def __add_conflicting_guards_constraints(self):
-        for e in self.G.edge_index_map().values():
-            if self.G[e[0]][0] == 'g' and self.G[e[1]][0] == 'g':
-                for k in range(self.K):
-                    self.solver.add_clause([-self.guard_to_var[(e[0], k)], -self.guard_to_var[(e[1], k)]])
+        for e in self.GC.edge_index_map().values():
+            for k in range(self.K):
+                self.solver.add_clause([-self.guard_to_var[(e[0], k)], -self.guard_to_var[(e[1], k)]])
 
     # These constraints are being replaced by the conflicting guards constraints
     def __add_edge_clique_cover_constraints(self):
@@ -51,20 +48,19 @@ class CAGPSolverSAT:
             self.solver.add_clause([self.guard_to_var[guard] for guard in edge_clique])
 
     def __deactivate_guards(self, color_lim: int):
-        return [-self.guard_to_var[(guard, k)] for guard in self.G.node_indices() if self.G[guard][0] == 'g' for k in range(color_lim, self.K)]
+        return [-self.guard_to_var[(guard, k)] for guard in self.guard_to_witnesses.keys() for k in range(color_lim, self.K)]
     
-    def __check_coverage(self, solution: list[int]):
+    def __check_coverage(self, solution: list[tuple[int, int]]):
         solution = [guard[0] for guard in solution]
         solution = list(set(solution))
 
-        missing_area = [self.poly]
+        covered_witnesses = set()
         for guard in solution:
-            # get the coverage of the guard
-            coverage = next((x.visibility for x in self.guards if x.id == self.G[guard]), None)
-            # remove the coverage from each polygon in the missing area
-            missing_area = sum((poly.difference(coverage) for poly in missing_area), [])
+            covered_witnesses = covered_witnesses.union(self.guard_to_witnesses[guard])
 
-        return missing_area
+        missing_witnesses = self.all_witnesses.difference(covered_witnesses)
+        
+        return missing_witnesses
 
     def __solve(self, assumptions=None):
         self.solver.solve(assumptions=assumptions)
@@ -80,29 +76,23 @@ class CAGPSolverSAT:
         else:
             solution = self.linear_search(color_lim)
 
-        missing_area = self.__check_coverage(solution)
+        missing_witnesses = self.__check_coverage(solution)
 
         iteration = 0
-        while(missing_area):
+        while(missing_witnesses):
             iteration += 1
             print('Adding new witnesses for missing area ({iteration})')
 
-            new_witnesses = []
-            index = len(self.witnesses)
-
-            for polygon in missing_area:
-                new_witnesses.append(Witness(f'w{index}', polygon.interior_sample_points()[0]))
-
-            for witness in new_witnesses:
+            for witness in missing_witnesses:
                 subset = []
-                for guard in self.guards:
-                    if guard.visibility.contains(witness.position):
+                for guard, witness_set in self.guard_to_witnesses.items():
+                    if witness_set.contains(witness):
                         for k in range(self.K):
-                            subset.append((self.__get_node_index_by_data(guard.id), k))
+                            subset.append((guard, k))
                 self.solver.add_clause([self.guard_to_var[guard] for guard in subset])
 
-            solution = self.linear_search(color_lim)
-            missing_area = self.__check_coverage(solution)
+            color_lim, solution = self.linear_ascent(color_lim)
+            missing_witnesses = self.__check_coverage(solution)
         return solution
 
     def binary_search(self):
@@ -118,24 +108,28 @@ class CAGPSolverSAT:
                 lower = mid + 1
         return lower, self.__solve(self.__deactivate_guards(lower))
     
-    def linear_search(self, color_lim: int):
-        print(f'Checking for {color_lim} colors')
+    def linear_ascent(self, color_lim: int):
         solution = self.__solve(assumptions=self.__deactivate_guards(color_lim))
-        while(solution and color_lim > 0):
-            color_lim -= 1
-            print(f'Checking for {color_lim} colors')
-            solution = self.__solve(assumptions=self.__deactivate_guards(color_lim))
         while(not solution and color_lim <= self.K):
             color_lim += 1
             print(f'Checking for {color_lim} colors')
             solution = self.__solve(assumptions=self.__deactivate_guards(color_lim))
-        return self.__solve(assumptions=self.__deactivate_guards(color_lim))
-    
-    def __get_node_index_by_data(self, data: str):
-        for node_index in self.G.node_indices():
-            if self.G.get_node_data(node_index) == data:
-                return node_index
-        return None
+        return color_lim, solution
+
+    def linear_search(self, color_lim: int):
+        print(f'Checking for {color_lim} colors')
+        solution = self.__solve(assumptions=self.__deactivate_guards(color_lim))
+        if solution:
+            while(solution and color_lim > 0):
+                color_lim -= 1
+                print(f'Checking for {color_lim} colors')
+                solution = self.__solve(assumptions=self.__deactivate_guards(color_lim))
+        else:
+            while(not solution and color_lim <= self.K):
+                color_lim += 1
+                print(f'Checking for {color_lim} colors')
+                solution = self.__solve(assumptions=self.__deactivate_guards(color_lim))
+        return solution
 
     def __del__(self):
         """

@@ -1,17 +1,16 @@
 from ortools.sat.python import cp_model
 import rustworkx as rx
-from guard import Guard
-from witness import Witness
 from pyvispoly import PolygonWithHoles
 
 class CAGPSolverCPSAT:
 
-    def __init__(self, K: int, poly: PolygonWithHoles, guards: list[Guard], witnesses: list[Witness], G: rx.PyGraph, edge_clique_covers: list[list[list[str]]], solution: list[list[Guard]]=None) -> list[str]:
+    def __init__(self, K: int, poly: PolygonWithHoles, guard_to_witnesses: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], G: rx.PyGraph, edge_clique_covers: list[list[list[int]]], solution: list[list[int]]=None) -> list[tuple[int, int]]:
         self.G = G
         self.K = K
         self.poly = poly
-        self.guards = guards
-        self.witnesses = witnesses
+        self.guard_to_witnesses = guard_to_witnesses
+        self.witnesses = initial_witnesses
+        self.all_witnesses = all_witnesses
         self.edge_clique_covers = edge_clique_covers
         self.model = cp_model.CpModel()
         self.__make_vars()
