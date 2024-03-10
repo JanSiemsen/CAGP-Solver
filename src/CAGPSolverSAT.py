@@ -30,7 +30,7 @@ class CAGPSolverSAT:
                 id += 1
 
     def __add_witness_covering_constraints(self):
-        for witness in self.witnesses():
+        for witness in self.witnesses:
             subset = []
             for guard in self.G.neighbors(witness):
                 for k in range(self.K):
@@ -72,10 +72,12 @@ class CAGPSolverSAT:
     
     def solve(self, color_lim: int=0):
         if color_lim == 0:
+            print('Starting binary search')
             color_lim, solution = self.binary_search()
         else:
             solution = self.linear_search(color_lim)
 
+        print('Checking coverage')
         missing_witnesses = self.__check_coverage(solution)
 
         iteration = 0
@@ -91,22 +93,29 @@ class CAGPSolverSAT:
                             subset.append((guard, k))
                 self.solver.add_clause([self.guard_to_var[guard] for guard in subset])
 
+            print('Starting linear ascent')
             color_lim, solution = self.linear_ascent(color_lim)
+            print('Checking coverage')
             missing_witnesses = self.__check_coverage(solution)
         return solution
 
     def binary_search(self):
         lower = 1
         upper = self.K
+        optimal_solution = None
         while lower < upper:
             mid = (lower + upper) // 2
             print(f'Checking for {mid} colors')
             solution = self.__solve(assumptions=self.__deactivate_guards(mid))
             if solution:
+                optimal_solution = solution
                 upper = mid
             else:
                 lower = mid + 1
-        return lower, self.__solve(self.__deactivate_guards(lower))
+        if not optimal_solution:
+            print(f'Checking for {upper} colors')
+            optimal_solution = self.__solve(assumptions=self.__deactivate_guards(upper))
+        return lower, optimal_solution
     
     def linear_ascent(self, color_lim: int):
         solution = self.__solve(assumptions=self.__deactivate_guards(color_lim))

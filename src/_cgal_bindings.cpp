@@ -737,10 +737,11 @@ PYBIND11_MODULE(_cgal_bindings, m) {
       //       return result;
       //     },
       //     "Returns a list of points that represent the shadow witnesses.");
-      .def("get_shadow_witnesses",
+      .def("get_shadow_witnesses_and_light_guard_sets",
           [](Ex_arrangement &self, const std::list<int> &guard) {
             std::map<int, std::set<int>> witness_to_guards;
             std::map<int, std::set<int>> guard_to_witnesses;
+            std::vector<std::set<int>> light_guard_sets;
             std::vector<Ex_arrangement::Face_handle> faces;
 
             for (auto fit = self.faces_begin(); fit != self.faces_end(); ++fit) {
@@ -748,23 +749,28 @@ PYBIND11_MODULE(_cgal_bindings, m) {
             }
 
             // Sort the faces by the size of their data
-            std::sort(faces.begin(), faces.end(), [](const Ex_arrangement::Face_handle &a, const Ex_arrangement::Face_handle &b) {
-              return a->data().size() < b->data().size();
-            });
+            // std::sort(faces.begin(), faces.end(), [](const Ex_arrangement::Face_handle &a, const Ex_arrangement::Face_handle &b) {
+            //   return a->data().size() < b->data().size();
+            // });
 
             int index = guard.size();
 
             for (auto f : faces) {
-              if (f->is_unbounded() || f->data().empty())
+              if (f->data().empty())
                 continue;
               bool is_shadow = true;
+              bool is_light = true;
               for (auto half_edge = f->outer_ccbs_begin(); half_edge != f->outer_ccbs_end(); ++half_edge) {
+                if (!is_shadow && !is_light)
+                  break;
                 Ex_arrangement::Ccb_halfedge_circulator curr = *half_edge;
-                if (curr->twin()->face()->is_unbounded())
+                if (curr->twin()->face()->data().empty())
                   continue;
                 if (std::includes(f->data().begin(), f->data().end(), curr->twin()->face()->data().begin(), curr->twin()->face()->data().end())) {
                   is_shadow = false;
-                  break;
+                }
+                if (std::includes(curr->twin()->face()->data().begin(), curr->twin()->face()->data().end(), f->data().begin(), f->data().end())) {
+                  is_light = false;
                 }
               }
               if (is_shadow) {
@@ -774,13 +780,16 @@ PYBIND11_MODULE(_cgal_bindings, m) {
                 }
                 index++;
               }
+              if (is_light) {
+                light_guard_sets.push_back(f->data());
+              }
             }
 
-            std::tuple<std::map<int, std::set<int>>, std::map<int, std::set<int>>> result;
-            result = std::make_tuple(witness_to_guards, guard_to_witnesses);
+            std::tuple<std::map<int, std::set<int>>, std::map<int, std::set<int>>, std::vector<std::set<int>>> result;
+            result = std::make_tuple(witness_to_guards, guard_to_witnesses, light_guard_sets);
             return result;
           },
-          "Returns a list of points that represent the shadow witnesses.");
+          "Returns a dictionary shadow AVP witness -> guard set, a dictionary guard -> shadow AVP witness set and a list of light AVP guard sets.");
 
   py::class_<Arrangement_2>(m, "Arrangement",
                             "A class to represent an arrangement.")

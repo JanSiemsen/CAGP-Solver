@@ -1,7 +1,8 @@
+import time
 from pyvispoly import Point, PolygonWithHoles, plot_polygon
 import solver_utils as solver_utils
 from CAGPSolverMIP import CAGPSolverMIP
-# from CAGPSolverSAT import CAGPSolverSAT
+from CAGPSolverSAT import CAGPSolverSAT
 from GreedyCAGP import get_greedy_solution
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -19,7 +20,7 @@ def convert_to_LinearRing(edges: list, pos: dict) -> list[Point]:
         edges.remove(cur_edge)
     return ring
 
-G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000010000.graphml.xz').read())
+G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000020000.graphml.xz').read())
 pos = {}
 for node in G.nodes(data=True):
     node_location = tuple(node[1].values())
@@ -50,24 +51,27 @@ greedyColors, greedySolution = get_greedy_solution(guard_to_witnesses, all_witne
 print("number of colors in greedy solution: ", greedyColors)
 print("number of guards in greedy solution: ", len(greedySolution))
 
-print('Generating edge clique covers...')
-edge_clique_covers = solver_utils.generate_edge_clique_covers(GC, greedyColors)
+# print('Generating edge clique covers...')
+# edge_clique_covers = solver_utils.generate_edge_clique_covers(GC, greedyColors)
 
-print('Creating MIP solver...')
-solverMIP = CAGPSolverMIP(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, edge_clique_covers, solution=greedySolution)
-print('Solving MIP...')
-solution = solverMIP.solve()
+# print('Creating MIP solver...')
+# solverMIP = CAGPSolverMIP(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, edge_clique_covers, solution=greedySolution)
+# print('Solving MIP...')
+# solution = solverMIP.solve()
+# print([(guard, color) for guard, color in solution])
+# print(solver_utils.verify_solver_solution(solution, GC))
+# print('Density of the graph:', (2 * len(GC.edge_indices())) / len(GC.node_indices()))
+
+print('Creating SAT solver...')
+solverSAT = CAGPSolverSAT(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, GC, None, solution=greedySolution)
+print('Solving SAT...')
+start = time.time()
+solution = solverSAT.solve()
+end = time.time()
+print('Time to solve:', end - start, 'seconds')
+solverSAT.__del__()
 print([(guard, color) for guard, color in solution])
 print(solver_utils.verify_solver_solution(solution, GC))
-print('Density of the graph:', (2 * len(GC.edge_indices())) / len(GC.node_indices()))
-
-# print('Creating SAT solver...')
-# solverSAT = CAGPSolverSAT(len(greedySolution), poly, guards, witnesses, G)
-# print('Solving SAT...')
-# solution = solverSAT.solve()
-# solverSAT.__del__()
-# print([(G[guard], color) for guard, color in solution])
-# print(solve.verify_solver_solution(solution, GC))
 
 # fig, ax = plt.subplots()
 # plot_polygon(poly, ax=ax, color="lightgrey")
