@@ -3,6 +3,7 @@ from pyvispoly import Point, PolygonWithHoles, plot_polygon
 import solver_utils as solver_utils
 from CAGPSolverMIP import CAGPSolverMIP
 from CAGPSolverSAT import CAGPSolverSAT
+from CAGPSolverCPSAT_MIP_Formulation import CAGPSolverCPSAT
 from GreedyCAGP import get_greedy_solution
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -20,7 +21,8 @@ def convert_to_LinearRing(edges: list, pos: dict) -> list[Point]:
         edges.remove(cur_edge)
     return ring
 
-G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000020000.graphml.xz').read())
+# to parse simple polygons from Salzburg Benchmark
+G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000002500.graphml.xz').read())
 pos = {}
 for node in G.nodes(data=True):
     node_location = tuple(node[1].values())
@@ -29,7 +31,8 @@ for node in G.nodes(data=True):
 ring = convert_to_LinearRing(list(G.edges()), pos)
 poly = PolygonWithHoles(ring)
 
-# with open('/home/yanyan/PythonProjects/CAGP-Solver/agp2009a-simplerand/randsimple-2500-30.pol') as f:
+# to parse simple polygons from AGP2009 Benchmark
+# with open('/home/yanyan/PythonProjects/CAGP-Solver/agp2009a-simplerand/randsimple-2500-1.pol') as f:
 #     vertices = f.readline().split()
 #     vertices = vertices[1:]
 #     linear_ring = []
@@ -38,6 +41,32 @@ poly = PolygonWithHoles(ring)
 #         y = int(vertices[i+1].split('/')[0])/int(vertices[i+1].split('/')[1])
 #         linear_ring.append(Point(x, y))
 #     poly = PolygonWithHoles(linear_ring)
+
+# to parse simple polygons from AGP2009 Benchmark with holes
+with open('/home/yanyan/PythonProjects/CAGP-Solver/gB-simple-simple/gB_simple-simple_100:400v-40h_1.pol') as f:
+    vertices = f.readline().split()
+    linear_rings = []
+    num_points = int(vertices.pop(0))
+    linear_ring = []
+    for _ in range(num_points):
+        x_str = vertices.pop(0).split('/')
+        x = int(x_str[0])/int(x_str[1])
+        y_str = vertices.pop(0).split('/')
+        y = int(y_str[0])/int(y_str[1])
+        linear_ring.append(Point(x, y))
+    linear_rings.append(linear_ring)  # Add outer boundary to linear_rings
+    num_holes = int(vertices.pop(0))  # Get the number of holes
+    for _ in range(num_holes):  # Repeat the process for each hole
+        num_points = int(vertices.pop(0))
+        linear_ring = []
+        for _ in range(num_points):
+            x_str = vertices.pop(0).split('/')
+            x = int(x_str[0])/int(x_str[1])
+            y_str = vertices.pop(0).split('/')
+            y = int(y_str[0])/int(y_str[1])
+            linear_ring.append(Point(x, y))
+        linear_rings.append(linear_ring)  # Add hole to linear_rings
+    poly = PolygonWithHoles(linear_rings[0], linear_rings[1:])
 
 # fig, ax = plt.subplots()
 # plot_polygon(poly, ax=ax, color="lightgrey")
@@ -51,16 +80,26 @@ greedyColors, greedySolution = get_greedy_solution(guard_to_witnesses, all_witne
 print("number of colors in greedy solution: ", greedyColors)
 print("number of guards in greedy solution: ", len(greedySolution))
 
-# print('Generating edge clique covers...')
-# edge_clique_covers = solver_utils.generate_edge_clique_covers(GC, greedyColors)
+print('Generating edge clique covers...')
+edge_clique_covers = solver_utils.generate_edge_clique_covers(GC, greedyColors)
 
-# print('Creating MIP solver...')
-# solverMIP = CAGPSolverMIP(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, edge_clique_covers, solution=greedySolution)
-# print('Solving MIP...')
-# solution = solverMIP.solve()
+print('Creating MIP solver...')
+solverMIP = CAGPSolverMIP(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, edge_clique_covers, solution=greedySolution)
+print('Solving MIP...')
+solution = solverMIP.solve()
 # print([(guard, color) for guard, color in solution])
-# print(solver_utils.verify_solver_solution(solution, GC))
-# print('Density of the graph:', (2 * len(GC.edge_indices())) / len(GC.node_indices()))
+print(solver_utils.verify_solver_solution(solution, GC))
+print('Average vertex degree:', (2 * len(GC.edge_indices())) / len(GC.node_indices()))
+
+print('Creating CPSAT solver...')
+solverCPSAT = CAGPSolverCPSAT(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, edge_clique_covers, solution=greedySolution)
+print('Solving CPSAT...')
+start = time.time()
+solution = solverCPSAT.solve()
+end = time.time()
+print('Time to solve:', end - start, 'seconds')
+# print([(guard, color) for guard, color in solution])
+print(solver_utils.verify_solver_solution(solution, GC))
 
 print('Creating SAT solver...')
 solverSAT = CAGPSolverSAT(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, GC, None, solution=greedySolution)
@@ -70,11 +109,11 @@ solution = solverSAT.solve()
 end = time.time()
 print('Time to solve:', end - start, 'seconds')
 solverSAT.__del__()
-print([(guard, color) for guard, color in solution])
+# print([(guard, color) for guard, color in solution])
 print(solver_utils.verify_solver_solution(solution, GC))
 
-# fig, ax = plt.subplots()
-# plot_polygon(poly, ax=ax, color="lightgrey")
+fig, ax = plt.subplots()
+plot_polygon(poly, ax=ax, color="lightgrey")
 
 # print('Plotting...')
 # colors = distcolors.get_colors(len(guards))
@@ -85,4 +124,4 @@ print(solver_utils.verify_solver_solution(solution, GC))
 #         if s[0] == id:
 #             plot_polygon(visibility, ax=ax, color=colors[s[1]], alpha=0.1)
 #             plt.scatter(point.x(), point.y(), color='black', s=10)
-# plt.show()
+plt.show()

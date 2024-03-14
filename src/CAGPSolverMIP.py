@@ -30,7 +30,7 @@ class CAGPSolverMIP:
             self.__provide_init_solution(solution)
 
         # Set solver parameters for faster computation
-        # parameters generated from DCAGP paper benchmark instance
+        # parameters generated from DCAGP paper benchmark instance (randsimple-2500-1)
         self.model.Params.lazyConstraints = 1
         self.model.Params.Method = 0
         self.model.Params.Heuristics = 0
@@ -39,7 +39,7 @@ class CAGPSolverMIP:
         self.model.Params.AggFill = 0
         self.model.Params.PrePasses = 1 # important
 
-        # parameters generated from salzburg benchmark instance
+        # parameters generated from salzburg benchmark instance (fpg-poly_0000002500)
         # self.model.Params.lazyConstraints = 1
         # self.model.Params.MIPFocus = 2
         # self.model.Params.PrePasses = 1
@@ -131,8 +131,6 @@ class CAGPSolverMIP:
 
     def __callback_fractional(self, model, varmap):
         # Nothing is being done here yet.
-        # Some more advanced techniques can be used to add helpful constraints
-        # just from looking at a fractional solution.
         pass
 
     def callback(self, where, model, varmap):
