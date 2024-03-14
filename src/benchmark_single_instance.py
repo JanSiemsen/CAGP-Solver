@@ -3,7 +3,8 @@ from pyvispoly import Point, PolygonWithHoles, plot_polygon
 import solver_utils as solver_utils
 from CAGPSolverMIP import CAGPSolverMIP
 from CAGPSolverSAT import CAGPSolverSAT
-from CAGPSolverCPSAT_MIP_Formulation import CAGPSolverCPSAT
+from CAGPSolverCPSAT_MIP_Formulation import CAGPSolverCPSAT as CAGPSolverCPSAT_MIP
+from CAGPSolverCPSAT_SAT_Formulation import CAGPSolverCPSAT as CAGPSolverCPSAT_SAT
 from GreedyCAGP import get_greedy_solution
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -22,14 +23,14 @@ def convert_to_LinearRing(edges: list, pos: dict) -> list[Point]:
     return ring
 
 # to parse simple polygons from Salzburg Benchmark
-G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000002500.graphml.xz').read())
-pos = {}
-for node in G.nodes(data=True):
-    node_location = tuple(node[1].values())
-    node_location = (float(node_location[0]), float(node_location[1]))
-    pos[node[0]] = node_location
-ring = convert_to_LinearRing(list(G.edges()), pos)
-poly = PolygonWithHoles(ring)
+# G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000020000.graphml.xz').read())
+# pos = {}
+# for node in G.nodes(data=True):
+#     node_location = tuple(node[1].values())
+#     node_location = (float(node_location[0]), float(node_location[1]))
+#     pos[node[0]] = node_location
+# ring = convert_to_LinearRing(list(G.edges()), pos)
+# poly = PolygonWithHoles(ring)
 
 # to parse simple polygons from AGP2009 Benchmark
 # with open('/home/yanyan/PythonProjects/CAGP-Solver/agp2009a-simplerand/randsimple-2500-1.pol') as f:
@@ -43,7 +44,7 @@ poly = PolygonWithHoles(ring)
 #     poly = PolygonWithHoles(linear_ring)
 
 # to parse simple polygons from AGP2009 Benchmark with holes
-with open('/home/yanyan/PythonProjects/CAGP-Solver/gB-simple-simple/gB_simple-simple_100:400v-40h_1.pol') as f:
+with open('/home/yanyan/PythonProjects/CAGP-Solver/simple-polygons-with-holes/g1_simple-simple_250:1000v-100h_2.pol') as f:
     vertices = f.readline().split()
     linear_rings = []
     num_points = int(vertices.pop(0))
@@ -73,7 +74,7 @@ with open('/home/yanyan/PythonProjects/CAGP-Solver/gB-simple-simple/gB_simple-si
 # plt.show()
 
 print('Generating solver input:')
-guards, guard_to_witnesses, initial_witnesses, all_witnesses, GC, G = solver_utils.generate_solver_input(poly)
+guards, guard_to_witnesses, initial_witnesses, all_witnesses, GC, G = solver_utils.generate_solver_input(poly, guards_on_holes=True)
 
 print('Calculating greedy solution...')
 greedyColors, greedySolution = get_greedy_solution(guard_to_witnesses, all_witnesses, GC)
@@ -81,7 +82,10 @@ print("number of colors in greedy solution: ", greedyColors)
 print("number of guards in greedy solution: ", len(greedySolution))
 
 print('Generating edge clique covers...')
+start = time.time()
 edge_clique_covers = solver_utils.generate_edge_clique_covers(GC, greedyColors)
+end = time.time()
+print('Time to generate edge clique covers:', end - start, 'seconds')
 
 print('Creating MIP solver...')
 solverMIP = CAGPSolverMIP(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, edge_clique_covers, solution=greedySolution)
@@ -91,29 +95,50 @@ solution = solverMIP.solve()
 print(solver_utils.verify_solver_solution(solution, GC))
 print('Average vertex degree:', (2 * len(GC.edge_indices())) / len(GC.node_indices()))
 
-print('Creating CPSAT solver...')
-solverCPSAT = CAGPSolverCPSAT(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, edge_clique_covers, solution=greedySolution)
-print('Solving CPSAT...')
-start = time.time()
-solution = solverCPSAT.solve()
-end = time.time()
-print('Time to solve:', end - start, 'seconds')
-# print([(guard, color) for guard, color in solution])
-print(solver_utils.verify_solver_solution(solution, GC))
+# print('Creating CPSAT solver...')
+# solverCPSAT = CAGPSolverCPSAT_MIP(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, edge_clique_covers, solution=greedySolution)
+# print('Solving CPSAT...')
+# start = time.time()
+# solution = solverCPSAT.solve()
+# end = time.time()
+# print('Time to solve:', end - start, 'seconds')
+# # print([(guard, color) for guard, color in solution])
+# print(solver_utils.verify_solver_solution(solution, GC))
 
-print('Creating SAT solver...')
-solverSAT = CAGPSolverSAT(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, GC, None, solution=greedySolution)
-print('Solving SAT...')
-start = time.time()
-solution = solverSAT.solve()
-end = time.time()
-print('Time to solve:', end - start, 'seconds')
-solverSAT.__del__()
-# print([(guard, color) for guard, color in solution])
-print(solver_utils.verify_solver_solution(solution, GC))
+# print('Creating CPSAT solver...')
+# solverCPSAT = CAGPSolverCPSAT_SAT(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, GC, None, solution=greedySolution)
+# print('Solving CPSAT...')
+# start = time.time()
+# solution = solverCPSAT.solve()
+# end = time.time()
+# print('Time to solve:', end - start, 'seconds')
+# # print([(guard, color) for guard, color in solution])
+# print(solver_utils.verify_solver_solution(solution, GC))
 
-fig, ax = plt.subplots()
-plot_polygon(poly, ax=ax, color="lightgrey")
+# print('Creating SAT solver...')
+# solverSAT = CAGPSolverSAT(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, GC, None, False, solution=greedySolution)
+# print('Solving SAT...')
+# start = time.time()
+# solution = solverSAT.solve()
+# end = time.time()
+# print('Time to solve:', end - start, 'seconds')
+# solverSAT.__del__()
+# # print([(guard, color) for guard, color in solution])
+# print(solver_utils.verify_solver_solution(solution, GC))
+
+# print('Creating SAT solver...')
+# solverSAT = CAGPSolverSAT(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, GC, None, True, solution=greedySolution)
+# print('Solving SAT...')
+# start = time.time()
+# solution = solverSAT.solve()
+# end = time.time()
+# print('Time to solve:', end - start, 'seconds')
+# solverSAT.__del__()
+# # print([(guard, color) for guard, color in solution])
+# print(solver_utils.verify_solver_solution(solution, GC))
+
+# fig, ax = plt.subplots()
+# plot_polygon(poly, ax=ax, color="lightgrey")
 
 # print('Plotting...')
 # colors = distcolors.get_colors(len(guards))
@@ -124,4 +149,4 @@ plot_polygon(poly, ax=ax, color="lightgrey")
 #         if s[0] == id:
 #             plot_polygon(visibility, ax=ax, color=colors[s[1]], alpha=0.1)
 #             plt.scatter(point.x(), point.y(), color='black', s=10)
-plt.show()
+# plt.show()

@@ -13,6 +13,9 @@ class CAGPSolverCPSAT:
         self.all_witnesses = all_witnesses
         self.edge_clique_covers = edge_clique_covers
         self.model = cp_model.CpModel()
+
+        self.model.log_search_progress = True
+
         self.__make_vars()
         self.__add_witness_covering_constraints()
         self.__add_edge_clique_cover_constraints()

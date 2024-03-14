@@ -4,7 +4,7 @@ from pyvispoly import PolygonWithHoles
 
 class CAGPSolverSAT:
     
-    def __init__(self, K: int, poly: PolygonWithHoles, guard_to_witnesses: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], G: rx.PyGraph, GC: rx.PyGraph, edge_clique_covers: list[list[list[int]]], solution: list[list[int]]=None) -> list[tuple[int, int]]:
+    def __init__(self, K: int, poly: PolygonWithHoles, guard_to_witnesses: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], G: rx.PyGraph, GC: rx.PyGraph, edge_clique_covers: list[list[list[int]]], guard_color_constraints: bool, solution: list[list[int]]=None) -> list[tuple[int, int]]:
         self.G = G
         self.GC = GC
         self.K = K
@@ -17,17 +17,21 @@ class CAGPSolverSAT:
         self.__make_vars()
         self.__add_witness_covering_constraints()
         self.__add_conflicting_guards_constraints()
+        if guard_color_constraints:
+            self.__add_guard_coloring_constraints()
         # self.__add_edge_clique_cover_constraints()
 
     def __make_vars(self):
-        self.guard_to_var = {}
-        self.var_to_guard = {}
+        self.guard_to_var = dict()
+        self.var_to_guard = dict()
         id = 1
         for guard in self.guard_to_witnesses.keys():
-            for i in range(self.K):
-                self.guard_to_var[(guard, i)] = id
-                self.var_to_guard[id] = (guard, i)
+            guard_dict = dict()
+            for k in range(self.K):
+                guard_dict[k] = id
+                self.var_to_guard[id] = (guard, k)
                 id += 1
+            self.guard_to_var[guard] = guard_dict
 
     def __add_witness_covering_constraints(self):
         for witness in self.witnesses:
@@ -35,20 +39,27 @@ class CAGPSolverSAT:
             for guard in self.G.neighbors(witness):
                 for k in range(self.K):
                     subset.append((guard, k))
-            self.solver.add_clause([self.guard_to_var[guard] for guard in subset])
+            self.solver.add_clause([self.guard_to_var[guard][color] for (guard, color) in subset])
 
     def __add_conflicting_guards_constraints(self):
         for e in self.GC.edge_index_map().values():
             for k in range(self.K):
-                self.solver.add_clause([-self.guard_to_var[(e[0], k)], -self.guard_to_var[(e[1], k)]])
+                self.solver.add_clause([-self.guard_to_var[e[0]][k], -self.guard_to_var[e[1]][k]])
+
+    def __add_guard_coloring_constraints(self):
+        for color_dict in self.guard_to_var.values():
+            self.solver.add_atmost(list(color_dict.values()), 1)
 
     # These constraints are being replaced by the conflicting guards constraints
     def __add_edge_clique_cover_constraints(self):
-        for edge_clique in self.edge_clique_covers:
-            self.solver.add_clause([self.guard_to_var[guard] for guard in edge_clique])
+        color = 0
+        for cover in self.edge_clique_covers:
+            for clique in cover:
+                self.solver.add_clause([self.guard_to_var[guard][color] for guard in clique])
+            color += 1
 
     def __deactivate_guards(self, color_lim: int):
-        return [-self.guard_to_var[(guard, k)] for guard in self.guard_to_witnesses.keys() for k in range(color_lim, self.K)]
+        return [-self.guard_to_var[guard][k] for guard in self.guard_to_witnesses.keys() for k in range(color_lim, self.K)]
     
     def __check_coverage(self, solution: list[tuple[int, int]]):
         solution = [guard[0] for guard in solution]
@@ -91,7 +102,7 @@ class CAGPSolverSAT:
                     if witness_set.contains(witness):
                         for k in range(self.K):
                             subset.append((guard, k))
-                self.solver.add_clause([self.guard_to_var[guard] for guard in subset])
+                self.solver.add_clause([self.guard_to_var[guard][color] for (guard, color) in subset])
 
             print('Starting linear ascent')
             color_lim, solution = self.linear_ascent(color_lim)
