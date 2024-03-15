@@ -1,6 +1,7 @@
 from ortools.sat.python import cp_model
 import rustworkx as rx
 from pyvispoly import PolygonWithHoles
+from sympy import assuming
 
 class CAGPSolverCPSAT:
 
@@ -14,8 +15,6 @@ class CAGPSolverCPSAT:
         self.all_witnesses = all_witnesses
         self.edge_clique_covers = edge_clique_covers
         self.model = cp_model.CpModel()
-
-        self.model.parameters.log_search_progress = True
 
         self.__make_vars()
         self.__add_witness_covering_constraints()
@@ -77,7 +76,8 @@ class CAGPSolverCPSAT:
 
     def solve(self):
         solver = cp_model.CpSolver()
-        status = solver.Solve(self.model)
+        solver.parameters.log_search_progress = True
+        status = solver.Solve(self.model, assumptions=None)
         if status != cp_model.OPTIMAL:
             print('No solution found')
             return None
