@@ -31,7 +31,7 @@ class CFCAGPSolverMIP:
     def __make_vars(self):
         self.color_vars = dict()
         self.guard_vars = dict()
-        self.guard_unique_color_witness_vars = dict()
+        self.witness_color_vars = dict()
 
         for color in range(self.K):
             self.color_vars[color] = self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY)
@@ -41,27 +41,29 @@ class CFCAGPSolverMIP:
                 self.guard_vars[guard, color] = self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY)
 
         for witness in self.initial_witnesses:        
-            for guard in self.G.neighbors(witness):
-                for color in range(self.K):
-                    self.guard_unique_color_witness_vars[guard, color, witness] = self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY)
+            for color in range(self.K):
+                self.witness_color_vars[witness, color] = self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY)
 
     def __add_guard_coloring_constraints(self):
         for guard in self.guard_to_witnesses.keys():
+            # Ensure that each guard is only assigned one color
             self.model.addConstr(sum(self.guard_vars[guard, color] for color in range(self.K)) <= 1)
 
     def __add_color_constraints(self):
         for color in range(self.K):
+            # Ensure that a color is only used if there is a guard of that color
             self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.guard_to_witnesses.keys()) >= self.color_vars[color])
             self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.guard_to_witnesses.keys()) <= self.M * self.color_vars[color])
 
     def __add_unique_color_constraints(self):
         for witness in self.initial_witnesses:
-            self.model.addConstr(sum(self.guard_unique_color_witness_vars[guard, color, witness] for guard in self.G.neighbors(witness) for color in range(self.K)) >= 1)
-
-            for guard in self.G.neighbors(witness):
-                for color in range(self.K):
-                    self.model.addConstr(self.guard_unique_color_witness_vars[guard, color, witness] <= self.guard_vars[guard, color])
-                    self.model.addConstr(self.guard_unique_color_witness_vars[guard, color, witness] <= 1 - sum(self.guard_vars[other_guard, color] for other_guard in self.G.neighbors(witness) if other_guard != guard))
+            for color in range(self.K):
+                # If a witness_color_var is true, there is exactly one guard of that color
+                self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.G.neighbors(witness)) >= self.witness_color_vars[witness, color])
+                self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.G.neighbors(witness)) <= 1 + self.M * (1 - self.witness_color_vars[witness, color]))
+                
+            # Ensure that each witness is covered by at least one guard with a unique color
+            self.model.addConstr(sum(self.witness_color_vars[witness, color] for color in range(self.K)) >= 1)
 
     def __set_objective(self):
         self.model.setObjective(sum(self.color_vars[color] for color in range(self.K)), grb.GRB.MINIMIZE)
@@ -125,12 +127,13 @@ class CFCAGPSolverMIP:
 
             print('Adding new witnesses...')
             for witness in missing_witnesses:
-                for guard in self.G.neighbors(witness):
-                    for color in range(self.K):
-                        self.guard_unique_color_witness_vars[guard, color, witness] = self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY)
-                        self.model.addConstr(self.guard_unique_color_witness_vars[guard, color, witness] <= self.guard_vars[guard, color])
-                        self.model.addConstr(self.guard_unique_color_witness_vars[guard, color, witness] <= 1 - sum(self.guard_vars[other_guard, color] for other_guard in self.G.neighbors(witness) if other_guard != guard))
-                self.model.addConstr(sum(self.guard_unique_color_witness_vars[guard, color, witness] for guard in self.G.neighbors(witness) for color in range(self.K)) >= 1)
+                for color in range(self.K):
+                    # If a witness_color_var is true, there is exactly one guard of that color
+                    self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.G.neighbors(witness)) >= self.witness_color_vars[witness, color])
+                    self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.G.neighbors(witness)) <= 1 + self.M * (1 - self.witness_color_vars[witness, color]))
+                    
+                # Ensure that each witness is covered by at least one guard with a unique color
+                self.model.addConstr(sum(self.witness_color_vars[witness, color] for color in range(self.K)) >= 1)
                 
                 self.lazy_witnesses += 1
 
