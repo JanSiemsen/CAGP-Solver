@@ -1,11 +1,12 @@
 import time
 from pyvispoly import Point, PolygonWithHoles, plot_polygon
 import solver_utils as solver_utils
+from GreedyCAGP import get_greedy_solution
 from CAGPSolverMIP import CAGPSolverMIP
 from CAGPSolverSAT import CAGPSolverSAT
 from CAGPSolverCPSAT_MIP_Formulation import CAGPSolverCPSAT as CAGPSolverCPSAT_MIP
 from CAGPSolverCPSAT_SAT_Formulation import CAGPSolverCPSAT as CAGPSolverCPSAT_SAT
-from GreedyCAGP import get_greedy_solution
+from CFCAGPSolverMIP import CFCAGPSolverMIP
 import networkx as nx
 import matplotlib.pyplot as plt
 import distinctipy as distcolors
@@ -33,7 +34,7 @@ def convert_to_LinearRing(edges: list, pos: dict) -> list[Point]:
 # poly = PolygonWithHoles(ring)
 
 # to parse simple polygons from AGP2009 Benchmark
-with open('/home/yanyan/PythonProjects/CAGP-Solver/agp2009a-simplerand/randsimple-2500-1.pol') as f:
+with open('/home/yanyan/PythonProjects/CAGP-Solver/agp2009a-simplerand/randsimple-200-1.pol') as f:
     vertices = f.readline().split()
     vertices = vertices[1:]
     linear_ring = []
@@ -81,6 +82,11 @@ greedyColors, greedySolution = get_greedy_solution(guard_to_witnesses, all_witne
 print("number of colors in greedy solution: ", greedyColors)
 print("number of guards in greedy solution: ", len(greedySolution))
 
+print('Creating MIP solver...')
+CFsolverMIP = CFCAGPSolverMIP(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, solution=greedySolution)
+print('Solving MIP...')
+solution = CFsolverMIP.solve()
+
 print('Generating edge clique covers...')
 start = time.time()
 edge_clique_covers = solver_utils.generate_edge_clique_covers(GC, greedyColors)
@@ -88,23 +94,23 @@ end = time.time()
 # print(edge_clique_covers)
 print('Time to generate edge clique covers:', end - start, 'seconds')
 
-# print('Creating MIP solver...')
-# solverMIP = CAGPSolverMIP(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, edge_clique_covers, solution=greedySolution)
-# print('Solving MIP...')
-# solution = solverMIP.solve()
-# # print([(guard, color) for guard, color in solution])
-# print(solver_utils.verify_solver_solution(solution, GC))
-# print('Average vertex degree:', (2 * len(GC.edge_indices())) / len(GC.node_indices()))
-
-print('Creating CPSAT solver...')
-solverCPSAT = CAGPSolverCPSAT_MIP(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, edge_clique_covers, solution=greedySolution)
-print('Solving CPSAT...')
-start = time.time()
-solution = solverCPSAT.solve()
-end = time.time()
-print('Time to solve:', end - start, 'seconds')
+print('Creating MIP solver...')
+solverMIP = CAGPSolverMIP(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, edge_clique_covers, solution=greedySolution)
+print('Solving MIP...')
+solution = solverMIP.solve()
 # print([(guard, color) for guard, color in solution])
 print(solver_utils.verify_solver_solution(solution, GC))
+print('Average vertex degree:', (2 * len(GC.edge_indices())) / len(GC.node_indices()))
+
+# print('Creating CPSAT solver...')
+# solverCPSAT = CAGPSolverCPSAT_MIP(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, edge_clique_covers, solution=greedySolution)
+# print('Solving CPSAT...')
+# start = time.time()
+# solution = solverCPSAT.solve()
+# end = time.time()
+# print('Time to solve:', end - start, 'seconds')
+# # print([(guard, color) for guard, color in solution])
+# print(solver_utils.verify_solver_solution(solution, GC))
 
 # print('Creating CPSAT solver...')
 # solverCPSAT = CAGPSolverCPSAT_SAT(greedyColors, poly, guard_to_witnesses, initial_witnesses, all_witnesses, G, GC, None, solution=greedySolution)
@@ -141,13 +147,13 @@ print(solver_utils.verify_solver_solution(solution, GC))
 # fig, ax = plt.subplots()
 # plot_polygon(poly, ax=ax, color="lightgrey")
 
-# print('Plotting...')
-# colors = distcolors.get_colors(len(guards))
-# fig, ax = plt.subplots()
-# plot_polygon(poly, ax=ax, color="lightgrey")
-# for s in solution:
-#     for id, (point, visibility) in guards.items():
-#         if s[0] == id:
-#             plot_polygon(visibility, ax=ax, color=colors[s[1]], alpha=0.1)
-#             plt.scatter(point.x(), point.y(), color='black', s=10)
-# plt.show()
+print('Plotting...')
+colors = distcolors.get_colors(len(guards))
+fig, ax = plt.subplots()
+plot_polygon(poly, ax=ax, color="lightgrey")
+for s in solution:
+    for id, (point, visibility) in guards.items():
+        if s[0] == id:
+            plot_polygon(visibility, ax=ax, color=colors[s[1]], alpha=0.1)
+            plt.scatter(point.x(), point.y(), color='black', s=10)
+plt.show()

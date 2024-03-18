@@ -1,11 +1,10 @@
 import gurobipy as grb
-from numpy import cov
 import rustworkx as rx
 from pyvispoly import Point, PolygonWithHoles, Arrangement, Arr_PointLocation, plot_polygon
 import matplotlib.pyplot as plt
 
 # This version of the solver takes in a precomputed visibility and covering graph to create its constraints
-# New witnesses are added whenever an optimal solution is found
+# New witnesses are added whenever a feasible solution is found
 class CAGPSolverMIP:
 
     def __init__(self, K: int, poly: PolygonWithHoles, guard_to_witnesses: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], G: rx.PyGraph, edge_clique_covers: list[list[list[int]]], solution: list[list[int]]=None) -> list[tuple[int, int]]:
