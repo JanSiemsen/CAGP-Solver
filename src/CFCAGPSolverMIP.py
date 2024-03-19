@@ -23,6 +23,8 @@ class CFCAGPSolverMIP:
         self.__add_guard_coloring_constraints()
         self.__add_color_constraints()
         self.__add_unique_color_constraints()
+        self.__add_color_symmetry_constraints()
+        self.__add_guard_symmetry_constraints()
         self.__set_objective()
 
         # if solution:
@@ -64,6 +66,15 @@ class CFCAGPSolverMIP:
                 
             # Ensure that each witness is covered by at least one guard with a unique color
             self.model.addConstr(sum(self.witness_color_vars[witness, color] for color in range(self.K)) >= 1)
+
+    def __add_color_symmetry_constraints(self):
+        for k in range(self.K - 1):
+            self.model.addConstr(0 <= self.color_vars[k] - self.color_vars[k + 1])
+
+    def __add_guard_symmetry_constraints(self):
+        for k in range(self.K - 1):
+            self.model.addConstr(0 <= sum(self.guard_vars[x] if x[1] == k else 0 for x in self.guard_vars.keys())
+                                            - sum(self.guard_vars[x] if x[1] == k + 1 else 0 for x in self.guard_vars.keys()))
 
     def __set_objective(self):
         self.model.setObjective(sum(self.color_vars[color] for color in range(self.K)), grb.GRB.MINIMIZE)

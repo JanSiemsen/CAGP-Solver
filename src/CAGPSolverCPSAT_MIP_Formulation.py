@@ -77,7 +77,7 @@ class CAGPSolverCPSAT:
     
     def solve(self):
         solver = cp_model.CpSolver()
-        solver.parameters.log_search_progress = True
+        # solver.parameters.log_search_progress = True
         status = solver.Solve(self.model)
         if status != cp_model.OPTIMAL:
             print('No solution found')

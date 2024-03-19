@@ -4,7 +4,7 @@ from pyvispoly import PolygonWithHoles
 
 class CAGPSolverSAT:
     
-    def __init__(self, K: int, poly: PolygonWithHoles, guard_to_witnesses: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], G: rx.PyGraph, GC: rx.PyGraph, edge_clique_covers: list[list[list[int]]], guard_color_constraints: bool, solution: list[list[int]]=None) -> list[tuple[int, int]]:
+    def __init__(self, K: int, poly: PolygonWithHoles, guard_to_witnesses: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], G: rx.PyGraph, GC: rx.PyGraph, guard_color_constraints: bool, solution: list[list[int]]=None) -> list[tuple[int, int]]:
         self.G = G
         self.GC = GC
         self.K = K
@@ -12,7 +12,6 @@ class CAGPSolverSAT:
         self.guard_to_witnesses = guard_to_witnesses
         self.witnesses = initial_witnesses
         self.all_witnesses = all_witnesses
-        self.edge_clique_covers = edge_clique_covers
         self.solver = Solver(name='Gluecard4', with_proof=False)
         self.__make_vars()
         self.__add_witness_covering_constraints()
@@ -51,12 +50,12 @@ class CAGPSolverSAT:
             self.solver.add_atmost(list(color_dict.values()), 1)
 
     # These constraints are being replaced by the conflicting guards constraints
-    def __add_edge_clique_cover_constraints(self):
-        color = 0
-        for cover in self.edge_clique_covers:
-            for clique in cover:
-                self.solver.add_clause([self.guard_to_var[guard][color] for guard in clique])
-            color += 1
+    # def __add_edge_clique_cover_constraints(self):
+    #     color = 0
+    #     for cover in self.edge_clique_covers:
+    #         for clique in cover:
+    #             self.solver.add_clause([self.guard_to_var[guard][color] for guard in clique])
+    #         color += 1
 
     def __deactivate_guards(self, color_lim: int):
         return [-self.guard_to_var[guard][k] for guard in self.guard_to_witnesses.keys() for k in range(color_lim, self.K)]
