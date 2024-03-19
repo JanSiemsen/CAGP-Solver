@@ -1,26 +1,66 @@
 %!TeX root=../thesis.tex
 \chapter{Introduction}
-
-You can write an introduction here!
+The chromatic art gallery problem:
+\begin{enumerate}
+    \item[-] first introduced by L. H. Erickson and S. M. LaValle in 2010 \cite{erickson2010chromatic}
+    \item[-] given a polygon $P$ find a guard set that covers the entirety of $P$ and requires the smallest number of colors to color the guards in a way that the visibility regions of two guards with the same color do not overlap
+    \item[-] the number is called \emph{chromatic guard number} $\chi_G(P)$ 
+\end{enumerate}
 
 \section{Results}
 You can write down your main result here.
 
 \section{Related Work}
-What has been done in the literature? This is needed to provide context of the area you are working in.
-You can add and refer to figures like \Cref{fig:logo}. 
-
-\begin{figure}
-	\centering
-	\includegraphics[]{./figures/tu-bs_logo.jpg}
-	\caption[Short description]{Long description: Notice that the List of Figures has a shorter description than this text right here. Isn't this fascinating?}
-	\label{fig:logo}
-\end{figure}
-
-You could for example cite~\cite{limper2013pop} with \begin{verbatim}
-~\cite{limper2013pop}
-\end{verbatim}
-(The \~{} keeps two word in the same line but also separates with a comma.)
+\textbf{The chromatic art gallery problem:} \\
+\textbf{Complexity:}
+\begin{enumerate}
+    \item[-] given a polygon P and guard set S of P, we can compute an optimal coloring of S so that no two members of S with the same color have overlapping visibility regions in polynomial time \cite{erickson2011many}
+    \item[-] for covering a polygon with holes it is NP-hard to decide whether any fixed number $k \geq 2$ of colors suffices \cite{fekete2014complexity}
+    \item[-] for covering a simple polygon to compute the minimum number of colors needed is NP-hard for $\Theta(n)$ colors \cite{fekete2014complexity},
+    the same stands when we limit ourselves to arbitrary guard positions \cite{fekete2014chromatic} 
+    \item[-] for a simple polygon P given a discrete set of candidate guards locations, there is an $O(\log (\chi_G(P)))$-approximation algorithm in polynomial time \cite{fekete2014chromatic}
+    \item[-] for a simple polygon P given a discrete set of candidate guard locations, there is a polynomial time algorithm to compute an optimal 2-colorable guard set regarding various objectives \cite{fekete2014chromatic} 
+    \item[-] for covering an orthogonal Polygon it is NP-hard to decide whether any fixed number $k \geq 2$ of colors suffices \cite{hoorfar2021np}
+    \item[-] there is a 6-approximation algorithm for simple orthogonal polygons with linear time and space complexity \cite{hoorfar2021np}
+    \item[-] there is an exact algorithm for histograms polygons in linear time \cite{hoorfar2021np}
+\end{enumerate}
+\textbf{Lower bounds:}
+\begin{enumerate}
+    \item[-] for $k \geq 3$ exists a polygon $P_k$ with $4k$ vertices and $\chi_G(P_k) \geq k$ \cite{erickson2012art}
+    \item[-] for $k$ exists a polygon $P_k$ with $3k$ vertices and $\chi_G(P_k) \geq k/2$ \cite{bartschi2011coloring}
+    \item[-] for $k \geq 3$ exists a strictly monotone polygon $M_k$ with $3k^2$ vertices and $\chi_G(M_k) \geq k$ \cite{erickson2012art}
+    \item[-] for $k \geq 3$ and odd exists a monotone orthogonal polygon $R_k$ with $4k^2 + 10k + 10$ vertices and $\chi_G(R_k) \geq k$ \cite{erickson2012art}
+    \item[-] for $k$ exists a monotone orthogonal polygon $R_k$ with $4k^2$ vertices and $\chi_G(R_k) \geq k/4$ \cite{bartschi2011coloring}
+\end{enumerate}
+\textbf{Upper bounds:}
+\begin{enumerate}
+    \item[-] for any monotone, orthogonal or general polygon $P_n$ with n vertices:  $\chi_G(P_n) = O(n)$ \cite{bartschi2011coloring}
+    \item[-] for any spiral polygon $P_{spi}$: $\chi_G(P_{spi}) \leq 2$ \cite{erickson2012art}
+    \item[-] for any staircase polygon $P_{sta}$: $\chi_G(P_{sta}) \leq 3$ \cite{erickson2012art}
+\end{enumerate}
+\textbf{The conflict-free chromatic art gallery problem:} \\
+\textbf{Upper bounds:}
+\begin{enumerate}
+    \item[-] for any monotone polygon $P_n$ with n vertices:  $\chi_{cfG}(P_n) = O(\log n)$ \cite{bartschi2011coloring}
+    \item[-] for any orthogonal polygon $P_n$ with n vertices:  $\chi_{cfG}(P_n) = O(\log n)$ \cite{bartschi2011coloring}
+    \item[-] for any polygon $P_n$ with n vertices:  $\chi_{cfG}(P_n) = O((\log n)^2)$ \cite{bartschi2011coloring}
+\end{enumerate}
+\textbf{Exact algorithm for the DCAGP (Discrete Chromatic Art Gallery Problem):} \cite{zambon2014exact}
+\begin{enumerate}
+    \item Determine guard set G
+    \item Determine witness set W via placing a witness in each shadow AVP
+    \item Build Graph G$_T$ for every guard/witness a vertex and an edge whenever a guard covers a witness or two guards are conflicting
+    \item Use Upper Bound heuristic using independent sets to find a feasible K
+    \item Solve the DCAGP on G$_T$ using K:
+    \begin{enumerate}
+        \item[-] Boolean variables for K colors and for whether a color is assigned to a guard in the optimal solution
+        \item[-] minimize number of colors used
+        \item[-] add witness covering constraints
+        \item[-] add at most one color per guard constraint (performance)
+        \item[-] add symmetry breaker constraints (performance)
+        \item[-] lazily add edge clique cover constraints (instead of edge constraints for conflicting guards)
+    \end{enumerate}
+\end{enumerate}
 
 \section{Overview}
 If needed, write down where to find everything.
