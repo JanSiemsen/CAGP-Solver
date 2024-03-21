@@ -59,7 +59,7 @@ def generate_solver_input(polygon: PolygonWithHoles, guards_on_holes: bool=True)
             if witness in witness_set:
                 G.add_edge(witness, guard, None)
 
-    return guards, guard_to_witnesses, initial_witnesses, set(all_witnesses), GC, G
+    return guards, guard_to_witnesses, witness_to_guards, initial_witnesses, set(all_witnesses), GC, G
 
 def sort_edge(e: tuple[int, int]):
     return (min(e[0], e[1]), max(e[0], e[1]))
