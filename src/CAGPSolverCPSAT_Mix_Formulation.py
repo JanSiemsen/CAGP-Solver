@@ -4,12 +4,11 @@ from pyvispoly import PolygonWithHoles
 
 class CAGPSolverCPSAT:
 
-    def __init__(self, K: int, poly: PolygonWithHoles, guard_to_witnesses: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], G: rx.PyGraph, GC: rx.PyGraph, solution: list[list[int]]=None) -> list[tuple[int, int]]:
-        self.G = G
+    def __init__(self, K: int, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], GC: rx.PyGraph, solution: list[list[int]]=None) -> list[tuple[int, int]]:
         self.GC = GC
         self.K = K
-        self.poly = poly
         self.guard_to_witnesses = guard_to_witnesses
+        self.witness_to_guards = witness_to_guards
         self.witnesses = initial_witnesses
         self.all_witnesses = all_witnesses
         self.model = cp_model.CpModel()
@@ -31,7 +30,7 @@ class CAGPSolverCPSAT:
     def __add_witness_covering_constraints(self):
         for witness in self.witnesses:
             subset = []
-            for guard in self.G.neighbors(witness):
+            for guard in self.witness_to_guards[witness]:
                 for k in range(self.K):
                     subset.append((guard, k))
             self.model.AddBoolOr([self.guard_vars[guard] for guard in subset])
@@ -86,10 +85,9 @@ class CAGPSolverCPSAT:
             print('Adding new witnesses...')
             for witness in missing_witnesses:
                 subset = []
-                for guard, witness_set in self.guard_to_witnesses.items():
-                    if witness in witness_set:
-                        for k in range(self.K):
-                            subset.append(self.guard_vars[(guard, k)])
+                for guard in self.witness_to_guards[witness]:
+                    for k in range(self.K):
+                        subset.append(self.guard_vars[(guard, k)])
                 self.model.Add(sum(subset) >= 1)
             status = solver.Solve(self.model)
             if status != cp_model.OPTIMAL:

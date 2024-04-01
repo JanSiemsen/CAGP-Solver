@@ -4,12 +4,11 @@ from pyvispoly import PolygonWithHoles
 
 class CAGPSolverSAT:
     
-    def __init__(self, K: int, poly: PolygonWithHoles, guard_to_witnesses: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], G: rx.PyGraph, GC: rx.PyGraph, guard_color_constraints: bool, solution: list[list[int]]=None) -> list[tuple[int, int]]:
-        self.G = G
+    def __init__(self, K: int, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], GC: rx.PyGraph, guard_color_constraints: bool, solution: list[list[int]]=None) -> list[tuple[int, int]]:
         self.GC = GC
         self.K = K
-        self.poly = poly
         self.guard_to_witnesses = guard_to_witnesses
+        self.witness_to_guards = witness_to_guards
         self.witnesses = initial_witnesses
         self.all_witnesses = all_witnesses
         self.solver = Solver(name='Gluecard4', with_proof=False)
@@ -35,7 +34,7 @@ class CAGPSolverSAT:
     def __add_witness_covering_constraints(self):
         for witness in self.witnesses:
             subset = []
-            for guard in self.G.neighbors(witness):
+            for guard in self.witness_to_guards[witness]:
                 for k in range(self.K):
                     subset.append((guard, k))
             self.solver.add_clause([self.guard_to_var[guard][color] for (guard, color) in subset])
@@ -97,10 +96,9 @@ class CAGPSolverSAT:
 
             for witness in missing_witnesses:
                 subset = []
-                for guard, witness_set in self.guard_to_witnesses.items():
-                    if witness_set.contains(witness):
-                        for k in range(self.K):
-                            subset.append((guard, k))
+                for guard in self.witness_to_guards[witness]:
+                    for k in range(self.K):
+                        subset.append((guard, k))
                 self.solver.add_clause([self.guard_to_var[guard][color] for (guard, color) in subset])
 
             print('Starting linear ascent')

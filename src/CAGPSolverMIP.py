@@ -7,11 +7,10 @@ import matplotlib.pyplot as plt
 # New witnesses are added whenever a feasible solution is found
 class CAGPSolverMIP:
 
-    def __init__(self, K: int, poly: PolygonWithHoles, guard_to_witnesses: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], G: rx.PyGraph, edge_clique_covers: list[list[list[int]]], solution: list[list[int]]=None) -> list[tuple[int, int]]:
-        self.G = G
+    def __init__(self, K: int, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], edge_clique_covers: list[list[list[int]]], solution: list[list[int]]=None) -> list[tuple[int, int]]:
         self.K = K
-        self.poly = poly
         self.guard_to_witnesses = guard_to_witnesses
+        self.witness_to_guards = witness_to_guards
         self.initial_witnesses = initial_witnesses
         self.all_witnesses = all_witnesses
         self.edge_clique_covers = edge_clique_covers
@@ -45,7 +44,7 @@ class CAGPSolverMIP:
         self.model.Params.Method = 0
         self.model.Params.DegenMoves = 2
         self.model.Params.Cuts = 1
-        self.model.Params.LogFile = 'mip.log'
+        # self.model.Params.LogFile = 'mip.log'
 
         # Set the objective
         self.model.setObjective(sum(self.color_vars.values()), grb.GRB.MINIMIZE)
@@ -68,17 +67,10 @@ class CAGPSolverMIP:
     def __add_witness_covering_constraints(self):
         for witness in self.initial_witnesses:
             subset = []
-            for guard in self.G.neighbors(witness):
+            for guard in self.witness_to_guards[witness]:
                 for k in range(self.K):
                     subset.append((guard, k))
             self.model.addConstr(1 <= sum(self.guard_vars[guard][k] for guard, k in subset))
-
-    # These constraints are being replaced by the edge clique cover constraints
-    def __add_conflicting_guards_constraints(self):
-        for e in self.G.edge_index_map().values():
-            if self.G[e[0]] < len(self.guards) and self.G[e[1]] < len(self.guards):
-                for k in range(self.K):
-                    self.model.addConstr(0 >= self.guard_vars[(e[0], k)] + self.guard_vars[(e[1], k)] - self.color_vars[k])
                 
     def __add_edge_clique_cover_constraints(self):
         color = 0
@@ -120,10 +112,9 @@ class CAGPSolverMIP:
             print('Adding new witnesses...')
             for witness in missing_witnesses:
                 subset = []
-                for guard, witness_set in self.guard_to_witnesses.items():
-                    if witness_set.contains(witness):
-                        for k in range(self.K):
-                            subset.append((guard, k))
+                for guard in self.witness_to_guards[witness]:
+                    for k in range(self.K):
+                        subset.append((guard, k))
                 self.model.cbLazy(1 <= sum(self.guard_vars[x] for x in subset))
                 self.lazy_witnesses += 1
             self.iteration += 1

@@ -34,7 +34,7 @@ def generate_solver_input(polygon: PolygonWithHoles, guards_on_holes: bool=True)
 
     print('Creating AVP arrangement...')
     avp = generate_AVP_recursive(list(guards.items()))
-    witness_to_guards, guard_to_witnesses, light_guard_sets = avp.get_shadow_witnesses_and_light_guard_sets(list(guards.keys()))
+    witness_to_guards, guard_to_witnesses, light_guard_sets, all_witness_to_guards, all_guard_to_witnesses = avp.get_shadow_witnesses_and_light_guard_sets(list(guards.keys()))
 
     print('Creating visibility graph...')
     for guard_set in light_guard_sets:
@@ -52,14 +52,7 @@ def generate_solver_input(polygon: PolygonWithHoles, guards_on_holes: bool=True)
                 Exception("Witness index does not match the index returned by the graph")
             initial_witnesses.append(witness)
 
-    print('Creating visibility covering graph...')
-    G = GC.copy()
-    for witness in initial_witnesses:
-        for guard, witness_set in guard_to_witnesses.items():
-            if witness in witness_set:
-                G.add_edge(witness, guard, None)
-
-    return guards, guard_to_witnesses, witness_to_guards, initial_witnesses, set(all_witnesses), GC, G
+    return guards, guard_to_witnesses, witness_to_guards, all_guard_to_witnesses, all_witness_to_guards, initial_witnesses, set(all_witnesses), GC
 
 def sort_edge(e: tuple[int, int]):
     return (min(e[0], e[1]), max(e[0], e[1]))

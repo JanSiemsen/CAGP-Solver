@@ -8,11 +8,12 @@ import matplotlib.pyplot as plt
 # New witnesses are added whenever an optimal solution is found
 class CFCAGPSolverMIP:
 
-    def __init__(self, K: int, poly: PolygonWithHoles, guard_to_witnesses: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], G: rx.PyGraph, solution: list[list[int]]=None) -> list[tuple[int, int]]:
+    def __init__(self, K: int, poly: PolygonWithHoles, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], G: rx.PyGraph, solution: list[list[int]]=None) -> list[tuple[int, int]]:
         self.G = G
         self.K = K
         self.poly = poly
         self.guard_to_witnesses = guard_to_witnesses
+        self.witness_to_guards = witness_to_guards
         self.initial_witnesses = initial_witnesses
         self.all_witnesses = all_witnesses
         self.M = len(self.guard_to_witnesses)

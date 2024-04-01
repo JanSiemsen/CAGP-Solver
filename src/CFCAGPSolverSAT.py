@@ -49,16 +49,27 @@ class CFCAGPSolverSAT:
             self.solver.add_atmost([self.guard_to_var[guard, color] for color in range(self.K)], 1)
 
     def __add_unique_color_constraints(self):
+        i = 0
         for witness in self.initial_witnesses:
-            if not set(self.G.neighbors(witness)) == self.witness_to_guards[witness]:
-                print(self.G.neighbors(witness), self.witness_to_guards[witness])
-                Exception("Witness neighbors do not match the witness to guards mapping")
+            # if not len(self.G.neighbors(witness)) == len(self.witness_to_guards[witness]):
+            #     print(self.G.neighbors(witness), self.witness_to_guards[witness])
+            #     Exception("Witness neighbors do not match the witness to guards mapping")
+            # if not set(self.G.neighbors(witness)) == self.witness_to_guards[witness]:
+            #     print(self.G.neighbors(witness), self.witness_to_guards[witness])
+            #     Exception("Witness neighbors do not match the witness to guards mapping")
+            # if not [(g1, g2) for g1, g2 in combinations(self.witness_to_guards[witness], 2)] == [(g1, g2) for g1, g2 in combinations(self.G.neighbors(witness), 2)]:
+            #         print([(g1, g2) for g1, g2 in combinations(self.witness_to_guards[witness], 2)], [(g1, g2) for g1, g2 in combinations(self.G.neighbors(witness), 2)])
+            #         if i > 9:
+            #             raise Exception("Combinations of witness guards do not match the combinations of witness neighbors")
+            #         i += 1
+            # neighbors = sorted(list(self.G.neighbors(witness)).copy())
+            neighbors = self.witness_to_guards[witness]
             for color in range(self.K):
                 # If a witness_color_var is true, at least one guard of that color is true
                 unique_color = self.witness_color_to_var[witness, color]
-                neighbor_guards_color = [self.guard_to_var[guard, color] for guard in self.witness_to_guards[witness]]
+                neighbor_guards_color = [self.guard_to_var[guard, color] for guard in neighbors]
                 self.solver.add_clause([-unique_color] + neighbor_guards_color)
-                for guard1, guard2 in combinations(self.witness_to_guards[witness], 2):
+                for guard1, guard2 in combinations(neighbors, 2):
                     # If a witness_color_var is true, no two guards of that color are true
                     guard1_color = self.guard_to_var[guard1, color]
                     guard2_color = self.guard_to_var[guard2, color]
@@ -151,7 +162,6 @@ class CFCAGPSolverSAT:
             print(upper, mid, lower)
             print(f'Checking for {mid} colors')
             solution = self.__solve(assumptions=self.__deactivate_guards(mid))
-            print(solution)
             if solution:
                 optimal_solution = solution
                 upper = mid
