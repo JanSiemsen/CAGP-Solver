@@ -1,5 +1,6 @@
 from functools import partial
 from itertools import combinations
+import re
 from pyvispoly import Point, PolygonWithHoles, VisibilityPolygonCalculator, AVP_Arrangement
 import rustworkx as rx
 from heapq import heappop, heappush
@@ -17,7 +18,7 @@ def generate_AVP_recursive(guards: list[tuple[int, tuple[Point, PolygonWithHoles
     else:
         return generate_AVP_recursive(leftHalf).overlay(generate_AVP_recursive(rightHalf))
 
-def generate_solver_input(polygon: PolygonWithHoles, guards_on_holes: bool=True) -> rx.PyGraph:
+def generate_solver_input(polygon: PolygonWithHoles, guards_on_holes: bool=True):
     GC = rx.PyGraph(multigraph=False)
 
     print('Creating guard set...')
@@ -34,7 +35,7 @@ def generate_solver_input(polygon: PolygonWithHoles, guards_on_holes: bool=True)
 
     print('Creating AVP arrangement...')
     avp = generate_AVP_recursive(list(guards.items()))
-    witness_to_guards, guard_to_witnesses, light_guard_sets, all_witness_to_guards, all_guard_to_witnesses = avp.get_shadow_witnesses_and_light_guard_sets(list(guards.keys()))
+    witness_to_guards, guard_to_witnesses, light_guard_sets, witness_to_guards_cf, guard_to_witnesses_cf = avp.get_shadow_witnesses_and_light_guard_sets(list(guards.keys()))
 
     print('Creating visibility graph...')
     for guard_set in light_guard_sets:
@@ -52,7 +53,11 @@ def generate_solver_input(polygon: PolygonWithHoles, guards_on_holes: bool=True)
                 Exception("Witness index does not match the index returned by the graph")
             initial_witnesses.append(witness)
 
-    return guards, guard_to_witnesses, witness_to_guards, all_guard_to_witnesses, all_witness_to_guards, initial_witnesses, set(all_witnesses), GC
+    print('Creating initial witnesses and all witnesses for conflict-free...')
+    all_witnesses_cf = sorted(witness_to_guards_cf.keys(), key=lambda x: len(witness_to_guards_cf[x]), reverse=True)
+    initial_witnesses_cf = all_witnesses_cf[:len(guards)]
+
+    return guards, guard_to_witnesses, witness_to_guards, initial_witnesses, set(all_witnesses), GC, guard_to_witnesses_cf, witness_to_guards_cf, initial_witnesses_cf, set(all_witnesses_cf)
 
 def sort_edge(e: tuple[int, int]):
     return (min(e[0], e[1]), max(e[0], e[1]))

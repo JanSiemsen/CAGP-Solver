@@ -1,3 +1,4 @@
+from collections import Counter
 from colorama import init
 import gurobipy as grb
 import rustworkx as rx
@@ -8,10 +9,8 @@ import matplotlib.pyplot as plt
 # New witnesses are added whenever an optimal solution is found
 class CFCAGPSolverMIP:
 
-    def __init__(self, K: int, poly: PolygonWithHoles, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], G: rx.PyGraph, solution: list[list[int]]=None) -> list[tuple[int, int]]:
-        self.G = G
+    def __init__(self, K: int, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], solution: list[list[int]]=None) -> list[tuple[int, int]]:
         self.K = K
-        self.poly = poly
         self.guard_to_witnesses = guard_to_witnesses
         self.witness_to_guards = witness_to_guards
         self.initial_witnesses = initial_witnesses
@@ -62,8 +61,8 @@ class CFCAGPSolverMIP:
         for witness in self.initial_witnesses:
             for color in range(self.K):
                 # If a witness_color_var is true, there is exactly one guard of that color
-                self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.G.neighbors(witness)) >= self.witness_color_vars[witness, color])
-                self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.G.neighbors(witness)) <= 1 + self.M * (1 - self.witness_color_vars[witness, color]))
+                self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.witness_to_guards[witness]) >= self.witness_color_vars[witness, color])
+                self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.witness_to_guards[witness]) <= 1 + self.M * (1 - self.witness_color_vars[witness, color]))
                 
             # Ensure that each witness is covered by at least one guard with a unique color
             self.model.addConstr(sum(self.witness_color_vars[witness, color] for color in range(self.K)) >= 1)
@@ -81,49 +80,53 @@ class CFCAGPSolverMIP:
         self.model.setObjective(sum(self.color_vars[color] for color in range(self.K)), grb.GRB.MINIMIZE)
 
     def __check_coverage(self):
-        solution = [guard for (guard, color), variable in self.guard_vars.items() if variable.x >= 0.5]
-        solution = list(set(solution))
+        # Create a dictionary mapping guards to their colors
+        guard_to_color = {guard: color for (guard, color), variable in self.guard_vars.items() if variable.x >= 0.5}
 
-        covered_witnesses = set()
-        for guard in solution:
-            covered_witnesses = covered_witnesses.union(self.guard_to_witnesses[guard])
+        # Check each witness
+        witnesses_without_unique_guard = []
+        for witness, guards in self.witness_to_guards.items():
+            # Check if there's a guard with a unique color among the guards of this witness
+            colors = [guard_to_color[guard] for guard in guards if guard in guard_to_color]
+            color_counts = Counter(colors)
+            has_unique_guard = any(count == 1 for count in color_counts.values())
+            if not has_unique_guard:
+                witnesses_without_unique_guard.append(witness)
 
-        missing_witnesses = self.all_witnesses.difference(covered_witnesses)
-        
-        return missing_witnesses
+        return witnesses_without_unique_guard
 
-    # not used
-    def __callback_integral(self, model, guard_vars):
-        print('Checking coverage...')
-        missing_witnesses = self.__check_coverage(model, guard_vars)
+    # # not used
+    # def __callback_integral(self, model, guard_vars):
+    #     print('Checking coverage...')
+    #     missing_witnesses = self.__check_coverage(model, guard_vars)
 
-        if(missing_witnesses):
-            print('Adding new witnesses...')
-            for witness in missing_witnesses:
-                subset = []
-                for guard, witness_set in self.guard_to_witnesses.items():
-                    if witness_set.contains(witness):
-                        for k in range(self.K):
-                            subset.append((guard, k))
-                # TODO: add constraints for new witness and new variables which is not possible during solving time for gurobi
-                self.lazy_witnesses += 1
-            self.iteration += 1
+    #     if(missing_witnesses):
+    #         print('Adding new witnesses...')
+    #         for witness in missing_witnesses:
+    #             subset = []
+    #             for guard, witness_set in self.guard_to_witnesses.items():
+    #                 if witness_set.contains(witness):
+    #                     for k in range(self.K):
+    #                         subset.append((guard, k))
+    #             # TODO: add constraints for new witness and new variables which is not possible during solving time for gurobi
+    #             self.lazy_witnesses += 1
+    #         self.iteration += 1
 
-    # not used
-    def __callback_fractional(self, model, varmap):
-        # Nothing is being done here yet.
-        pass
+    # # not used
+    # def __callback_fractional(self, model, varmap):
+    #     # Nothing is being done here yet.
+    #     pass
     
-    # not used
-    def callback(self, where, model, varmap):
-        if where == grb.GRB.Callback.MIPSOL:
-            # we have an integral solution (potentially valid solution)
-            self.__callback_integral(model, varmap)
-        elif where == grb.GRB.Callback.MIPNODE and \
-                model.cbGet(grb.GRB.Callback.MIPNODE_STATUS) == grb.GRB.OPTIMAL:
-            # we have a fractional solution
-            # (intermediate solution with fractional values for all booleans)
-            self.__callback_fractional(model, varmap)
+    # # not used
+    # def callback(self, where, model, varmap):
+    #     if where == grb.GRB.Callback.MIPSOL:
+    #         # we have an integral solution (potentially valid solution)
+    #         self.__callback_integral(model, varmap)
+    #     elif where == grb.GRB.Callback.MIPNODE and \
+    #             model.cbGet(grb.GRB.Callback.MIPNODE_STATUS) == grb.GRB.OPTIMAL:
+    #         # we have a fractional solution
+    #         # (intermediate solution with fractional values for all booleans)
+    #         self.__callback_fractional(model, varmap)
 
     def solve(self):
         self.iteration = 0
@@ -140,9 +143,10 @@ class CFCAGPSolverMIP:
             print('Adding new witnesses...')
             for witness in missing_witnesses:
                 for color in range(self.K):
+                    self.witness_color_vars[witness, color] = self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY)
                     # If a witness_color_var is true, there is exactly one guard of that color
-                    self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.G.neighbors(witness)) >= self.witness_color_vars[witness, color])
-                    self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.G.neighbors(witness)) <= 1 + self.M * (1 - self.witness_color_vars[witness, color]))
+                    self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.witness_to_guards[witness]) >= self.witness_color_vars[witness, color])
+                    self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.witness_to_guards[witness]) <= 1 + self.M * (1 - self.witness_color_vars[witness, color]))
                     
                 # Ensure that each witness is covered by at least one guard with a unique color
                 self.model.addConstr(sum(self.witness_color_vars[witness, color] for color in range(self.K)) >= 1)
@@ -150,8 +154,8 @@ class CFCAGPSolverMIP:
                 self.lazy_witnesses += 1
 
             self.model.optimize()
-            if self.model.status != grb.GRB.OPTIMAL:
-                raise RuntimeError("Unexpected status after optimization!")
+            
+            self.model.params.BestObjStop = self.model.objVal
             missing_witnesses = self.__check_coverage()
 
         obj_val = self.model.objVal

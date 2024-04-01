@@ -1,5 +1,7 @@
+from calendar import c
 from collections import Counter
 from itertools import combinations
+from operator import le
 from pysat.solvers import Solver
 import rustworkx as rx
 
@@ -7,8 +9,7 @@ import rustworkx as rx
 # New witnesses are added whenever an optimal solution is found
 class CFCAGPSolverSAT:
 
-    def __init__(self, K: int, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], G: rx.PyGraph, solution: list[list[int]]=None) -> list[tuple[int, int]]:
-        self.G = G
+    def __init__(self, K: int, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], solution: list[list[int]]=None) -> list[tuple[int, int]]:
         self.K = K
         self.guard_to_witnesses = guard_to_witnesses
         self.witness_to_guards = witness_to_guards
@@ -123,11 +124,15 @@ class CFCAGPSolverSAT:
         else:
             solution = self.linear_search(color_lim)
 
+        current_witnesses = len(self.initial_witnesses)
+        print('current witnesses', current_witnesses)
         print('Checking coverage')
         missing_witnesses = self.__check_coverage(solution)
 
         iteration = 0
         while(missing_witnesses):
+            current_witnesses += len(missing_witnesses)
+            print('current witnesses', current_witnesses)
             iteration += 1
             print(f'Adding new witnesses without a unique color ({iteration})')
 
@@ -151,6 +156,8 @@ class CFCAGPSolverSAT:
             color_lim, solution = self.linear_ascent(color_lim)
             print('Checking coverage')
             missing_witnesses = self.__check_coverage(solution)
+
+        print('all witnesses:', len(self.all_witnesses))
         return solution
 
     def binary_search(self):
