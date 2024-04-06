@@ -4,7 +4,7 @@ When given a list of distinct points in the plane, the line segments between con
 \end{definition}
 
 \begin{definition}[Visibility polygon]
-For a simple polygon P (possibly with holes), two points p, q E P are mutually visible if the line segment between them is fully contained in P. Given a point $p\in P$, p and all points in P visible to it form a simple polygon. We call the polygon visibility polygon of p.
+For a simple polygon P (possibly with holes), two points $p,q\in P$ are mutually visible if the line segment between them is fully contained in P. Given a point $p\in P$, p and all points in P visible to it form a simple polygon. We call this polygon visibility polygon of p.
 \end{definition}
 
 \begin{definition}[Guard set]
@@ -12,7 +12,7 @@ For a simple polygon P (possibly with holes), a guard set G is a set of points i
 \end{definition}
 
 \begin{definition}[Atomic visibility polygon (AVP)]
-When given a guard set G of a polygon P, we can overlay the visibility polygons of G to form an arrangement. We call the faces of this arrangement atomic visibility polygon (AVP) and denote the set of faces as $\mathcal{F}$. By assigning to each AVP $f\in\mathcal{F}$ the guard subset $G_{f}$ that they were created from, we can form a partial order over the AVPs s.t. for $f,f'\in\mathcal{F}$ $f\prec f'$ if and only if $G_{f}\subsetG_{f'}$. For an AVP $f\in\mathcal{F}$ we call it shadow (light) whenever it is minimal (maximal) within that order.
+When given a guard set G of a polygon P, we can overlay the visibility polygons of G to form an arrangement. We call the faces of this arrangement atomic visibility polygon (AVP) and denote the set of faces as $\mathcal{F}$. When a guard of G covers a point within an AVP f, it automatically also covers the entirety of f, hence the name atomic. By assigning to each AVP $f\in\mathcal{F}$ the guard subset $G_{f}$ that they were created from, we can form a partial order over the AVPs s.t. for $f,f'\in\mathcal{F}$ $f\prec f'$ if and only if $G_{f}\subset G_{f'}$. For an AVP $f\in\mathcal{F}$ we call it shadow (light) whenever it is minimal (maximal) within that order.
 \end{definition}
 
 \begin{definition}[Witness set]
@@ -32,5 +32,5 @@ For a guard set G and a witness set W of a polygon P, the Chromatic Art Gallery 
 \end{definition}
 
 \begin{definition}[Conflict-free Chromatic Art Gallery Problem]
-For a guard set G and a witness set W of a polygon P, the Conflict-free Chromatic Art Gallery Problem looks for a minimum coloring among all subgraphs $G_{sub}$ of $G_{cov}$ s.t. 
+For a guard set G and a witness set W of a polygon P, the Conflict-free Chromatic Art Gallery Problem looks for a minimum coloring among all subgraphs $G_{sub}$ of $G_{cov}$ s.t. among the guard vertices in the neighborhood of each witness vertex there exists at least one that has a unique color.
 \end{definition}
