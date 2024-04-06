@@ -1,21 +1,21 @@
 \chapter{Theoretical Shenanigans}
 
 \begin{theorem}[Couto et al.\cite{couto2011exact}]
-When given a polygon P and a guard set G, a subset of G fully covers P if and only if it covers all witnesses in the shadow witness set W of G.
+When given a polygon $P$ and a guard set $G$, a subset of G fully covers $P$ if and only if it covers all witnesses in the shadow witness set $W$ of $G$.
 \end{theorem}
 \begin{proof}
 The necessity condition follows trivially from $W\in P$. As for the sufficiency condition 
 \end{proof}
 
 \begin{theorem}
-When given a polygon P and a guard set G, the guard subsets of a light polygon form a clique in the 2-link-visibility graph of G and the cliques of all light polygons cover all edges of the graph.
+When given a polygon $P$ and a guard set $G$, the guard subsets of a light polygon form a clique in the 2-link-visibility graph $G_{vis}$ of $G$, and the cliques of all light polygons cover all edges of the graph.
 \end{theorem}
 \begin{proof}
-    
+The guard subset of a light polygon is formed by all the guards whose visibility polygons intersect in it, thus trivially forming a clique in $G_{vis}$. Assuming that for $g,g'\in G$ there exists an edge $(g, g')$ in $G_{vis}$ that is not covered by those cliques, then there exists an AVP $f$ that is not light and contains $g$ and $g'$ in its guard subset $G_{sub}$. As $f$ is not light there exists a neighboring AVP $f'$ whose guard subset contains $G_{sub}$. One can continue this argument with $f'$, but as the number of AVPs is finite, we will eventually reach an AVP $f^{*}$ of which the guard subset is not contained in its neighbors. Thus, $f^{*}$ is a light AVP and contains $g$ and $g'$, a contradiction.
 \end{proof}
 
 \begin{theorem}
-For a polygon P and a guard set G, neither conflict-freeness of all shadow witnesses nor all light witnesses guarantees conflict-freeness within all AVPs.
+For a polygon $P$ and a guard set $G$, neither conflict-freeness of all shadow witnesses nor all light witnesses guarantees conflict-freeness within all AVPs.
 \end{theorem}
 \begin{proof}
 To prove this theorem, we present a simple example in.

@@ -1,36 +1,36 @@
 \chapter{Preliminaries}
 \begin{definition}[Simple polygon]
-When given a list of distinct points in the plane, the line segments between consecutive points in the list and the last and first point form the outer boundary of a simple polygon as long as none cross each other. This outer boundary is a Jordan polygonal curve, and together with its interior face, it forms a simple polygon. A simple polygon with holes P additionally contains one or more smaller simple polygons fully contained in its interior. The interior of these smaller polygons is then considered as the exterior of P.
+When given a list of distinct points in the plane, the line segments between consecutive points in the list and the last and first point form the outer boundary of a simple polygon as long as none cross each other. This outer boundary is a Jordan polygonal curve, and together with its interior face, it forms a simple polygon. A simple polygon with holes $P$ additionally contains one or more smaller simple polygons fully contained in its interior. The interior of these smaller polygons is then considered as the exterior of $P$.
 \end{definition}
 
 \begin{definition}[Visibility polygon]
-For a simple polygon P (possibly with holes), two points $p,q\in P$ are mutually visible if the line segment between them is fully contained in P. Given a point $p\in P$, p and all points in P visible to it form a simple polygon. We call this polygon visibility polygon of p.
+For a simple polygon $P$ (possibly with holes), two points $p,q\in P$ are mutually visible if the line segment between them is fully contained in $P$. Given a point $p\in P$, $p$ and all points in $P$ visible to it form a simple polygon. We call this polygon visibility polygon of $p$.
 \end{definition}
 
 \begin{definition}[Guard set]
-For a simple polygon P (possibly with holes), a guard set G is a set of points in P s.t. all points in P are contained in at least one of the visibility polygons of G. We call the points of the guard set guards.
+For a simple polygon $P$ (possibly with holes), a guard set $G$ is a set of points in $P$ s.t. all points in $P$ are contained in at least one of the visibility polygons of $G$. We call the points of the guard set guards.
 \end{definition}
 
 \begin{definition}[Atomic visibility polygon (AVP)]
-When given a guard set G of a polygon P, we can overlay the visibility polygons of G to form an arrangement. We call the faces of this arrangement atomic visibility polygon (AVP) and denote the set of faces as $\mathcal{F}$. When a guard of G covers a point within an AVP f, it automatically also covers the entirety of f, hence the name atomic. By assigning to each AVP $f\in\mathcal{F}$ the guard subset $G_{f}$ that they were created from, we can form a partial order over the AVPs s.t. for $f,f'\in\mathcal{F}$ $f\prec f'$ if and only if $G_{f}\subset G_{f'}$. For an AVP $f\in\mathcal{F}$ we call it shadow (light) whenever it is minimal (maximal) within that order.
+When given a guard set $G$ of a polygon $P$, we can overlay the visibility polygons of $G$ to form an arrangement. We call the faces of this arrangement atomic visibility polygon (AVP) and denote the set of faces as $\mathcal{F}$. When a guard of $G$ covers a point within an AVP $f$, it automatically also covers the entirety of $f$, hence the name atomic. By assigning to each AVP $f\in\mathcal{F}$ the guard subset $G_{f}$ that they were created from, we can form a partial order over the AVPs s.t. for $f,f'\in\mathcal{F}$ $f\prec f'$ if and only if $G_{f}\subset G_{f'}$. For an AVP $f\in\mathcal{F}$ we call it shadow (light) whenever it is minimal (maximal) within that order.
 \end{definition}
 
 \begin{definition}[Witness set]
-When given a guard set G of a polygon P, a witness set W is a set of points inside P that must be covered by G. W is called a shadow witness set when it consists of a point within each shadow AVP of G. We call these points shadow witnesses.
+When given a guard set $G$ of a polygon $P$, a witness set $W$ is a set of points inside $P$ that must be covered by $G$. $W$ is called a shadow witness set when it consists of a point within each shadow AVP of $G$. We call these points shadow witnesses.
 \end{definition}
 
 \begin{definition}[2-link-visibility graph]
-For a guard set G of a polygon P, the 2-link-visibility graph $G_{vis}$ has a vertex for each guard and an edge between two guard vertices whenever their visibility polygons intersect.
+For a guard set $G$ of a polygon $P$, the 2-link-visibility graph $G_{vis}$ has a vertex for each guard and an edge between two guard vertices whenever their visibility polygons intersect.
 \end{definition}
 
 \begin{definition}[Covering graph]
-For a guard set G and a witness set W of a polygon P, the covering graph $G_{cov}$ has a vertex for each guard in G and each witness in W and an edge between a guard and a witness whenever the witness is contained in the visibility region of that guard.
+For a guard set $G$ and a witness set $W$ of a polygon $P$, the covering graph $G_{cov}$ has a vertex for each guard in $G$ and each witness in $W$ and an edge between a guard and a witness whenever the witness is contained in the visibility region of that guard.
 \end{definition}
 
 \begin{definition}[Chromatic Art Gallery Problem]
-For a guard set G and a witness set W of a polygon P, the Chromatic Art Gallery Problem looks for minimum proper coloring among all subgraphs $G_{sub}$ of $G_{vis}$ s.t. each witness vertex in $G_{cov}$ has a guard vertex in its neighborhood that is contained in $G_{sub}$.
+For a guard set $G$ and a witness set $W$ of a polygon $P$, the Chromatic Art Gallery Problem looks for minimum proper coloring among all subgraphs $G_{sub}$ of $G_{vis}$ s.t. each witness vertex in $G_{cov}$ has a guard vertex in its neighborhood that is contained in $G_{sub}$.
 \end{definition}
 
 \begin{definition}[Conflict-free Chromatic Art Gallery Problem]
-For a guard set G and a witness set W of a polygon P, the Conflict-free Chromatic Art Gallery Problem looks for a minimum coloring among all subgraphs $G_{sub}$ of $G_{cov}$ s.t. among the guard vertices in the neighborhood of each witness vertex there exists at least one that has a unique color.
+For a guard set $G$ and a witness set $W$ of a polygon $P$, the Conflict-free Chromatic Art Gallery Problem looks for a minimum coloring among all subgraphs $G_{sub}$ of $G_{cov}$ s.t. among the guard vertices in the neighborhood of each witness vertex there exists at least one that has a unique color.
 \end{definition}
