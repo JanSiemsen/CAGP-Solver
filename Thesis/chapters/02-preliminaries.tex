@@ -8,15 +8,15 @@ For a simple polygon P (possibly with holes), two points p, q E P are mutually v
 \end{definition}
 
 \begin{definition}[Guard set]
-For a simple polygon P (possibly with holes), a guard set G is a set of points in P s.t. all the points in P are contained in at least one of the visibility polygons of G. We call the points of the guard set guards.
+For a simple polygon P (possibly with holes), a guard set G is a set of points in P s.t. all points in P are contained in at least one of the visibility polygons of G. We call the points of the guard set guards.
 \end{definition}
 
 \begin{definition}[Atomic visibility polygon (AVP)]
-When given a guard set G of a polygon P, we can overlay the visibility polygons of G to form an arrangement. We call the faces of this arrangement atomic visibility polygon (AVP) and denote the set of faces as $\mathcal{F}$. By assigning to each AVP $f\in\mathcal{F}$ the guard subset $G_{f}$ that they were created from, we can form a partial order over the AVPs s.t. for $f,f'\in\mathcal{F}$ $f$
+When given a guard set G of a polygon P, we can overlay the visibility polygons of G to form an arrangement. We call the faces of this arrangement atomic visibility polygon (AVP) and denote the set of faces as $\mathcal{F}$. By assigning to each AVP $f\in\mathcal{F}$ the guard subset $G_{f}$ that they were created from, we can form a partial order over the AVPs s.t. for $f,f'\in\mathcal{F}$ $f\prec f'$ if and only if $G_{f}\subsetG_{f'}$. For an AVP $f\in\mathcal{F}$ we call it shadow (light) whenever it is minimal (maximal) within that order.
 \end{definition}
 
 \begin{definition}[Shadow witness set]
-The shadow witness set of a Polygon P consists of a witness for each shadow AVP in 
+When given a guard set G of a polygon P, the shadow witness set contains a witness 
 \end{definition}
 
 \begin{definition}[2-link-visibility graph]
