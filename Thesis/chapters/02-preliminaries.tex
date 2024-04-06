@@ -15,20 +15,20 @@ For a simple polygon P (possibly with holes), a guard set G is a set of points i
 When given a guard set G of a polygon P, we can overlay the visibility polygons of G to form an arrangement. We call the faces of this arrangement atomic visibility polygon (AVP) and denote the set of faces as $\mathcal{F}$. By assigning to each AVP $f\in\mathcal{F}$ the guard subset $G_{f}$ that they were created from, we can form a partial order over the AVPs s.t. for $f,f'\in\mathcal{F}$ $f\prec f'$ if and only if $G_{f}\subsetG_{f'}$. For an AVP $f\in\mathcal{F}$ we call it shadow (light) whenever it is minimal (maximal) within that order.
 \end{definition}
 
-\begin{definition}[Shadow witness set]
-When given a guard set G of a polygon P, the shadow witness set contains a point within each shadow AVP of G. We call these points shadow witnesses.
+\begin{definition}[Witness set]
+When given a guard set G of a polygon P, a witness set W is a set of points inside P that must be covered by G. W is called a shadow witness set when it consists of a point within each shadow AVP of G. We call these points shadow witnesses.
 \end{definition}
 
 \begin{definition}[2-link-visibility graph]
-The 
+For a guard set G of a polygon P, the 2-link-visibility graph $G_{vis}$ has a vertex for each guard and an edge between two guard vertices whenever their visibility polygons intersect.
 \end{definition}
 
 \begin{definition}[Covering graph]
-    
+For a guard set G and a witness set W of a polygon P, the covering graph $G_{cov}$ has a vertex for each guard in G and each witness in W and an edge between a guard and a witness whenever the witness is contained in the visibility region of that guard.
 \end{definition}
 
 \begin{definition}[Chromatic Art Gallery Problem]
-    
+
 \end{definition}
 
 \begin{definition}[Conflict-free Chromatic Art Gallery Problem]
