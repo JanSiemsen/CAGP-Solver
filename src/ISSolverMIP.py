@@ -7,6 +7,7 @@ class ISSolverMIP:
         self.G = G
         self.weights = weights
         self.model = grb.Model()
+        self.model.setParam('OutputFlag', False)
         self.__make_vars()
         self.__add_conflicting_guards_constraints()
         self.model.setObjective(sum(self.guard_vars[guard] * weight for guard, weight in weights), grb.GRB.MAXIMIZE)

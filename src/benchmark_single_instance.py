@@ -26,17 +26,17 @@ def convert_to_LinearRing(edges: list, pos: dict) -> list[Point]:
     return ring
 
 # to parse simple polygons from Salzburg Benchmark
-G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000002500.graphml.xz').read())
-pos = {}
-for node in G.nodes(data=True):
-    node_location = tuple(node[1].values())
-    node_location = (float(node_location[0]), float(node_location[1]))
-    pos[node[0]] = node_location
-ring = convert_to_LinearRing(list(G.edges()), pos)
-poly = PolygonWithHoles(ring)
+# G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000020000.graphml.xz').read())
+# pos = {}
+# for node in G.nodes(data=True):
+#     node_location = tuple(node[1].values())
+#     node_location = (float(node_location[0]), float(node_location[1]))
+#     pos[node[0]] = node_location
+# ring = convert_to_LinearRing(list(G.edges()), pos)
+# poly = PolygonWithHoles(ring)
 
 # to parse simple polygons from AGP2009 Benchmark
-# with open('/home/yanyan/PythonProjects/CAGP-Solver/agp2009a-simplerand/randsimple-2500-1.pol') as f:
+# with open('/home/yanyan/PythonProjects/CAGP-Solver/cagp_solver/mini_benchmark/agp2009a-simplerand/randsimple-500-3.pol') as f:
 #     vertices = f.readline().split()
 #     vertices = vertices[1:]
 #     linear_ring = []
@@ -47,30 +47,30 @@ poly = PolygonWithHoles(ring)
 #     poly = PolygonWithHoles(linear_ring)
 
 # to parse simple polygons from AGP2009 Benchmark with holes
-# with open('/home/yanyan/PythonProjects/CAGP-Solver/simple-polygons-with-holes/g1_simple-simple_125:500v-50h_1.pol') as f:
-#     vertices = f.readline().split()
-#     linear_rings = []
-#     num_points = int(vertices.pop(0))
-#     linear_ring = []
-#     for _ in range(num_points):
-#         x_str = vertices.pop(0).split('/')
-#         x = int(x_str[0])/int(x_str[1])
-#         y_str = vertices.pop(0).split('/')
-#         y = int(y_str[0])/int(y_str[1])
-#         linear_ring.append(Point(x, y))
-#     linear_rings.append(linear_ring)  # Add outer boundary to linear_rings
-#     num_holes = int(vertices.pop(0))  # Get the number of holes
-#     for _ in range(num_holes):  # Repeat the process for each hole
-#         num_points = int(vertices.pop(0))
-#         linear_ring = []
-#         for _ in range(num_points):
-#             x_str = vertices.pop(0).split('/')
-#             x = int(x_str[0])/int(x_str[1])
-#             y_str = vertices.pop(0).split('/')
-#             y = int(y_str[0])/int(y_str[1])
-#             linear_ring.append(Point(x, y))
-#         linear_rings.append(linear_ring)  # Add hole to linear_rings
-#     poly = PolygonWithHoles(linear_rings[0], linear_rings[1:])
+with open('/home/yanyan/PythonProjects/CAGP-Solver/simple-polygons-with-holes/g1_simple-simple_75:300v-30h_1.pol') as f:
+    vertices = f.readline().split()
+    linear_rings = []
+    num_points = int(vertices.pop(0))
+    linear_ring = []
+    for _ in range(num_points):
+        x_str = vertices.pop(0).split('/')
+        x = int(x_str[0])/int(x_str[1])
+        y_str = vertices.pop(0).split('/')
+        y = int(y_str[0])/int(y_str[1])
+        linear_ring.append(Point(x, y))
+    linear_rings.append(linear_ring)  # Add outer boundary to linear_rings
+    num_holes = int(vertices.pop(0))  # Get the number of holes
+    for _ in range(num_holes):  # Repeat the process for each hole
+        num_points = int(vertices.pop(0))
+        linear_ring = []
+        for _ in range(num_points):
+            x_str = vertices.pop(0).split('/')
+            x = int(x_str[0])/int(x_str[1])
+            y_str = vertices.pop(0).split('/')
+            y = int(y_str[0])/int(y_str[1])
+            linear_ring.append(Point(x, y))
+        linear_rings.append(linear_ring)  # Add hole to linear_rings
+    poly = PolygonWithHoles(linear_rings[0], linear_rings[1:])
 
 # fig, ax = plt.subplots()
 # plot_polygon(poly, ax=ax, color="lightgrey")
@@ -89,16 +89,16 @@ print("number of guards in greedy solution: ", len(greedySolution))
 # print('Solving MIP...')
 # solution = CFsolverMIP.solve()
 
-print(len(all_witnesses))
-print(len(all_witnesses_cf))
-print('Creating SAT solver...')
-CFsolverSAT = CFCAGPSolverSAT(greedyColors, guard_to_witnesses_cf, witness_to_guards_cf, all_witnesses_cf, all_witnesses_cf, solution=greedySolution)
-print('Solving SAT...')
-start = time.time()
-solution = CFsolverSAT.solve()
-end = time.time()
-CFsolverSAT.__del__()
-print('Time to solve:', end - start)
+# print(len(all_witnesses))
+# print(len(all_witnesses_cf))
+# print('Creating SAT solver...')
+# CFsolverSAT = CFCAGPSolverSAT(greedyColors, guard_to_witnesses_cf, witness_to_guards_cf, all_witnesses_cf, all_witnesses_cf, solution=greedySolution)
+# print('Solving SAT...')
+# start = time.time()
+# solution = CFsolverSAT.solve()
+# end = time.time()
+# CFsolverSAT.__del__()
+# print('Time to solve:', end - start)
 
 # print('Generating edge clique covers...')
 # start = time.time()
@@ -157,14 +157,19 @@ print('Time to solve:', end - start)
 # print(solver_utils.verify_solver_solution(solution, GC))
 
 print('Creating SAT solver...')
-solverSAT = CAGPSolverSAT(greedyColors, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, GC, True, solution=greedySolution)
+solverSAT = CAGPSolverSAT(greedyColors, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, GC, solver_name="Cadical153", guard_color_constraints=False, solution=greedySolution)
 print('Solving SAT...')
 start = time.time()
-solution = solverSAT.solve()
+colors, solution, iterations, number_of_witnesses, status = solverSAT.solve()
 end = time.time()
+print('Number of colors:', colors)
+print('Number of guards:', len(solution))
+print('Number of iterations:', iterations)
+print('Number of witnesses:', number_of_witnesses)
 print('Time to solve:', end - start, 'seconds')
+print('Status:', status)
 solverSAT.__del__()
-# print([(guard, color) for guard, color in solution])
+print([(guard, color) for guard, color in solution])
 print(solver_utils.verify_solver_solution(solution, GC))
 
 # fig, ax = plt.subplots()

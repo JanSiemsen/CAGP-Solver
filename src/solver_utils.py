@@ -21,7 +21,7 @@ def generate_AVP_recursive(guards: list[tuple[int, tuple[Point, PolygonWithHoles
 def generate_solver_input(polygon: PolygonWithHoles, guards_on_holes: bool=True):
     GC = rx.PyGraph(multigraph=False)
 
-    print('Creating guard set...')
+    # print('Creating guard set...')
     vis_calculator = VisibilityPolygonCalculator(polygon)
     guards = {}
     for point in polygon.outer_boundary().boundary():
@@ -33,16 +33,16 @@ def generate_solver_input(polygon: PolygonWithHoles, guards_on_holes: bool=True)
                 index = GC.add_node(None)
                 guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
 
-    print('Creating AVP arrangement...')
+    # print('Creating AVP arrangement...')
     avp = generate_AVP_recursive(list(guards.items()))
     witness_to_guards, guard_to_witnesses, light_guard_sets, witness_to_guards_cf, guard_to_witnesses_cf = avp.get_shadow_witnesses_and_light_guard_sets(list(guards.keys()))
 
-    print('Creating visibility graph...')
+    # print('Creating visibility graph...')
     for guard_set in light_guard_sets:
         for g1, g2 in combinations(guard_set, 2):
             GC.add_edge(g1, g2, None)
 
-    print('Creating witness set...')
+    # print('Creating witness set...')
     initial_witnesses = []
     all_witnesses = sorted(witness_to_guards.keys(), key=lambda x: len(witness_to_guards[x]))
     amount = 0
@@ -52,8 +52,9 @@ def generate_solver_input(polygon: PolygonWithHoles, guards_on_holes: bool=True)
             if index != witness:
                 Exception("Witness index does not match the index returned by the graph")
             initial_witnesses.append(witness)
+        amount += 1
 
-    print('Creating initial witnesses and all witnesses for conflict-free...')
+    # print('Creating initial witnesses and all witnesses for conflict-free...')
     all_witnesses_cf = sorted(witness_to_guards_cf.keys(), key=lambda x: len(witness_to_guards_cf[x]), reverse=True)
     initial_witnesses_cf = all_witnesses_cf[:len(guards)]
 
