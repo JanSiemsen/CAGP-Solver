@@ -6,46 +6,61 @@ import rustworkx as rx
 from heapq import heappop, heappush
 from collections import defaultdict
 from multiprocessing import Pool
+from tqdm import tqdm
 
 # This version uses the rustworkx library to create graphs
     
-def generate_AVP_recursive(guards: list[tuple[int, tuple[Point, PolygonWithHoles]]]) -> AVP_Arrangement:
-    half = int(len(guards)//2)
+def generate_AVP_recursive(guards: list[tuple[int, tuple[Point, PolygonWithHoles]]], progress: tqdm) -> AVP_Arrangement:
+    half = len(guards)//2
     leftHalf = guards[:half]
     rightHalf = guards[half:]
     if len(guards) == 1:
+        progress.update(1)
         return AVP_Arrangement(guards[0][1][1], {guards[0][0]})
     else:
-        return generate_AVP_recursive(leftHalf).overlay(generate_AVP_recursive(rightHalf))
+        return generate_AVP_recursive(leftHalf, progress).overlay(generate_AVP_recursive(rightHalf, progress))
 
 def generate_solver_input(polygon: PolygonWithHoles, guards_on_holes: bool=True):
     GC = rx.PyGraph(multigraph=False)
 
-    # print('Creating guard set...')
+    print('Creating guard set...')
     vis_calculator = VisibilityPolygonCalculator(polygon)
     guards = {}
+    progress = tqdm(polygon.outer_boundary().boundary())
     for point in polygon.outer_boundary().boundary():
         index = GC.add_node(None)
         guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
+        progress.update()
+    progress.close()
     if guards_on_holes:
+        progress = tqdm(total=len(polygon.holes()))
         for hole in polygon.holes():
             for point in hole.boundary():
                 index = GC.add_node(None)
                 guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
+            progress.update()
+        progress.close()
 
-    # print('Creating AVP arrangement...')
-    avp = generate_AVP_recursive(list(guards.items()))
+    print('Creating AVP arrangement...')
+    progress = tqdm(total=len(guards))
+    avp = generate_AVP_recursive(list(guards.items()), progress)
+    progress.refresh()
+    progress.close()
     witness_to_guards, guard_to_witnesses, light_guard_sets, witness_to_guards_cf, guard_to_witnesses_cf = avp.get_shadow_witnesses_and_light_guard_sets(list(guards.keys()))
 
-    # print('Creating visibility graph...')
+    print('Creating visibility graph...')
+    progress = tqdm(total=len(light_guard_sets))
     for guard_set in light_guard_sets:
         for g1, g2 in combinations(guard_set, 2):
             GC.add_edge(g1, g2, None)
+        progress.update()
+    progress.close()
 
-    # print('Creating witness set...')
+    print('Creating witness set...')
     initial_witnesses = []
     all_witnesses = sorted(witness_to_guards.keys(), key=lambda x: len(witness_to_guards[x]))
     amount = 0
+    progress = tqdm(total=len(all_witnesses))
     for witness in all_witnesses:
         if amount < len(guards):
             index = GC.add_node(None)
@@ -53,6 +68,8 @@ def generate_solver_input(polygon: PolygonWithHoles, guards_on_holes: bool=True)
                 Exception("Witness index does not match the index returned by the graph")
             initial_witnesses.append(witness)
         amount += 1
+        progress.update()
+    progress.close()
 
     # print('Creating initial witnesses and all witnesses for conflict-free...')
     all_witnesses_cf = sorted(witness_to_guards_cf.keys(), key=lambda x: len(witness_to_guards_cf[x]), reverse=True)

@@ -13,6 +13,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import distinctipy as distcolors
 import lzma
+from tqdm import tqdm
 
 def convert_to_LinearRing(edges: list, pos: dict) -> list[Point]:
     ring = []
@@ -26,14 +27,14 @@ def convert_to_LinearRing(edges: list, pos: dict) -> list[Point]:
     return ring
 
 # to parse simple polygons from Salzburg Benchmark
-# G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000020000.graphml.xz').read())
-# pos = {}
-# for node in G.nodes(data=True):
-#     node_location = tuple(node[1].values())
-#     node_location = (float(node_location[0]), float(node_location[1]))
-#     pos[node[0]] = node_location
-# ring = convert_to_LinearRing(list(G.edges()), pos)
-# poly = PolygonWithHoles(ring)
+G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000030000.graphml.xz').read())
+pos = {}
+for node in G.nodes(data=True):
+    node_location = tuple(node[1].values())
+    node_location = (float(node_location[0]), float(node_location[1]))
+    pos[node[0]] = node_location
+ring = convert_to_LinearRing(list(G.edges()), pos)
+poly = PolygonWithHoles(ring)
 
 # to parse simple polygons from AGP2009 Benchmark
 # with open('/home/yanyan/PythonProjects/CAGP-Solver/cagp_solver/mini_benchmark/agp2009a-simplerand/randsimple-500-3.pol') as f:
@@ -47,30 +48,30 @@ def convert_to_LinearRing(edges: list, pos: dict) -> list[Point]:
 #     poly = PolygonWithHoles(linear_ring)
 
 # to parse simple polygons from AGP2009 Benchmark with holes
-with open('/home/yanyan/PythonProjects/CAGP-Solver/simple-polygons-with-holes/g1_simple-simple_75:300v-30h_1.pol') as f:
-    vertices = f.readline().split()
-    linear_rings = []
-    num_points = int(vertices.pop(0))
-    linear_ring = []
-    for _ in range(num_points):
-        x_str = vertices.pop(0).split('/')
-        x = int(x_str[0])/int(x_str[1])
-        y_str = vertices.pop(0).split('/')
-        y = int(y_str[0])/int(y_str[1])
-        linear_ring.append(Point(x, y))
-    linear_rings.append(linear_ring)  # Add outer boundary to linear_rings
-    num_holes = int(vertices.pop(0))  # Get the number of holes
-    for _ in range(num_holes):  # Repeat the process for each hole
-        num_points = int(vertices.pop(0))
-        linear_ring = []
-        for _ in range(num_points):
-            x_str = vertices.pop(0).split('/')
-            x = int(x_str[0])/int(x_str[1])
-            y_str = vertices.pop(0).split('/')
-            y = int(y_str[0])/int(y_str[1])
-            linear_ring.append(Point(x, y))
-        linear_rings.append(linear_ring)  # Add hole to linear_rings
-    poly = PolygonWithHoles(linear_rings[0], linear_rings[1:])
+# with open('/home/yanyan/PythonProjects/CAGP-Solver/simple-polygons-with-holes/g1_simple-simple_75:300v-30h_1.pol') as f:
+#     vertices = f.readline().split()
+#     linear_rings = []
+#     num_points = int(vertices.pop(0))
+#     linear_ring = []
+#     for _ in range(num_points):
+#         x_str = vertices.pop(0).split('/')
+#         x = int(x_str[0])/int(x_str[1])
+#         y_str = vertices.pop(0).split('/')
+#         y = int(y_str[0])/int(y_str[1])
+#         linear_ring.append(Point(x, y))
+#     linear_rings.append(linear_ring)  # Add outer boundary to linear_rings
+#     num_holes = int(vertices.pop(0))  # Get the number of holes
+#     for _ in range(num_holes):  # Repeat the process for each hole
+#         num_points = int(vertices.pop(0))
+#         linear_ring = []
+#         for _ in range(num_points):
+#             x_str = vertices.pop(0).split('/')
+#             x = int(x_str[0])/int(x_str[1])
+#             y_str = vertices.pop(0).split('/')
+#             y = int(y_str[0])/int(y_str[1])
+#             linear_ring.append(Point(x, y))
+#         linear_rings.append(linear_ring)  # Add hole to linear_rings
+#     poly = PolygonWithHoles(linear_rings[0], linear_rings[1:])
 
 # fig, ax = plt.subplots()
 # plot_polygon(poly, ax=ax, color="lightgrey")
@@ -157,12 +158,12 @@ print("number of guards in greedy solution: ", len(greedySolution))
 # print(solver_utils.verify_solver_solution(solution, GC))
 
 print('Creating SAT solver...')
-solverSAT = CAGPSolverSAT(greedyColors, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, GC, solver_name="Cadical153", guard_color_constraints=False, solution=greedySolution)
+solverSAT = CAGPSolverSAT(greedyColors, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, GC, solver_name="Cadical103", guard_color_constraints=False, solution=greedySolution)
 print('Solving SAT...')
 start = time.time()
-colors, solution, iterations, number_of_witnesses, status = solverSAT.solve()
+num_colors, solution, iterations, number_of_witnesses, status = solverSAT.solve()
 end = time.time()
-print('Number of colors:', colors)
+print('Number of colors:', num_colors)
 print('Number of guards:', len(solution))
 print('Number of iterations:', iterations)
 print('Number of witnesses:', number_of_witnesses)
@@ -175,13 +176,16 @@ print(solver_utils.verify_solver_solution(solution, GC))
 # fig, ax = plt.subplots()
 # plot_polygon(poly, ax=ax, color="lightgrey")
 
-# print('Plotting...')
-# colors = distcolors.get_colors(len(guards))
-# fig, ax = plt.subplots()
+print('Plotting...')
+colors = distcolors.get_colors(num_colors)
+fig, ax = plt.subplots()
 # plot_polygon(poly, ax=ax, color="lightgrey")
-# for s in solution:
-#     for id, (point, visibility) in guards.items():
-#         if s[0] == id:
-#             plot_polygon(visibility, ax=ax, color=colors[s[1]], alpha=0.1)
-#             plt.scatter(point.x(), point.y(), color=colors[s[1]], s=10)
-# plt.show()
+progress = tqdm(solution)
+for s in solution:
+    (point, visibility) = guards[s[0]]
+    plot_polygon(visibility, ax=ax, color=colors[s[1]], alpha=0.2, zorder=0, linewidth=0.01)
+    plt.scatter(point.x(), point.y(), color=colors[s[1]], s=0.5, zorder=1, edgecolors='none')
+    progress.update()
+progress.close()
+
+plt.savefig("polygon_solution_plot_30000.png", dpi=1200)

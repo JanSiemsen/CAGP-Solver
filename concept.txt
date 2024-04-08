@@ -1,8 +1,0 @@
-1. determine a guard set
-2. determine a witness set
-3. calculate the graph Gc for every guard a vertex 
-and an edge if the visibility polygons overlap
-4. calculate the graph Gw for every guard a vertex and witness a vertex 
-and an edge between them if the witness is inside the visibility polygon of the guard
-5. calculate the graph Gt; the union of Gc and Gw
-

@@ -1,5 +1,3 @@
-from hmac import new
-from turtle import st
 from algbench import describe, read_as_pandas, Benchmark
 from matplotlib import pyplot as plt
 import pandas as pd

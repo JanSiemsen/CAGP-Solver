@@ -93,7 +93,7 @@ class CAGPSolverSAT:
     
     def solve(self, color_lim: int=0):
         self.start = time.time()
-        self.time_limit = 600
+        self.time_limit = 36000
         self.timeout = False
 
         if color_lim == 0:
