@@ -25,12 +25,22 @@ The guard subset of a light polygon is formed by all the guards whose visibility
 For a polygon $P$ and a guard set $G$, neither conflict-freeness of all shadow witnesses nor all light witnesses guarantees conflict-freeness within all AVPs.
 \end{theorem}
 \begin{proof}
-To prove this theorem, we present a simple example in \cref{fig:light_covers}. In the figure $A_{1}$, $A_{2}$ and $A_{3}$ are shadow AVPs and $A_{4}$ is a light AVP. Each of them is covered by a guard of unique color. On the other hand, $A_{5}$ is neither shadow nor light and is covered by two guards of the same color, thus is not conflict-free.
+To prove this theorem, we present a simple example in \cref{fig:light_covers}. In the figure $A_{1}$, $A_{2}$ and $A_{3}$ are shadow AVPs and $A_{4}$ is a light AVP. Each of them is covered by a guard of unique color. On the other hand, $A_{5}$ is neither shadow nor light and is covered by two guards of the same color, thus, it is not conflict-free.
 \end{proof}
 
 \chapter{Chromatic Art Gallery Problem Formulations}
 
 \section{MIP Formulation}
+
+\begin{align}
+\label{eq:f.0} \mbox{minimize}~& \;\sum_{k\in K} c_{k}& \\
+\label{eq:f.1} \mbox{s.t. } &\sum_{g \in H}x_{gk} <= c_{k} & \forall H \in \mathcal{H}, \forall k\in K\\
+\label{eq:f.2}&\sum_{g\in N(w), k\in K}x_{gk}>=1 & \forall w\in W\\
+\label{eq:f.3}&\sum_{(i,d_k)\in A}x_{id_k}^{k}>=1 & \forall k\in K\\
+\label{eq:f.4}&
+\label{eq:f.5}& x_{gk} \in \{0,...,1\} & \forall g\in G, \forall k\in \{1,...,K\}\\
+\label{eq:f.6}& c_{k}\in \{0,1\} & \forall k\in \{1,...,K\}
+\end{align}
 
 \section{SAT Formulation}
 
