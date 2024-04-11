@@ -34,11 +34,11 @@ To prove this theorem, we present a simple example in \cref{fig:light_covers}. I
 
 \begin{align}
 \label{eq:f.0} \mbox{minimize}~& \;\sum_{k\in K} c_{k}& \\
-\label{eq:f.1} \mbox{s.t. } &\sum_{g \in H}x_{o_kj}^{k} <= c_{k} & \forall H \in \, \forall k\in K\\
+\label{eq:f.1} \mbox{s.t. } &\sum_{g \in H}x_{gk} <= c_{k} & \forall H \in \mathcal{H}, \forall k\in K\\
 \label{eq:f.2}&\sum_{(j,i)\in A}x_{ji}^{k}=\sum_{(i,j)\in A}x_{ij}^{k} & \forall k\in K, i\in V \setminus \{o_k,d_k\}\\
 \label{eq:f.3}&\sum_{(i,d_k)\in A}x_{id_k}^{k}=1 & \forall k \in K\\
-\label{eq:f.4}& x_{gk} \in \{0,...,1\} & \forall g \in G, \forall k \in {1,...,K}\\
-\label{eq:f.5}& c_{k} \in \{0,1\} & \forall k\in {1,...,K}
+\label{eq:f.4}& x_{gk} \in \{0,...,1\} & \forall g \in G, \forall k \in \{1,...,K\}\\
+\label{eq:f.5}& c_{k} \in \{0,1\} & \forall k\in \{1,...,K\}
 \end{align}
 
 \section{SAT Formulation}
