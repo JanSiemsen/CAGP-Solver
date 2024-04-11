@@ -1,7 +1,6 @@
 import time
 from pysat.solvers import Solver
 import rustworkx as rx
-from pyvispoly import PolygonWithHoles
 from threading import Timer
 
 class CAGPSolverSAT:
@@ -15,6 +14,7 @@ class CAGPSolverSAT:
         self.number_of_witnesses = len(initial_witnesses)
         self.all_witnesses = all_witnesses
         self.solver = Solver(name=solver_name, with_proof=False)
+        
         self.__make_vars()
         self.__add_witness_covering_constraints()
         self.__add_conflicting_guards_constraints()
@@ -93,8 +93,9 @@ class CAGPSolverSAT:
     
     def solve(self, color_lim: int=0):
         self.start = time.time()
-        self.time_limit = 36000
+        self.time_limit = 600
         self.timeout = False
+        iteration = 1
 
         if color_lim == 0:
             print('Starting binary search')
@@ -111,7 +112,6 @@ class CAGPSolverSAT:
         print('Number of missing witnesses:', len(missing_witnesses))
         self.number_of_witnesses += len(missing_witnesses)
 
-        iteration = 1
         while missing_witnesses:
             iteration += 1
             print(f'Adding new witnesses for missing area ({iteration})')

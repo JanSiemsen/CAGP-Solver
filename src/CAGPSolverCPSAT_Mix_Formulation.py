@@ -1,6 +1,6 @@
+import time
 from ortools.sat.python import cp_model
 import rustworkx as rx
-from pyvispoly import PolygonWithHoles
 
 class CAGPSolverCPSAT:
 
@@ -10,6 +10,7 @@ class CAGPSolverCPSAT:
         self.guard_to_witnesses = guard_to_witnesses
         self.witness_to_guards = witness_to_guards
         self.witnesses = initial_witnesses
+        self.number_of_witnesses = len(initial_witnesses)
         self.all_witnesses = all_witnesses
         self.model = cp_model.CpModel()
 
@@ -19,7 +20,6 @@ class CAGPSolverCPSAT:
         self.__color_activation_constraints()
         self.__add_guard_coloring_constraints()
         self.__add_objective()
-        # self.__add_edge_clique_cover_constraints()
         # if solution:
         #     self.__provide_init_solution(solution)
 
@@ -48,14 +48,6 @@ class CAGPSolverCPSAT:
         for guard in self.guard_to_witnesses.keys():
             self.model.AddAtMostOne([self.guard_vars[(guard, i)] for i in range(self.K)])
 
-    # These constraints are being replaced by the conflicting guards constraints
-    # def __add_edge_clique_cover_constraints(self):
-    #     color = 0
-    #     for cover in self.edge_clique_covers:
-    #         for clique in cover:
-    #             self.model.Add(self.color_vars[color] >= sum(self.guard_vars[(guard, color)] for guard in clique))
-    #         color += 1
-
     def __add_objective(self):
         self.model.Minimize(sum(self.color_vars.values()))
     
@@ -72,28 +64,66 @@ class CAGPSolverCPSAT:
         return missing_witnesses
 
     def solve(self):
+        start = time.time()
+        max_time = 600
         solver = cp_model.CpSolver()
         # solver.parameters.log_search_progress = True
-        status = solver.Solve(self.model)
-        if status != cp_model.OPTIMAL:
-            print('No solution found')
-            return None
+        iteration = 1
+
+        solver.parameters.max_time_in_seconds = max_time - (time.time() - start)
+        self.callback = LowerBoundSolutionCallback(1)
+        status = solver.Solve(self.model, self.callback)
+        if status != cp_model.OPTIMAL and self.callback.timeout:
+            print('Time limit reached')
+            if status == cp_model.FEASIBLE:
+                return int(solver.ObjectiveValue()), [(guard, color) for guard, color in self.guard_vars.keys() if solver.Value(self.guard_vars[(guard, color)]) == 1], iteration, self.number_of_witnesses, 'timeout'
+            return self.K, [], iteration, self.number_of_witnesses, 'timeout'
         
+        print('Solution with chromatic number:', solver.ObjectiveValue())
+        print('Checking coverage...')
         missing_witnesses = self.__check_coverage([(guard, color) for guard, color in self.guard_vars.keys() if solver.Value(self.guard_vars[(guard, color)]) == 1])
 
         while(missing_witnesses):
-            print('Adding new witnesses...')
+            iteration += 1
+            print('Number of missing witnesses:', len(missing_witnesses))
+            self.number_of_witnesses += len(missing_witnesses)
+
             for witness in missing_witnesses:
                 subset = []
                 for guard in self.witness_to_guards[witness]:
                     for k in range(self.K):
                         subset.append(self.guard_vars[(guard, k)])
                 self.model.Add(sum(subset) >= 1)
-            status = solver.Solve(self.model)
-            if status != cp_model.OPTIMAL:
-                print('No solution found')
-                return None
+
+            current_time = time.time()
+            if (current_time - start) > max_time:
+                print('Time limit reached')
+                return self.K, [], iteration, self.number_of_witnesses, 'timeout'
+            
+            solver.parameters.max_time_in_seconds = max_time - (current_time - start)
+            self.callback = LowerBoundSolutionCallback(int(solver.ObjectiveValue()))
+            status = solver.Solve(self.model, self.callback)
+            if status != cp_model.OPTIMAL and self.callback.timeout:
+                print('Time limit reached')
+                if status == cp_model.FEASIBLE:
+                    return int(solver.ObjectiveValue()), [(guard, color) for guard, color in self.guard_vars.keys() if solver.Value(self.guard_vars[(guard, color)]) == 1], iteration, self.number_of_witnesses, 'timeout'
+                return self.K, [], iteration, self.number_of_witnesses, 'timeout'
+            
+            print('Solution with chromatic number:', solver.ObjectiveValue())
+            print('Checking coverage...')
             missing_witnesses = self.__check_coverage([(guard, color) for guard, color in self.guard_vars.keys() if solver.Value(self.guard_vars[(guard, color)]) == 1])
 
         print('Solution with chromatic number:', solver.ObjectiveValue())
-        return [(guard, color) for guard, color in self.guard_vars.keys() if solver.Value(self.guard_vars[(guard, color)]) == 1]
+        return int(solver.ObjectiveValue()), [(guard, color) for guard, color in self.guard_vars.keys() if solver.Value(self.guard_vars[(guard, color)]) == 1], iteration, self.number_of_witnesses, 'success'
+    
+class LowerBoundSolutionCallback(cp_model.CpSolverSolutionCallback):
+    def __init__(self, lower_bound):
+        cp_model.CpSolverSolutionCallback.__init__(self)
+        self.lower_bound = lower_bound
+        self.timeout = True
+
+    def on_solution_callback(self):
+        obj = self.ObjectiveValue()  # best solution value
+        if obj <= self.lower_bound:
+            self.StopSearch()  # abort search for better solutions  
+            self.timeout = False

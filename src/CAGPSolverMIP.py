@@ -115,7 +115,7 @@ class CAGPSolverMIP:
                 for guard in self.witness_to_guards[witness]:
                     for k in range(self.K):
                         subset.append((guard, k))
-                self.model.cbLazy(1 <= sum(self.guard_vars[x] for x in subset))
+                self.model.cbLazy(1 <= sum(self.guard_vars[guard][k] for guard, k in subset))
                 self.lazy_witnesses += 1
             self.iteration += 1
 
