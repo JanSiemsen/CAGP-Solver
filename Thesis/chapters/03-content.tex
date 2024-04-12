@@ -36,13 +36,22 @@ To prove this theorem, we present a simple example in \cref{fig:light_covers}. I
 \label{eq:f.0} \mbox{minimize}~& \;\sum_{k\in K} c_{k}& \\
 \label{eq:f.1} \mbox{s.t. } &\sum_{g \in H}x_{gk} <= c_{k} & \forall H \in \mathcal{H}, \forall k\in K\\
 \label{eq:f.2}&\sum_{g\in N(w), k\in K}x_{gk}>=1 & \forall w\in W\\
-\label{eq:f.3}&\sum_{(i,d_k)\in A}x_{id_k}^{k}>=1 & \forall k\in K\\
-\label{eq:f.4}&
-\label{eq:f.5}& x_{gk} \in \{0,...,1\} & \forall g\in G, \forall k\in \{1,...,K\}\\
-\label{eq:f.6}& c_{k}\in \{0,1\} & \forall k\in \{1,...,K\}
+\label{eq:f.3}&\sum_{k\in K}x_{gk}<=1 & \forall g\in G\\
+\label{eq:f.4}&c_{k} - c_{k+1} >= 0 & \forall k\in \{1,...,K-1\}\\
+\label{eq:f.5}&\sum_{g\in G}x_{gk} - \sum_{g\in G}x_{g(k+1)} & \forall k\in \{1,...,K-1\}\\
+\label{eq:f.6}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,...,K\}\\
+\label{eq:f.7}& c_{k}\in \{0,1\} & \forall k\in \{1,...,K\}
 \end{align}
 
 \section{SAT Formulation}
+
+\begin{align}
+\label{eq:f.0}&(\lnot x_{uk} \lor \lnot x_{vk}) \land & \forall (u,v)\in E_{G}, \forall k\in K\\
+\label{eq:f.1}&(\bigvee_{g\in N(w), k\in K}x_{gk}) \land & \forall w\in W\\
+\label{eq:f.2}&\bigwedge_{1 \leq i < j \leq K} (\lnot x_{gi} \lor \lnot x_{gj})
+ & \forall g\in G\\
+\label{eq:f.3}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,...,K\}
+\end{align}
 
 \section{CPSAT Formulation}
 
