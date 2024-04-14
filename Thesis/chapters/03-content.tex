@@ -35,10 +35,10 @@ In the following sections, we introduce a MIP, a SAT, and a CPSAT formulation of
 \section{MIP Formulation}
 
 \begin{align}
-\label{eq_MIP:f.0} \mbox{minimize}~& \;\sum_{k\in K} c_{k}& \\
-\label{eq_MIP:f.1} \mbox{s.t. } &\sum_{g \in H}x_{gk} <= c_{k} & \forall H \in \mathcal{H}, \forall k\in K\\
-\label{eq_MIP:f.2}&\sum_{g\in N(w), k\in K}x_{gk}>=1 & \forall w\in W\\
-\label{eq_MIP:f.3}&\sum_{k\in K}x_{gk}<=1 & \forall g\in G\\
+\label{eq_MIP:f.0} \mbox{minimize}~& \;\sum_{k\in \{1,...,K\}} c_{k}& \\
+\label{eq_MIP:f.1} \mbox{s.t. } &\sum_{g \in H}x_{gk} <= c_{k} & \forall H \in \mathcal{H}, \forall k\in \{1,...,K\}\\
+\label{eq_MIP:f.2}&\sum_{g\in N(w), k\in \{1,...,K\}}x_{gk}>=1 & \forall w\in W\\
+\label{eq_MIP:f.3}&\sum_{k\in \{1,...,K\}}x_{gk}<=1 & \forall g\in G\\
 \label{eq_MIP:f.4}&c_{k} - c_{k+1} >= 0 & \forall k\in \{1,...,K-1\}\\
 \label{eq_MIP:f.5}&\sum_{g\in G}x_{gk} - \sum_{g\in G}x_{g(k+1)} >= 0 & \forall k\in \{1,...,K-1\}\\
 \label{eq_MIP:f.6}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,...,K\}\\
@@ -50,8 +50,8 @@ The MIP formulation of the problem introduces binary variables for every guard c
 \section{SAT Formulation}
 
 \begin{align}
-\label{eq_SAT:f.0}&\lnot x_{uk} \lor \lnot x_{vk} & \forall (u,v)\in E_{G}, \forall k\in K\\
-\label{eq_SAT:f.1}&\bigvee_{g\in N(w), k\in K}x_{gk} & \forall w\in W\\
+\label{eq_SAT:f.0}&\lnot x_{uk} \lor \lnot x_{vk} & \forall (u,v)\in E_{G}, \forall k\in \{1,...,K\}\\
+\label{eq_SAT:f.1}&\bigvee_{g\in N(w), k\in \{1,...,K\}}x_{gk} & \forall w\in W\\
 \label{eq_SAT:f.2}&\bigwedge_{1 \leq i < j \leq K} (\lnot x_{gi} \lor \lnot x_{gj})
  & \forall g\in G\\
 \label{eq:_SATf.3}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,...,K\}
@@ -70,17 +70,18 @@ In the following sections, we introduce a MIP, a SAT, and a CPSAT formulation of
 \section{MIP Formulation}
 
 \begin{align}
-\label{eq_MIP_cf:f.0} \mbox{minimize}~& \;\sum_{k\in K} c_{k}& \\
-\label{eq_MIP_cf:f.1} \mbox{s.t. } &\sum_{g \in G}x_{gk} >= c_{k} & \forall k\in K\\
-\label{eq_MIP_cf:f.2}&\sum_{g\in G}x_{gk} <= |G|*c_{k} & \forall k\in K\\
-\label{eq_MIP_cf:f.3}&\sum_{g\in N(w)}x_{gk} >= u_{wk} & \forall w\in W, \forall k\in K\\
-\label{eq_MIP_cf:f.4}&\sum_{g\in N(w)}x_{gk} <= 1 + |G|*u_{wk} & \forall w\in W, \forall k\in K\\
-\label{eq_MIP_cf:f.5}&\sum_{k\in K}x_{gk} <= 1 & \forall g\in G\\
-\label{eq_MIP_cf:f.6}&c_{k} - c_{k+1} >= 0 & \forall k\in \{1,...,K-1\}\\
-\label{eq_MIP_cf:f.7}&\sum_{g\in G}x_{gk} - \sum_{g\in G}x_{g(k+1)} >= 0 & \forall k\in \{1,...,K-1\}\\
-\label{eq_MIP_cf:f.8}& u_{wk} \in \{0,1\} & \forall w\in W, \forall k\in \{1,...,K\}\\
-\label{eq_MIP_cf:f.9}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,...,K\}\\
-\label{eq_MIP_cf:f.10}& c_{k}\in \{0,1\} & \forall k\in \{1,...,K\}
+\label{eq_MIP_cf:f.0} \mbox{minimize}~& \;\sum_{k\in \{1,...,K\}} c_{k}& \\
+\label{eq_MIP_cf:f.1} \mbox{s.t. } &\sum_{g \in G}x_{gk} >= c_{k} & \forall k\in \{1,...,K\}\\
+\label{eq_MIP_cf:f.2}&\sum_{g\in G}x_{gk} <= |G|\cdot  c_{k} & \forall k\in \{1,...,K\}\\
+\label{eq_MIP_cf:f.3}&\sum_{g\in N(w)}x_{gk} >= u_{wk} & \forall w\in W, \forall k\in \{1,...,K\}\\
+\label{eq_MIP_cf:f.4}&\sum_{g\in N(w)}x_{gk} <= 1 + |G|\cdot  (1-u_{wk}) & \forall w\in W, \forall k\in \{1,...,K\}\\
+\label{eq_MIP_cf:f.5}&\sum_{k\in \{1,...,K\}}u_{wk} >= 1 & \forall w\in W\\
+\label{eq_MIP_cf:f.6}&\sum_{k\in \{1,...,K\}}x_{gk} <= 1 & \forall g\in G\\
+\label{eq_MIP_cf:f.7}&c_{k} - c_{k+1} >= 0 & \forall k\in \{1,...,K-1\}\\
+\label{eq_MIP_cf:f.8}&\sum_{g\in G}x_{gk} - \sum_{g\in G}x_{g(k+1)} >= 0 & \forall k\in \{1,...,K-1\}\\
+\label{eq_MIP_cf:f.9}& u_{wk} \in \{0,1\} & \forall w\in W, \forall k\in \{1,...,K\}\\
+\label{eq_MIP_cf:f.10}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,...,K\}\\
+\label{eq_MIP_cf:f.11}& c_{k}\in \{0,1\} & \forall k\in \{1,...,K\}
 \end{align}
 
 \section{SAT Formulation}
