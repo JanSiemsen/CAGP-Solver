@@ -78,13 +78,12 @@ In the following sections, we introduce a MIP, a SAT, and a CPSAT formulation of
 \label{eq_MIP_cf:f.6}&\sum_{k\in \{1,...,K\}}x_{gk} <= 1 & \forall g\in G\\
 \label{eq_MIP_cf:f.7}&c_{k} - c_{k+1} >= 0 & \forall k\in \{1,...,K-1\}\\
 \label{eq_MIP_cf:f.8}&\sum_{g\in G}x_{gk} - \sum_{g\in G}x_{g(k+1)} >= 0 & \forall k\in \{1,...,K-1\}\\
-\label{eq_MIP_cf:f.9}&
 \label{eq_MIP_cf:f.10}& u_{wk} \in \{0,1\} & \forall w\in W, \forall k\in \{1,...,K\}\\
 \label{eq_MIP_cf:f.11}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,...,K\}\\
 \label{eq_MIP_cf:f.12}& c_{k}\in \{0,1\} & \forall k\in \{1,...,K\}
 \end{align}
 
-
+The MIP formulation for the CCAGP is similar to the one of the CAGP. We are still trying to minimize the number of colors \cref{eq_MIP_cf:f.0} and keep the same variables \cref{eq_MIP_cf:f.11} and \cref{eq_MIP_cf:f.12} for colors and guard color combinations. Additionally, we add auxiliary variables \cref{eq_MIP_cf:f.10} for all witness color combinations that are true whenever there exists exactly one guard with that color in the neighborhood of that witness. To ensure that color variables are true if and only if a guard variable of that color is true, we add the constraints in \cref{eq_MIP_cf:f.1} and \cref{eq_MIP_cf:f.2}. The constraints \cref{eq_MIP_cf:f.3} ensure that 
 
 \section{SAT Formulation}
 
