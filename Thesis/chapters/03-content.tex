@@ -30,38 +30,60 @@ To prove this theorem, we present a simple example in \cref{fig:light_covers}. I
 
 \chapter{Chromatic Art Gallery Problem Formulations}
 
+In the following sections, we introduce a MIP, a SAT, and a CPSAT formulation of the Chromatic Art Gallery Problem. The MIP formulation is the one proposed by de Souza et al. \cite{zambon2014exact}, which gets modified and turned into a SAT formula for the SAT and the CPSAT formulation.
+
 \section{MIP Formulation}
 
 \begin{align}
-\label{eq:f.0} \mbox{minimize}~& \;\sum_{k\in K} c_{k}& \\
-\label{eq:f.1} \mbox{s.t. } &\sum_{g \in H}x_{gk} <= c_{k} & \forall H \in \mathcal{H}, \forall k\in K\\
-\label{eq:f.2}&\sum_{g\in N(w), k\in K}x_{gk}>=1 & \forall w\in W\\
-\label{eq:f.3}&\sum_{k\in K}x_{gk}<=1 & \forall g\in G\\
-\label{eq:f.4}&c_{k} - c_{k+1} >= 0 & \forall k\in \{1,...,K-1\}\\
-\label{eq:f.5}&\sum_{g\in G}x_{gk} - \sum_{g\in G}x_{g(k+1)} & \forall k\in \{1,...,K-1\}\\
-\label{eq:f.6}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,...,K\}\\
-\label{eq:f.7}& c_{k}\in \{0,1\} & \forall k\in \{1,...,K\}
+\label{eq_MIP:f.0} \mbox{minimize}~& \;\sum_{k\in K} c_{k}& \\
+\label{eq_MIP:f.1} \mbox{s.t. } &\sum_{g \in H}x_{gk} <= c_{k} & \forall H \in \mathcal{H}, \forall k\in K\\
+\label{eq_MIP:f.2}&\sum_{g\in N(w), k\in K}x_{gk}>=1 & \forall w\in W\\
+\label{eq_MIP:f.3}&\sum_{k\in K}x_{gk}<=1 & \forall g\in G\\
+\label{eq_MIP:f.4}&c_{k} - c_{k+1} >= 0 & \forall k\in \{1,...,K-1\}\\
+\label{eq_MIP:f.5}&\sum_{g\in G}x_{gk} - \sum_{g\in G}x_{g(k+1)} >= 0 & \forall k\in \{1,...,K-1\}\\
+\label{eq_MIP:f.6}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,...,K\}\\
+\label{eq_MIP:f.7}& c_{k}\in \{0,1\} & \forall k\in \{1,...,K\}
 \end{align}
+
+The MIP formulation of the problem introduces binary variables for every guard color combination \cref{eq_MIP:f.6} and every color \cref{eq_MIP:f.7}. The guard color variables are true whenever the guard is used and is assigned the associated color in the solution. The color variables are true whenever a guard uses that color in a solution. The objective function \cref{eq_MIP:f.0} minimizes the number of colors used in the solution. The constraints in \cref{eq_MIP:f.1} are called edge clique cover constraints. They ensure that for every clique in an edge clique cover of the 2-link-visibilty-graph $G_{vis}$ and every color only one of the guards in that clique can be assigned that color. At the same time, they make sure that if a guard in that clique uses the color, the corresponding color variable must also be true. How to find an edge clique cover for $G_{vis}$, will be discussed in the Implementation Details chapter. The constraints in \cref{eq_MIP:f.2} are called witness covering constraints. They ensure that for every witness in the witness covering graph $G_{cov}$ at least one guard in its neighborhood is used in the solution, thus the witness gets covered. We call the constraints in \cref{eq_MIP:f.3} guard coloring constraints. They ensure that each guard is assigned at most one color. Technically, these constraints are not necessary to find an optimal solution, as one can simply process the solution by deciding on one color for every guard that got assigned multiple. The reason for still including these constraints is that they reduce the space of possible optimal and near-optimal solutions, which can help the solver arrive at an optimal solution faster. In the same mindset, we add the constraints \cref{eq_MIP:f.4} and \cref{eq_MIP:f.5}, which are symmetry breaker constraints. \cref{eq_MIP:f.4} ensure that when $k$ colors are used, those colors are the first k colors in $\{1,...,K\}$. As for \cref{eq_MIP:f.4}, they induce a partial order of the colors over the size of guards using that color. This reduces possible permutations of the colors assigned to each guard in an optimal solution.
 
 \section{SAT Formulation}
 
 \begin{align}
-\label{eq:f.0}&(\lnot x_{uk} \lor \lnot x_{vk}) \land & \forall (u,v)\in E_{G}, \forall k\in K\\
-\label{eq:f.1}&(\bigvee_{g\in N(w), k\in K}x_{gk}) \land & \forall w\in W\\
-\label{eq:f.2}&\bigwedge_{1 \leq i < j \leq K} (\lnot x_{gi} \lor \lnot x_{gj})
+\label{eq_SAT:f.0}&\lnot x_{uk} \lor \lnot x_{vk} & \forall (u,v)\in E_{G}, \forall k\in K\\
+\label{eq_SAT:f.1}&\bigvee_{g\in N(w), k\in K}x_{gk} & \forall w\in W\\
+\label{eq_SAT:f.2}&\bigwedge_{1 \leq i < j \leq K} (\lnot x_{gi} \lor \lnot x_{gj})
  & \forall g\in G\\
-\label{eq:f.3}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,...,K\}
+\label{eq:_SATf.3}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,...,K\}
 \end{align}
 
+The SAT formulation of the problem differs from the MIP formulation in the way that we are not trying to minimize the number of colors used. Instead, we test whether there exists a feasible solution given a fixed number of colors K. By doing so, we can solve the SAT formula for different numbers of colors, increasing the number whenever we encounter infeasibility and decreasing it on a feasible solution, until we find the smallest number of colors for which there exists a feasible solution. The exact procedure for choosing the number of colors will be discussed in the Implementation Details chapter. Because we have a fixed number of colors, we do not require color variables like \cref{eq_MIP:f.7} anymore and restrict ourselves to the guard color variables in \cref{eq:_SATf.3}. We also omit the symmetry breaker constraints \cref{eq_MIP:f.4} and \cref{eq_MIP:f.5}, as \cref{eq_MIP:f.4} uses color variables and we found no straightforward way to model them efficiently using SAT clauses. Now for the clauses in our SAT formulation, we ensure that no two guards that share an edge in the 2-link-visibility graph $G_{vis}$ share the same color using \cref{eq_SAT:f.0}. These clauses replace the edge clique cover constraints in \cref{eq_MIP:f.1}. The reason for simply using the edges of $G_{vis}$ and not cliques is that SAT solvers are very efficient at solving large numbers of small clauses i.e. with only two variables. For the witness covering constraints \cref{eq_MIP:f.2}, we use the clauses in \cref{eq_MIP:f.1}, which have an equivalent meaning. Lastly, we use the clauses in \cref{eq_MIP:f.2} to replace the guard coloring constraints in \cref{eq_MIP:f.3}. Again, these constraints can be omitted by processing the solution at the end and we will compare the performance with and without them in the Experiments chapter below.
+
 \section{CPSAT Formulation}
+
+As CPSAT solvers allow for both MIP and SAT constraints, we use both the MIP and the SAT formulation and compare them against each other in the Experiments chapter.
 
 \chapter{Conflict-free Chromatic Art Gallery Problem Formulations}
 
+In the following sections, we introduce a MIP, a SAT, and a CPSAT formulation of the Conflict-free Chromatic Art Gallery Problem.
+
 \section{MIP Formulation}
+
+\begin{align}
+\label{eq_MIP:f.0} \mbox{minimize}~& \;\sum_{k\in K} c_{k}& \\
+\label{eq_MIP:f.1} \mbox{s.t. } &\sum_{g \in H}x_{gk} <= c_{k} & \forall H \in \mathcal{H}, \forall k\in K\\
+\label{eq_MIP:f.2}&\sum_{g\in N(w), k\in K}x_{gk}>=1 & \forall w\in W\\
+\label{eq_MIP:f.3}&\sum_{k\in K}x_{gk}<=1 & \forall g\in G\\
+\label{eq_MIP:f.4}&c_{k} - c_{k+1} >= 0 & \forall k\in \{1,...,K-1\}\\
+\label{eq_MIP:f.5}&\sum_{g\in G}x_{gk} - \sum_{g\in G}x_{g(k+1)} >= 0 & \forall k\in \{1,...,K-1\}\\
+\label{eq_MIP:f.6}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,...,K\}\\
+\label{eq_MIP:f.7}& c_{k}\in \{0,1\} & \forall k\in \{1,...,K\}
+\end{align}
 
 \section{SAT Formulation}
 
 \section{CPSAT Formulation}
+Similar to the Chromatic Art Gallery Problem, we use both the MIP and the SAT formulation for CPSAT and compare them against each other in the Experiments chapter.
 
 \chapter{Implementation Details}
 
@@ -69,6 +91,6 @@ To prove this theorem, we present a simple example in \cref{fig:light_covers}. I
 
 \section{Initial Upper Bound}
 
-\section{Clique Edge Covers}
+\section{Edge Clique Covers}
 
 \section{Lazy Constraints}
