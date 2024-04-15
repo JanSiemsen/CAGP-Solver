@@ -125,19 +125,16 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
 \begin{algorithm}
 \caption{Calculate witness sets and light guard sets}
 \begin{algorithmic}[1]
-\STATE Initialize empty maps: witness\_to\_guards, guard\_to\_witnesses, all\_witness\_to\_guards, all\_guard\_to\_witnesses
-\STATE Initialize empty list: light\_guard\_sets
-\STATE Initialize empty list: faces
-\FORALL{face in self}
-    \STATE Add face to faces
-\ENDFOR
-\STATE Initialize index to size of guard
-\STATE Initialize all\_index to size of guard
+\STATE Initialize empty maps: $witness\_to\_guards, guard\_to\_witnesses, all\_witness\_to\_guards, all\_guard\_to\_witnesses$
+\STATE Initialize empty list: $light\_guard\_sets$
+\STATE $shadow\_index\gets 0$
+\STATE $all\_index\gets 0$
 \FORALL{face in faces}
-    \IF{face data is empty}
-        \STATE Continue to next iteration
+    \IF{face guard set is empty}
+        \STATE Continue
     \ENDIF
-    \STATE Initialize is\_shadow and is\_light to true
+    \STATE is\_shadow and is\_light to true
+    \STATE is\_light
     \FORALL{half\_edge in face}
         \IF{twin face data is empty}
             \STATE Continue to next iteration
