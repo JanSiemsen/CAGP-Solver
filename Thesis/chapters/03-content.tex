@@ -130,23 +130,25 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
 \STATE $shadow\_index\gets 0$
 \STATE $all\_index\gets 0$
 \FORALL{face in faces}
-    \IF{face guard set is empty}
+    \STATE $g_data\gets$ guard set of the face
+    \IF{$g_data$ is empty}
         \STATE Continue
     \ENDIF
     \STATE $is\_shadow\gets \TRUE$
     \STATE $is\_light\gets \TRUE$
     \FORALL{half\_edge in face}
-        \IF{twin face guard set is empty}
+        \STATE $twin_g_data\gets$ guard set of the twin face of the half\_edge
+        \IF{$twin_g_data$ is empty}
             \STATE Continue
         \ENDIF
-        \IF{face guard set includes twin face guard set}
+        \IF{face guard set includes $twin_g_data$}
             \STATE $is\_shadow\gets \FALSE$
         \ENDIF
         \IF{twin guard set data includes face guard set}
             \STATE $is\_light\gets \FALSE$
         \ENDIF
     \ENDFOR
-    \STATE Insert all\_index and face data to all\_witness\_to\_guards
+    \STATE $all\_witness\_to\_guards[all\_index]\gets$ face guard set
     \FORALL{g in face data}
         \STATE Insert all\_index to all\_guard\_to\_witnesses[g]
     \ENDFOR
