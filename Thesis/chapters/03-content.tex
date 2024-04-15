@@ -122,6 +122,54 @@ The instances are given as lists of points, which represent the outer boundaries
 
 For the CAGP, we calculate the shadow witness set. As geometric operations are expensive, instead of saving the shadow witness set as a set of points, we store each witness as an integer together with the set of guards that covers the witness as well as each guard together with the set of witnesses that the guard covers. Additionally, we store a list of the set of guards for each light AVP. For the CCAGP, we calculate the witness set as well. But because of \cref{thm:light_covers} just using shadow or light witnesses is not sufficient, thus we use a witness for every AVP instead. 
 
+\begin{algorithm}
+\caption{Calculate witness sets and light guard sets}
+\begin{algorithmic}[1]
+\STATE Initialize empty maps: witness\_to\_guards, guard\_to\_witnesses, all\_witness\_to\_guards, all\_guard\_to\_witnesses
+\STATE Initialize empty list: light\_guard\_sets
+\STATE Initialize empty list: faces
+\FORALL{face in self}
+    \STATE Add face to faces
+\ENDFOR
+\STATE Initialize index to size of guard
+\STATE Initialize all\_index to size of guard
+\FORALL{face in faces}
+    \IF{face data is empty}
+        \STATE Continue to next iteration
+    \ENDIF
+    \STATE Initialize is\_shadow and is\_light to true
+    \FORALL{half\_edge in face}
+        \IF{twin face data is empty}
+            \STATE Continue to next iteration
+        \ENDIF
+        \IF{face data includes twin face data}
+            \STATE Set is\_shadow to false
+        \ENDIF
+        \IF{twin face data includes face data}
+            \STATE Set is\_light to false
+        \ENDIF
+    \ENDFOR
+    \STATE Insert all\_index and face data to all\_witness\_to\_guards
+    \FORALL{g in face data}
+        \STATE Insert all\_index to all\_guard\_to\_witnesses[g]
+    \ENDFOR
+    \STATE Increment all\_index
+    \IF{is\_shadow is true}
+        \STATE Insert index and face data to witness\_to\_guards
+        \FORALL{g in face data}
+            \STATE Insert index to guard\_to\_witnesses[g]
+        \ENDFOR
+        \STATE Increment index
+    \ENDIF
+    \IF{is\_light is true}
+        \STATE Add face data to light\_guard\_sets
+    \ENDIF
+\ENDFOR
+\STATE Create result tuple with witness\_to\_guards, guard\_to\_witnesses, light\_guard\_sets, all\_witness\_to\_guards, all\_guard\_to\_witnesses
+\RETURN result
+\end{algorithmic}
+\end{algorithm}
+
 \section{Initial Upper Bound}
 Calculating a low initial upper bound is vital for efficiently solving the CAGP and CCAGP, as the possible number of colors K directly affects the size of the problem formulation. To achieve this, we implement the approach presented by de Souza et al. \cite{zambon2014exact}, for which K was on average only 1.7 larger than the number of colors used by the optimal solution. 
 
