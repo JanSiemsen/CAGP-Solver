@@ -107,7 +107,7 @@ Similar to the Chromatic Art Gallery Problem, we use both the MIP and the SAT fo
 The instances are given as lists of points, which represent the outer boundaries of the polygons and possible holes. First, we create a CGAL Polygon\_with\_holes\_2 using the instance input. Then, using the vertices of the polygon and its holes as the guard set $G$, we calculate the visibility regions as polygons for each guard using CGAL's "Triangular\_expansion\_visibility\_2.h". Afterward, we recursively overlay the visibility polygons using CGAL's "Arr\_overlay\_2.h" to obtain the AVP arrangement. 
 
 \begin{algorithm}
-\caption{An algorithm with caption}\label{alg:AVP_generation}
+\caption{generate\_AVP\_recursive()}\label{alg:AVP_generation}
 \begin{algorithmic}
 \STATE $i\gets 10$
 \IF {$i\geq 5$} 
