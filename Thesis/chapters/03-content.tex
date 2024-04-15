@@ -104,7 +104,7 @@ Similar to the Chromatic Art Gallery Problem, we use both the MIP and the SAT fo
 \chapter{Implementation Details}
 
 \section{Instance Processing}
-The instances are given as lists of points, which represent the outer boundaries of the polygons and possible holes. First, we create a CGAL Polygon\_with\_holes\_2. Using the vertices of the polygon and its holes as the guard set $G$, we calculate the visibility regions for each guard using CGAL's "Triangular\_expansion\_visibility\_2.h" as polygons. Afterwards, we recursively overlay the visibility polygons using CGAL's overlay
+The instances are given as lists of points, which represent the outer boundaries of the polygons and possible holes. First, we create a CGAL Polygon\_with\_holes\_2 using the instance input. Then, using the vertices of the polygon and its holes as the guard set $G$, we calculate the visibility regions as polygons for each guard using CGAL's "Triangular\_expansion\_visibility\_2.h". Afterward, we recursively overlay the visibility polygons using CGAL's "Arr\_overlay\_2.h" to obtain the AVP arrangement. 
 
 \section{Initial Upper Bound}
 Calculating a low initial upper bound is vital for efficiently solving the CAGP and CCAGP, as the possible number of colors K directly affects the size of the problem formulation. To achieve this, we implement the approach presented by de Souza et al. \cite{zambon2014exact}, for which K was on average only 1.7 larger than the number of colors used by the optimal solution. 
