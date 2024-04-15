@@ -125,8 +125,8 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
 \begin{algorithm}
 \caption{Calculate witness sets and light guard sets}
 \begin{algorithmic}[1]
-\STATE Initialize empty maps: $witness\_to\_guards, guard\_to\_witnesses, all\_witness\_to\_guards, all\_guard\_to\_witnesses$
-\STATE Initialize empty list: $light\_guard\_sets$
+\STATE Initialize empty maps:\\ $witness\_to\_guards,\linebreak guard\_to\_witnesses,\linebreak all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
+\STATE Initialize empty list:\\ $light\_guard\_sets$
 \STATE $shadow\_index\gets 0$
 \STATE $all\_index\gets 0$
 \FORALL{face in faces}
@@ -154,18 +154,17 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
     \ENDFOR
     \STATE $all\_index\gets all\_index + 1$
     \IF{$is\_shadow$}
-        \STATE Insert index and face data to witness\_to\_guards
-        \FORALL{g in face data}
-            \STATE Insert index to guard\_to\_witnesses[g]
+        \STATE $witness\_to\_guards[index]\gets g_data$
+        \FORALL{$g$ in $g_data$}
+            \STATE $guard\_to\_witnesses[g]\gets guard\_to\_witnesses[g]\cup index$
         \ENDFOR
-        \STATE Increment index
+        \STATE $shadow\_index\gets shadow\_index + 1$
     \ENDIF
     \IF{$is\_light$}
-        \STATE Add face data to light\_guard\_sets
+        \STATE light\_guard\_sets
     \ENDIF
 \ENDFOR
-\RETURN $witness\_to\_guards, guard\_to\_witnesses, light\_guard\_sets, all\_witness\_to\_guards, all\_guard\_to\_witnesses$
-\RETURN result
+\RETURN\linebreak $witness\_to\_guards,\linebreak guard\_to\_witnesses,\linebreak light\_guard\_sets,\linebreak all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
 \end{algorithmic}
 \end{algorithm}
 
