@@ -112,8 +112,11 @@ The instances are given as lists of points, which represent the outer boundaries
 \STATE $half\gets len(guards)/2$
 \STATE $firstHalf = guards[:half]$ 
 \STATE $secondHalf = guards[half:]$
-\IF{}
-\E
+\IF{$len(guards) = 1$}
+    \STATE $Arrangement(guards[0][0], guards[0][1])$
+\ELSE
+    \STATE $generate\_AVP\_recursive(firstHalf).overlaygenerate\_AVP\_recursive(secondHalf)$
+\En
 \end{algorithmic}
 \end{algorithm}
 
