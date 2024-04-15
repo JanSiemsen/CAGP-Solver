@@ -73,7 +73,7 @@ In the following sections, we introduce a MIP, a SAT, and a CPSAT formulation of
 \label{eq_MIP_cf:f.1} \mbox{s.t. } &\sum_{g \in G}x_{gk} >= c_{k} & \forall k\in \{1,...,K\}\\
 \label{eq_MIP_cf:f.2}&\sum_{g\in G}x_{gk} <= |G|\cdot  c_{k} & \forall k\in \{1,...,K\}\\
 \label{eq_MIP_cf:f.3}&\sum_{g\in N(w)}x_{gk} >= u_{wk} & \forall w\in W, \forall k\in \{1,...,K\}\\
-\label{eq_MIP_cf:f.4}&\sum_{g\in N(w)}x_{gk} <= 1 + |G|\cdot  (1-u_{wk}) & \forall w\in W, \forall k\in \{1,...,K\}\\
+\label{eq_MIP_cf:f.4}&\sum_{g\in N(w)}x_{gk} <= 1 + |N(w)|\cdot  (1-u_{wk}) & \forall w\in W, \forall k\in \{1,...,K\}\\
 \label{eq_MIP_cf:f.5}&\sum_{k\in \{1,...,K\}}u_{wk} >= 1 & \forall w\in W\\
 \label{eq_MIP_cf:f.6}&\sum_{k\in \{1,...,K\}}x_{gk} <= 1 & \forall g\in G\\
 \label{eq_MIP_cf:f.7}&c_{k} - c_{k+1} >= 0 & \forall k\in \{1,...,K-1\}\\
