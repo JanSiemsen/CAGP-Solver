@@ -130,41 +130,41 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
 \STATE $shadow\_index\gets 0$
 \STATE $all\_index\gets 0$
 \FORALL{face in faces}
-    \STATE $g_data\gets$ guard set of the face
-    \IF{$g_data$ is empty}
+    \STATE $g\_data\gets$ guard set of the face
+    \IF{$g\_data$ is empty}
         \STATE Continue
     \ENDIF
     \STATE $is\_shadow\gets \TRUE$
     \STATE $is\_light\gets \TRUE$
     \FORALL{half\_edge in face}
-        \STATE $twin_g_data\gets$ guard set of the twin face of the half\_edge
-        \IF{$twin_g_data$ is empty}
+        \STATE $twin\_g\_data\gets$ guard set of the twin face of the half\_edge
+        \IF{$twin\_g\_data$ is empty}
             \STATE Continue
         \ENDIF
-        \IF{face guard set includes $twin_g_data$}
+        \IF{$g\_data\subset twin\_g\_data$}
             \STATE $is\_shadow\gets \FALSE$
         \ENDIF
-        \IF{twin guard set data includes face guard set}
+        \IF{$twin\_g\_data\subset g\_data$}
             \STATE $is\_light\gets \FALSE$
         \ENDIF
     \ENDFOR
-    \STATE $all\_witness\_to\_guards[all\_index]\gets$ face guard set
-    \FORALL{g in face data}
-        \STATE Insert all\_index to all\_guard\_to\_witnesses[g]
+    \STATE $all\_witness\_to\_guards[all\_index]\gets g\_data$
+    \FORALL{$g$ in $g\_data$}
+        \STATE $all\_guard\_to\_witnesses[g]\gets all\_guard\_to\_witnesses[g]\cup all\_index$
     \ENDFOR
-    \STATE Increment all\_index
-    \IF{is\_shadow is true}
+    \STATE $all\_index\gets all\_index + 1$
+    \IF{$is\_shadow$}
         \STATE Insert index and face data to witness\_to\_guards
         \FORALL{g in face data}
             \STATE Insert index to guard\_to\_witnesses[g]
         \ENDFOR
         \STATE Increment index
     \ENDIF
-    \IF{is\_light is true}
+    \IF{$is\_light$}
         \STATE Add face data to light\_guard\_sets
     \ENDIF
 \ENDFOR
-\STATE Create result tuple with witness\_to\_guards, guard\_to\_witnesses, light\_guard\_sets, all\_witness\_to\_guards, all\_guard\_to\_witnesses
+\RETURN $witness\_to\_guards, guard\_to\_witnesses, light\_guard\_sets, all\_witness\_to\_guards, all\_guard\_to\_witnesses$
 \RETURN result
 \end{algorithmic}
 \end{algorithm}
