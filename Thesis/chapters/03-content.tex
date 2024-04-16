@@ -7,7 +7,7 @@ When given a polygon $P$ and a guard set $G$, a subset $G_{sub}$ of $G$ fully co
 The necessity condition follows trivially from $W\subset P$. As for the sufficiency condition, consider the largest area $R$ that is not covered by $G_{sub}$. Because of the atomicity of AVPs, $R$ must consist of one or more AVPs. Now consider the AVP $f$ with minimal guard subset $G_{f}$ in $R$. We show that $f$ must be a shadow AVP, a contradiction. If $f = R$, then $f$ trivially must be a shadow AVP. Otherwise, consider the neighbors of $f$. For all neighbors in $R$, $G_{f}$ can not contain their guard subset as $G_{f}$ is minimal in R. As for the neighbors not in $R$, if there exists a neighbor of which the guard subset is contained in $G_{f}$, then $f$ must be covered by one of the guards in that subset and can not be part of $R$. Otherwise, $G_{f}$ does not contain any of its neighbors' guard subsets and thus is a shadow AVP.
 \end{proof}
 
-\begin{theorem}
+\begin{theorem}\label{thm:light_covers}
 When given a polygon $P$ and a guard set $G$, the guard subsets of a light polygon form a clique in the 2-link-visibility graph $G_{vis}$ of $G$, and the cliques of all light polygons cover all edges of the graph.
 \end{theorem}
 \begin{proof}
@@ -17,15 +17,15 @@ The guard subset of a light polygon is formed by all the guards whose visibility
 \begin{figure}[htbp]
 \centering
 \includegraphics[scale=1.3]{Thesis/figures/conflict-free_witnesses.pdf}
-\caption{Illustration for the proof of \cref{thm:light_covers}.}
-\label{fig:light_covers}
+\caption{Illustration for the proof of \cref{thm:conflict-free_witnesses}.}
+\label{fig:conflict-free_witnesses}
 \end{figure}
 
-\begin{theorem}\label{thm:light_covers}
+\begin{theorem}\label{thm:conflict-free_witnesses}
 For a polygon $P$ and a guard set $G$, neither conflict-freeness of all shadow witnesses nor all light witnesses guarantees conflict-freeness within all AVPs.
 \end{theorem}
 \begin{proof}
-To prove this theorem, we present a simple example in \cref{fig:light_covers}. In the figure $A_{1}$, $A_{2}$ and $A_{3}$ are shadow AVPs and $A_{4}$ is a light AVP. Each of them is covered by a guard of unique color. On the other hand, $A_{5}$ is neither shadow nor light and is covered by two guards of the same color, thus, it is not conflict-free.
+To prove this theorem, we present a simple example in \cref{fig:conflict-free_witnesses}. In the figure $A_{1}$, $A_{2}$ and $A_{3}$ are shadow AVPs and $A_{4}$ is a light AVP. Each of them is covered by a guard of unique color. On the other hand, $A_{5}$ is neither shadow nor light and is covered by two guards of the same color, thus, it is not conflict-free.
 \end{proof}
 
 \chapter{Chromatic Art Gallery Problem Formulations}
@@ -120,7 +120,7 @@ The instances are given as lists of points, which represent the outer boundaries
 \end{algorithmic}
 \end{algorithm}
 
-For the CAGP, we calculate the shadow witness set. As geometric operations are expensive, instead of saving the shadow witness set as a set of points, we store each witness as an integer together with the set of guards that covers the witness as well as each guard together with the set of witnesses that the guard covers. Additionally, we store a list of the set of guards for each light AVP. For the CCAGP, we calculate the witness set as well. But because of \cref{thm:light_covers} just using shadow or light witnesses is not sufficient, thus we use a witness for every AVP instead. To calculate all of the above, we use \cref{alg:AVP_processing}. 
+For the CAGP, we calculate the shadow witness set. As geometric operations are expensive, instead of saving the shadow witness set as a set of points, we store each witness as an integer together with the set of guards that covers the witness as well as each guard together with the set of witnesses that the guard covers. Additionally, we store a list of the set of guards for each light AVP. For the CCAGP, we calculate the witness set as well. But because of \cref{thm:conflict-free_witnesses} just using shadow or light witnesses is not sufficient, thus we use a witness for every AVP instead. To calculate all of the above, we use \cref{alg:AVP_processing}. Afterward, we can use the light guard sets to create the visibility graph $G_{vis}$ by adding edges between guards within each set (\cref{thm:light_covers}). As for the covering graph $G_{cov}$, there is no need to create the overhead of an additional graph. Instead, we can simply check the corresponding guard set of a witness, whenever we need the neighborhood of that witness in $G_{vis}$. 
 
 \begin{algorithm}
 \caption{Calculate witness sets and light guard sets}\label{alg:AVP_processing}
