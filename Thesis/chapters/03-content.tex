@@ -108,7 +108,7 @@ The instances are given as lists of points, which represent the outer boundaries
 
 \begin{algorithm}
 \caption{generate\_AVP\_recursive(guards: list[tuple[int, Polygon\_with\_holes\_2]])}\label{alg:AVP_generation}
-\begin{algorithmic}
+\begin{algorithmic} 
 \STATE $half\gets len(guards)/2$
 \STATE $firstHalf\gets guards[:half]$ 
 \STATE $secondHalf\gets guards[half:]$
@@ -125,19 +125,20 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
 \begin{algorithm}
 \caption{Calculate witness sets and light guard sets}\label{alg:AVP_processing}
 \begin{algorithmic}[1]
+\REQUIRE $faces$ of the AVP arrangement
 \STATE Initialize empty maps:\\ $witness\_to\_guards,\linebreak guard\_to\_witnesses,\linebreak all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
 \STATE Initialize empty list:\\ $light\_guard\_sets$
 \STATE $shadow\_index\gets 0$
 \STATE $all\_index\gets 0$
-\FORALL{face in faces}
-    \STATE $g\_data\gets$ guard set of the face
+\FORALL{$face$ in $faces$}
+    \STATE $g\_data\gets$ guard set of the $face$
     \IF{$g\_data$ is empty}
         \STATE Continue
     \ENDIF
     \STATE $is\_shadow\gets \TRUE$
     \STATE $is\_light\gets \TRUE$
-    \FORALL{half\_edge in face}
-        \STATE $twin\_g\_data\gets$ guard set of the twin face of the half\_edge
+    \FORALL{$half\_edge$ in $face$}
+        \STATE $twin\_g\_data\gets$ guard set of the twin face of the $half\_edge$
         \IF{$twin\_g\_data$ is empty}
             \STATE Continue
         \ENDIF
@@ -170,6 +171,27 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
 
 \section{Initial Upper Bound}
 Calculating a low initial upper bound is vital for efficiently solving the CAGP and CCAGP, as the possible number of colors K directly affects the size of the problem formulation. To achieve this, we implement the approach presented by de Souza et al. \cite{zambon2014exact}, for which K was on average only 1.7 larger than the number of colors used by the optimal solution. 
+
+\begin{algorithm}
+\caption{Greedy Solution}
+\begin{algorithmic}[1]
+\REQUIRE $guard\_to\_witnesses, initial\_witnesses, G_{vis}$
+\STATE Initialize empty set: $solution$
+\STATE $uncovered\gets initial\_witnesses$
+\STATE $size\gets 0$
+\WHILE{$uncovered$ is not empty}
+    \STATE Initialize weights with pair (g\_id, size of intersection of witnesses and uncovered) for each g\_id, witnesses in guard\_to\_witnesses
+    \STATE Initialize solver with weights and G
+    \STATE Solve the solver and get independent\_set
+    \FORALL{guard in independent\_set}
+        \STATE Add pair (guard, size) to solution
+        \STATE Remove guard\_to\_witnesses[guard] from uncovered
+    \ENDFOR
+    \STATE Increment size
+\ENDWHILE
+\RETURN size, solution
+\end{algorithmic}
+\end{algorithm}
 
 \section{Edge Clique Covers}
 
