@@ -120,10 +120,10 @@ The instances are given as lists of points, which represent the outer boundaries
 \end{algorithmic}
 \end{algorithm}
 
-For the CAGP, we calculate the shadow witness set. As geometric operations are expensive, instead of saving the shadow witness set as a set of points, we store each witness as an integer together with the set of guards that covers the witness as well as each guard together with the set of witnesses that the guard covers. Additionally, we store a list of the set of guards for each light AVP. For the CCAGP, we calculate the witness set as well. But because of \cref{thm:light_covers} just using shadow or light witnesses is not sufficient, thus we use a witness for every AVP instead. To calculate all of the above, we use \cref{AVP_processing}.
+For the CAGP, we calculate the shadow witness set. As geometric operations are expensive, instead of saving the shadow witness set as a set of points, we store each witness as an integer together with the set of guards that covers the witness as well as each guard together with the set of witnesses that the guard covers. Additionally, we store a list of the set of guards for each light AVP. For the CCAGP, we calculate the witness set as well. But because of \cref{thm:light_covers} just using shadow or light witnesses is not sufficient, thus we use a witness for every AVP instead. To calculate all of the above, we use \cref{alg:AVP_processing}. 
 
-\begin{algorithm}\label{AVP_processing}
-\caption{Calculate witness sets and light guard sets}
+\begin{algorithm}
+\caption{Calculate witness sets and light guard sets}\label{alg:AVP_processing}
 \begin{algorithmic}[1]
 \STATE Initialize empty maps:\\ $witness\_to\_guards,\linebreak guard\_to\_witnesses,\linebreak all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
 \STATE Initialize empty list:\\ $light\_guard\_sets$
