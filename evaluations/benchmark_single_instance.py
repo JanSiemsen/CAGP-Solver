@@ -1,14 +1,12 @@
 import time
 from pyvispoly import Point, PolygonWithHoles, plot_polygon
-import solver_utils as solver_utils
-from GreedyCAGP import get_greedy_solution
-from CAGPSolverMIP import CAGPSolverMIP
-from CAGPSolverSAT import CAGPSolverSAT
-from CAGPSolverCPSAT_MIP_Formulation import CAGPSolverCPSAT as CAGPSolverCPSAT_MIP
-from CAGPSolverCPSAT_Mix_Formulation import CAGPSolverCPSAT as CAGPSolverCPSAT_Mix
-from CAGPSolverCPSAT_SAT_Formulation import CAGPSolverCPSAT as CAGPSolverCPSAT_SAT
-from CFCAGPSolverMIP import CFCAGPSolverMIP
-from CFCAGPSolverSAT import CFCAGPSolverSAT
+from CAGP_Solver import get_greedy_solution, generate_solver_input, generate_edge_clique_covers, verify_solver_solution
+from CAGP_Solver import CAGPSolverMIP
+from CAGP_Solver import CAGPSolverSAT
+from CAGP_Solver import  CAGPSolverCPSAT_MIP
+from CAGP_Solver import  CAGPSolverCPSAT_SAT
+from CAGP_Solver import CFCAGPSolverMIP
+from CAGP_Solver import CFCAGPSolverSAT
 import networkx as nx
 import matplotlib.pyplot as plt
 import distinctipy as distcolors
@@ -78,7 +76,7 @@ with open('/home/yanyan/PythonProjects/CAGP-Solver/simple-polygons-with-holes/g1
 # plt.show()
 
 print('Generating solver input:')
-guards, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, GC, guard_to_witnesses_cf, witness_to_guards_cf, initial_witnesses_cf, all_witnesses_cf = solver_utils.generate_solver_input(poly, guards_on_holes=True)
+guards, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, GC, guard_to_witnesses_cf, witness_to_guards_cf, initial_witnesses_cf, all_witnesses_cf = generate_solver_input(poly, guards_on_holes=True)
 
 print('Calculating greedy solution...')
 greedyColors, greedySolution = get_greedy_solution(guard_to_witnesses, all_witnesses, GC)
@@ -101,20 +99,20 @@ print("number of guards in greedy solution: ", len(greedySolution))
 # CFsolverSAT.__del__()
 # print('Time to solve:', end - start)
 
-# print('Generating edge clique covers...')
-# start = time.time()
-# edge_clique_covers = solver_utils.generate_edge_clique_covers(GC, greedyColors)
-# end = time.time()
-# # print(edge_clique_covers)
-# print('Time to generate edge clique covers:', end - start, 'seconds')
+print('Generating edge clique covers...')
+start = time.time()
+edge_clique_covers = generate_edge_clique_covers(GC, greedyColors)
+end = time.time()
+# print(edge_clique_covers)
+print('Time to generate edge clique covers:', end - start, 'seconds')
 
-# print('Creating MIP solver...')
-# solverMIP = CAGPSolverMIP(greedyColors, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, edge_clique_covers, solution=greedySolution)
-# print('Solving MIP...')
-# solution = solverMIP.solve()
-# # print([(guard, color) for guard, color in solution])
-# print(solver_utils.verify_solver_solution(solution, GC))
-# print('Average vertex degree:', (2 * len(GC.edge_indices())) / len(GC.node_indices()))
+print('Creating MIP solver...')
+solverMIP = CAGPSolverMIP(greedyColors, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, edge_clique_covers, parameter_set=0, solution=greedySolution)
+print('Solving MIP...')
+num_colors, solution, iterations, number_of_witnesses, status = solverMIP.solve()
+# print([(guard, color) for guard, color in solution])
+print(verify_solver_solution(solution, GC))
+print('Average vertex degree:', (2 * len(GC.edge_indices())) / len(GC.node_indices()))
 
 # print('Creating CPSAT solver...')
 # solverCPSAT_MIP = CAGPSolverCPSAT_MIP(greedyColors, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, edge_clique_covers, solution=greedySolution)
@@ -129,7 +127,7 @@ print("number of guards in greedy solution: ", len(greedySolution))
 # print('Time to solve:', end - start, 'seconds')
 # print('Status:', status)
 # # print([(guard, color) for guard, color in solution])
-# print(solver_utils.verify_solver_solution(solution, GC))
+# print(verify_solver_solution(solution, GC))
 
 # print('Creating CPSAT solver...')
 # solverCPSAT_Mix = CAGPSolverCPSAT_Mix(greedyColors, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, GC, solution=greedySolution)
@@ -144,24 +142,24 @@ print("number of guards in greedy solution: ", len(greedySolution))
 # print('Time to solve:', end - start, 'seconds')
 # print('Status:', status)
 # # print([(guard, color) for guard, color in solution])
-# print(solver_utils.verify_solver_solution(solution, GC))
+# print(verify_solver_solution(solution, GC))
 # unique_first_values = set([s[1] for s in solution])
 # print("Unique first values:", unique_first_values)
 
-print('Creating CPSAT solver...')
-solverCPSAT_SAT = CAGPSolverCPSAT_SAT(greedyColors, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, GC, guard_color_constraints=True)
-print('Solving CPSAT...')
-start = time.time()
-num_colors, solution, iterations, number_of_witnesses, status = solverCPSAT_SAT.solve()
-end = time.time()
-print('Number of colors:', num_colors)
-print('Number of guards:', len(solution))
-print('Number of iterations:', iterations)
-print('Number of witnesses:', number_of_witnesses)
-print('Time to solve:', end - start, 'seconds')
-print('Status:', status)
-# print([(guard, color) for guard, color in solution])
-print(solver_utils.verify_solver_solution(solution, GC))
+# print('Creating CPSAT solver...')
+# solverCPSAT_SAT = CAGPSolverCPSAT_SAT(greedyColors, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, GC, guard_color_constraints=True)
+# print('Solving CPSAT...')
+# start = time.time()
+# num_colors, solution, iterations, number_of_witnesses, status = solverCPSAT_SAT.solve()
+# end = time.time()
+# print('Number of colors:', num_colors)
+# print('Number of guards:', len(solution))
+# print('Number of iterations:', iterations)
+# print('Number of witnesses:', number_of_witnesses)
+# print('Time to solve:', end - start, 'seconds')
+# print('Status:', status)
+# # print([(guard, color) for guard, color in solution])
+# print(verify_solver_solution(solution, GC))
 
 # print('Creating SAT solver...')
 # solverSAT = CAGPSolverSAT(greedyColors, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, GC, solver_name="Cadical103", guard_color_constraints=False, solution=greedySolution)
@@ -177,7 +175,7 @@ print(solver_utils.verify_solver_solution(solution, GC))
 # print('Status:', status)
 # solverSAT.__del__()
 # print([(guard, color) for guard, color in solution])
-# print(solver_utils.verify_solver_solution(solution, GC))
+# print(verify_solver_solution(solution, GC))
 
 # fig, ax = plt.subplots()
 # plot_polygon(poly, ax=ax, color="lightgrey")

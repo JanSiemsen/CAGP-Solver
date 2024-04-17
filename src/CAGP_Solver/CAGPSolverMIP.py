@@ -1,21 +1,20 @@
 import gurobipy as grb
-import rustworkx as rx
-from pyvispoly import Point, PolygonWithHoles, Arrangement, Arr_PointLocation, plot_polygon
-import matplotlib.pyplot as plt
 
 # This version of the solver takes in a precomputed visibility and covering graph to create its constraints
 # New witnesses are added whenever a feasible solution is found
 class CAGPSolverMIP:
 
-    def __init__(self, K: int, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], edge_clique_covers: list[list[list[int]]], solution: list[list[int]]=None) -> list[tuple[int, int]]:
+    def __init__(self, K: int, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], edge_clique_covers: list[list[list[int]]], parameter_set: int, solution: list[list[int]]=None) -> list[tuple[int, int]]:
         self.K = K
         self.guard_to_witnesses = guard_to_witnesses
         self.witness_to_guards = witness_to_guards
         self.initial_witnesses = initial_witnesses
+        self.number_of_witnesses = len(initial_witnesses)
         self.all_witnesses = all_witnesses
         self.edge_clique_covers = edge_clique_covers
         self.model = grb.Model()
         # self.model.Params.MemLimit = 16
+        self.model.Params.TimeLimit = 600
 
         self.__make_vars()
         self.__add_witness_covering_constraints()
@@ -28,22 +27,23 @@ class CAGPSolverMIP:
             self.__provide_init_solution(solution)
 
         # Set solver parameters for faster computation
-        # parameters generated from DCAGP paper benchmark instance (randsimple-2500-1)
-        # self.model.Params.lazyConstraints = 1
-        # self.model.Params.Method = 0
-        # self.model.Params.Heuristics = 0
-        # self.model.Params.MIPFocus = 2 # important
-        # self.model.Params.Cuts = 0
-        # self.model.Params.AggFill = 0
-        # self.model.Params.PrePasses = 1 # important
-
-        # parameters generated from salzburg benchmark instance (fpg-poly_0000002500)
-        self.model.Params.lazyConstraints = 1
-        self.model.Params.MIPFocus = 2
-        self.model.Params.PrePasses = 1
-        self.model.Params.Method = 0
-        self.model.Params.DegenMoves = 2
-        self.model.Params.Cuts = 1
+        if parameter_set == 0:
+            # parameters generated from DCAGP paper benchmark instance (randsimple-2500-1)
+            self.model.Params.lazyConstraints = 1
+            self.model.Params.Method = 0
+            self.model.Params.Heuristics = 0
+            self.model.Params.MIPFocus = 2 # important
+            self.model.Params.Cuts = 0
+            self.model.Params.AggFill = 0
+            self.model.Params.PrePasses = 1 # important
+        elif parameter_set == 1:
+            # parameters generated from salzburg benchmark instance (fpg-poly_0000002500)
+            self.model.Params.lazyConstraints = 1
+            self.model.Params.MIPFocus = 2
+            self.model.Params.PrePasses = 1
+            self.model.Params.Method = 0
+            self.model.Params.DegenMoves = 2
+            self.model.Params.Cuts = 1
         # self.model.Params.LogFile = 'mip.log'
 
         # Set the objective
@@ -110,14 +110,14 @@ class CAGPSolverMIP:
 
         if(missing_witnesses):
             print('Adding new witnesses...')
+            self.iteration += 1
+            self.number_of_witnesses += len(missing_witnesses)
             for witness in missing_witnesses:
                 subset = []
                 for guard in self.witness_to_guards[witness]:
                     for k in range(self.K):
                         subset.append((guard, k))
                 self.model.cbLazy(1 <= sum(self.guard_vars[guard][k] for guard, k in subset))
-                self.lazy_witnesses += 1
-            self.iteration += 1
 
     def __callback_fractional(self, model, varmap):
         # Nothing is being done here yet.
@@ -134,18 +134,17 @@ class CAGPSolverMIP:
             self.__callback_fractional(model, varmap)
 
     def solve(self):
-        self.iteration = 0
-        self.lazy_witnesses = 0
+        self.iteration = 1
         callback = lambda model, where: self.callback(where, model, self.guard_vars)
         self.model.optimize(callback)
         if self.model.status != grb.GRB.OPTIMAL:
-            raise RuntimeError("Unexpected status after optimization!")
+            return self.model.objVal, [], self.iteration, self.number_of_witnesses, "timeout"
 
         obj_val = self.model.objVal
         print(f"[CAGP SOLVER]: Found the minimum amount of colors required: {obj_val}")
         print(f"[CAGP SOLVER]: Iterations: {self.iteration}")
-        print(f"[CAGP SOLVER]: Lazy witnesses: {self.lazy_witnesses}")
-        return [(guard, color) for guard, color_dict in self.guard_vars.items() for color, variable in color_dict.items() if variable.x >= 0.5]
+        print(f"[CAGP SOLVER]: Witnesses used: {self.number_of_witnesses}")
+        return obj_val, [(guard, color) for guard, color_dict in self.guard_vars.items() for color, variable in color_dict.items() if variable.x >= 0.5], self.iteration, self.number_of_witnesses, "success"
 
     def __provide_init_solution(self, solution):
         for (guard, color) in solution:

@@ -1,9 +1,6 @@
-from calendar import c
 from collections import Counter
 from itertools import combinations
-from operator import le
 from pysat.solvers import Solver
-import rustworkx as rx
 
 # This version of the solver takes in a precomputed visibility and covering graph to create its constraints
 # New witnesses are added whenever an optimal solution is found
@@ -50,20 +47,7 @@ class CFCAGPSolverSAT:
             self.solver.add_atmost([self.guard_to_var[guard, color] for color in range(self.K)], 1)
 
     def __add_unique_color_constraints(self):
-        i = 0
         for witness in self.initial_witnesses:
-            # if not len(self.G.neighbors(witness)) == len(self.witness_to_guards[witness]):
-            #     print(self.G.neighbors(witness), self.witness_to_guards[witness])
-            #     Exception("Witness neighbors do not match the witness to guards mapping")
-            # if not set(self.G.neighbors(witness)) == self.witness_to_guards[witness]:
-            #     print(self.G.neighbors(witness), self.witness_to_guards[witness])
-            #     Exception("Witness neighbors do not match the witness to guards mapping")
-            # if not [(g1, g2) for g1, g2 in combinations(self.witness_to_guards[witness], 2)] == [(g1, g2) for g1, g2 in combinations(self.G.neighbors(witness), 2)]:
-            #         print([(g1, g2) for g1, g2 in combinations(self.witness_to_guards[witness], 2)], [(g1, g2) for g1, g2 in combinations(self.G.neighbors(witness), 2)])
-            #         if i > 9:
-            #             raise Exception("Combinations of witness guards do not match the combinations of witness neighbors")
-            #         i += 1
-            # neighbors = sorted(list(self.G.neighbors(witness)).copy())
             neighbors = self.witness_to_guards[witness]
             for color in range(self.K):
                 # If a witness_color_var is true, at least one guard of that color is true
@@ -80,18 +64,6 @@ class CFCAGPSolverSAT:
 
     def __deactivate_guards(self, color_lim: int):
         return [-self.guard_to_var[guard, k] for guard in self.guard_to_witnesses.keys() for k in range(color_lim, self.K)]
-    
-    # def __check_coverage(self, solution: list[tuple[int, int]]):
-    #     solution = [guard[0] for guard in solution]
-    #     solution = list(set(solution))
-
-    #     covered_witnesses = set()
-    #     for guard in solution:
-    #         covered_witnesses = covered_witnesses.union(self.guard_to_witnesses[guard])
-
-    #     missing_witnesses = self.all_witnesses.difference(covered_witnesses)
-        
-    #     return missing_witnesses
 
     def __check_coverage(self, solution: list[tuple[int, int]]):
         # Create a dictionary mapping guards to their colors

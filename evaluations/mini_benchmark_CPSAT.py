@@ -9,7 +9,7 @@ from CAGPSolverCPSAT_SAT_Formulation import CAGPSolverCPSAT as CAGPSolverCPSAT_S
 import solver_utils
 from GreedyCAGP import get_greedy_solution
 
-benchmark = Benchmark("/home/yanyan/PythonProjects/CAGP-Solver/cagp_solver/mini_benchmark_CPSAT_with_holes_final")
+benchmark = Benchmark("/home/yanyan/PythonProjects/CAGP-Solver/cagp_solver/mini_benchmark_CPSAT_with_holes")
 
 alg_params_to_evaluate = [
     {"model": "CPSAT_MIP", "guard_color_constraints": True},

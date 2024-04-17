@@ -1,9 +1,5 @@
 from collections import Counter
-from colorama import init
 import gurobipy as grb
-import rustworkx as rx
-from pyvispoly import Point, PolygonWithHoles, Arrangement, Arr_PointLocation, plot_polygon
-import matplotlib.pyplot as plt
 
 # This version of the solver takes in a precomputed visibility and covering graph to create its constraints
 # New witnesses are added whenever an optimal solution is found
@@ -15,7 +11,6 @@ class CFCAGPSolverMIP:
         self.witness_to_guards = witness_to_guards
         self.initial_witnesses = initial_witnesses
         self.all_witnesses = all_witnesses
-        self.M = len(self.guard_to_witnesses)
         self.model = grb.Model()
         # self.model.Params.MemLimit = 16
 
@@ -54,15 +49,17 @@ class CFCAGPSolverMIP:
     def __add_color_constraints(self):
         for color in range(self.K):
             # Ensure that a color is only used if there is a guard of that color
+            M = len(self.guard_to_witnesses)	
             self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.guard_to_witnesses.keys()) >= self.color_vars[color])
-            self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.guard_to_witnesses.keys()) <= self.M * self.color_vars[color])
+            self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.guard_to_witnesses.keys()) <= M * self.color_vars[color])
 
     def __add_unique_color_constraints(self):
         for witness in self.initial_witnesses:
             for color in range(self.K):
                 # If a witness_color_var is true, there is exactly one guard of that color
+                M = len(self.witness_to_guards[witness])
                 self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.witness_to_guards[witness]) >= self.witness_color_vars[witness, color])
-                self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.witness_to_guards[witness]) <= 1 + self.M * (1 - self.witness_color_vars[witness, color]))
+                self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.witness_to_guards[witness]) <= 1 + M * (1 - self.witness_color_vars[witness, color]))
                 
             # Ensure that each witness is covered by at least one guard with a unique color
             self.model.addConstr(sum(self.witness_color_vars[witness, color] for color in range(self.K)) >= 1)

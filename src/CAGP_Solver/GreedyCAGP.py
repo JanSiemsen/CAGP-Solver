@@ -1,9 +1,9 @@
 import rustworkx as rx
 from ISSolverMIP import ISSolverMIP
 
-def get_greedy_solution(guard_to_witnesses: dict[int, set[int]], initial_witnesses: list[int], G: rx.PyGraph) -> tuple[int, set[(int, int)]]:
+def get_greedy_solution(guard_to_witnesses: dict[int, set[int]], all_witnesses: list[int], G: rx.PyGraph) -> tuple[int, set[(int, int)]]:
     solution = set()
-    uncovered = set(initial_witnesses)
+    uncovered = set(all_witnesses)
     size = 0
     while uncovered:
         weights = [(g_id, len(witnesses & uncovered)) for g_id, witnesses in guard_to_witnesses.items()]

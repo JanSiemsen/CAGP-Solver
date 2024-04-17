@@ -1,7 +1,6 @@
 from functools import partial
 from itertools import combinations
-import re
-from pyvispoly import Point, PolygonWithHoles, VisibilityPolygonCalculator, AVP_Arrangement
+from pyvispoly_modified import Point, PolygonWithHoles, VisibilityPolygonCalculator, AVP_Arrangement
 import rustworkx as rx
 from heapq import heappop, heappush
 from collections import defaultdict
@@ -148,6 +147,30 @@ def construct_clique_cover(G: rx.PyGraph, edge: tuple[int, int]) -> list[list[in
 
     return edge_clique_cover
 
+def build_clique(e: tuple[int, int], G: rx.PyGraph) -> list[int]:
+    clique = [e[0], e[1]]
+    candidates = set(G.neighbors(e[0])) & set(G.neighbors(e[1]))
+    while len(candidates) > 0:
+        v = max(candidates, key=lambda v: sum(1 for u in G.neighbors(v) if u not in clique))
+        candidates &= set(G.neighbors(v))
+        clique.append(v)
+    return clique
+
+# This function verifies if all the set of guards with the same color have no edge between them
+def verify_solver_solution(solution: list[(str, int)], G: rx.PyGraph) -> bool:
+
+    # Group the guards by color
+    color_groups = defaultdict(list)
+    for vertex, color in solution:
+        color_groups[color].append(vertex)
+
+    # Check if the induced subgraph for each color group has no edges
+    for color, vertices in color_groups.items():
+        subgraph = G.subgraph(vertices)
+        if len(subgraph.edge_indices()) > 0:
+            return False
+
+    return True
 
 # def generate_edge_clique_covers(G: rx.PyGraph, K: int) -> list[list[list[int]]]:
 #     edge_clique_covers = []
@@ -209,29 +232,3 @@ def construct_clique_cover(G: rx.PyGraph, edge: tuple[int, int]) -> list[list[in
 
 #         edge_clique_covers.append(edge_clique_cover)
 #     return edge_clique_covers
-    
-def build_clique(e: tuple[int, int], G: rx.PyGraph) -> list[int]:
-    clique = [e[0], e[1]]
-    candidates = set(G.neighbors(e[0])) & set(G.neighbors(e[1]))
-    while len(candidates) > 0:
-        v = candidates.pop()
-        if all(v in G.neighbors(u) for u in clique):
-            candidates &= set(G.neighbors(v))
-            clique.append(v)
-    return clique
-
-# This function verifies if all the set of guards with the same color have no edge between them
-def verify_solver_solution(solution: list[(str, int)], G: rx.PyGraph) -> bool:
-
-    # Group the guards by color
-    color_groups = defaultdict(list)
-    for vertex, color in solution:
-        color_groups[color].append(vertex)
-
-    # Check if the induced subgraph for each color group has no edges
-    for color, vertices in color_groups.items():
-        subgraph = G.subgraph(vertices)
-        if len(subgraph.edge_indices()) > 0:
-            return False
-
-    return True
