@@ -234,14 +234,14 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 \REQUIRE $G, edge$
 \STATE $uncovered\_graph\gets G$
 \STATE $clique\gets$ Build Clique with $G, edge$
-\STATE Remove edges from $uncovered\_graph$ that are in $clique$
 \STATE $edge\_clique\_cover\gets \{clique\}$
+\STATE Remove edges from $uncovered\_graph$ that are in $clique$
 \STATE $edge\_queue\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
 \WHILE{$uncovered\_graph$ has edges}
     \STATE $edge\gets$ pop edge with highest priority from $edge\_queue$
     \STATE $clique\gets$ Build Clique with $G, edge$
-    \STATE Remove edges from $uncovered\_graph$ that are in $clique$
     \STATE $edge\_clique\_cover\gets edge\_clique\_cover\cup {clique}$
+    \STATE Remove edges from $uncovered\_graph$ that consist of vertices in $clique$
     \STATE Update priorities of edges in $edge\_queue$
 \ENDWHILE
 \RETURN $edge\_clique\_cover$
@@ -251,8 +251,9 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 \begin{algorithm}
 \caption{Build Clique}
 \begin{algorithmic}[1]
-\REQUIRE G, edge
-\STATE Initialize clique with vertices of e
+\REQUIRE $G, edge$
+\STATE $(u, v)\gets edge$
+\STATE $clique\gets \{u, v\}$
 \STATE Initialize candidates with neighbors of vertices of e
 \WHILE{candidates is not empty}
     \STATE Pop a vertex from candidates and assign to v
