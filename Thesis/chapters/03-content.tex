@@ -238,12 +238,11 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 \STATE $edge\_clique\_cover\gets \{clique\}$
 \STATE $edge\_queue\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
 \WHILE{$uncovered\_graph$ has edges}
-    \STATE Get edge with highest priority from edge\_queue
+    \STATE $edge\gets$ pop edge with highest priority from $edge\_queue$
     \STATE $clique\gets$ Build Clique with $G, edge$
-    \STATE Remove edges from uncovered\_graph that are in clique
+    \STATE Remove edges from $uncovered\_graph$ that are in $clique$
     \STATE $edge\_clique\_cover\gets edge\_clique\_cover\cup {clique}$
-    \STATE Mark removed edges as REMOVED in edge\_queue and keep track of affected edges
-    \STATE Update degrees in edge\_queue for affected edges
+    \STATE Update priorities of edges in $edge\_queue$
 \ENDWHILE
 \RETURN $edge\_clique\_cover$
 \end{algorithmic}
