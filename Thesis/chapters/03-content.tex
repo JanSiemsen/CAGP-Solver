@@ -254,12 +254,12 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 \REQUIRE $G, edge$
 \STATE $(u, v)\gets edge$
 \STATE $clique\gets \{u, v\}$
-\STATE Initialize candidates with neighbors of vertices of e
-\WHILE{candidates is not empty}
-    \STATE Pop a vertex from candidates and assign to v
+\STATE $candidates\gets N(u)\cup N(v)$
+\WHILE{$candidates$ is not empty}
+    \STATE $v\gets$ pop a vertex from candidates
     \IF{v is a neighbor of all vertices in clique}
-        \STATE Update candidates with neighbors of v
-        \STATE Add v to clique
+        \STATE $candidates\gets candidates\cup N(v)$
+        \STATE $clique\gets clique\cup {v}$
     \ENDIF
 \ENDWHILE
 \RETURN clique
