@@ -210,11 +210,11 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 \REQUIRE $G, K$
 \STATE Initialize empty lists: $matching, edge\_clique\_covers$
 \STATE Initialize empty set: $covered\_vertices$
-\STATE $sorted_edges\gets$ edges in G sorted by the sum of degrees of their vertices
+\STATE $sorted_edges\gets$ edges in G sorted by the sum of degrees of their vertices as an iterator
 \FOR{$i=0$ \TO $K$}
-    \STATE Get next edge from sorted edges
-    \WHILE{either vertex of edge is in covered\_vertices}
-        \STATE Get next edge from sorted edges
+    \STATE $(u, v)\gets$ next element of $sorted_edges$
+    \WHILE{${u, v}\cap covered\_vertices$}
+        \STATE $(u, v)\gets$ next element of $sorted_edges$
     \ENDWHILE
     \STATE Add edge to matching
     \STATE Add vertices of edge to covered\_vertices
