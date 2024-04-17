@@ -1,6 +1,6 @@
 \chapter{Theoretical Shenanigans}
 
-\begin{theorem}[Couto et al.\cite{couto2011exact}]
+\begin{theorem}[Couto et al.\cite{couto2011exact}]\label{thm:shadow_coverage}
 When given a polygon $P$ and a guard set $G$, a subset $G_{sub}$ of $G$ fully covers $P$ if and only if it covers all witnesses in the shadow witness set $W$ of $G$.
 \end{theorem}
 \begin{proof}
@@ -50,7 +50,7 @@ The MIP formulation of the problem introduces binary variables for every guard c
 \section{SAT Formulation}
 
 \begin{align}
-\label{eq_SAT:f.0}&\lnot x_{uk} \lor \lnot x_{vk} & \forall (u,v)\in E_{G}, \forall k\in \{1,...,K\}\\
+\label{eq_SAT:f.0}&\lnot x_{uk} \lor \lnot x_{vk} & \forall (u,v)\in E_{G_{vis}}, \forall k\in \{1,...,K\}\\
 \label{eq_SAT:f.1}&\bigvee_{g\in N(w), k\in \{1,...,K\}}x_{gk} & \forall w\in W\\
 \label{eq_SAT:f.2}&\bigwedge_{1 \leq i < j \leq K} (\lnot x_{gi} \lor \lnot x_{gj}) & \forall g\in G\\
 \label{eq:_SATf.3}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,...,K\}
@@ -126,8 +126,8 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
 \caption{Calculate witness sets and light guard sets}\label{alg:AVP_processing}
 \begin{algorithmic}[1]
 \REQUIRE $faces$ of the AVP arrangement
-\STATE Initialize empty maps:\\ $witness\_to\_guards,\linebreak guard\_to\_witnesses,\linebreak all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
-\STATE Initialize empty list:\\ $light\_guard\_sets$
+\STATE Initialize empty maps: $witness\_to\_guards, guard\_to\_witnesses, all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
+\STATE Initialize empty list: $light\_guard\_sets$
 \STATE $shadow\_index\gets 0$
 \STATE $all\_index\gets 0$
 \FORALL{$face$ in $faces$}
@@ -165,36 +165,48 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
         \STATE $light\_guard\_sets.insert(g\_data)$
     \ENDIF
 \ENDFOR
-\RETURN\linebreak $witness\_to\_guards,\linebreak guard\_to\_witnesses,\linebreak light\_guard\_sets,\linebreak all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
+\RETURN $witness\_to\_guards, guard\_to\_witnesses, light\_guard\_sets, all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
 \end{algorithmic}
 \end{algorithm}
 
 \section{Initial Upper Bound}
-Calculating a low initial upper bound is vital for efficiently solving the CAGP and CCAGP, as the possible number of colors K directly affects the size of the problem formulation. To achieve this, we implement the approach presented by de Souza et al. \cite{zambon2014exact}, for which K was on average only 1.7 larger than the number of colors used by the optimal solution. 
+Calculating a low initial upper bound is vital for efficiently solving the CAGP and CCAGP, as the possible number of colors K directly affects the size of the problem formulation. To achieve this, we implement the approach presented by de Souza et al. \cite{zambon2014exact}, for which K was on average only 1.7 larger than the number of colors used by the optimal solution (\cref{alg:greedy}). In the approach, we calculate weighted independent guard sets in $G_{vis}$ for as long as there are uncovered witnesses left and assign each independent guard set a different color. The weight of each guard is determined by the number of witnesses that the guard covers in the uncovered witnesses. To solve the weighted independent set formulation, we use a MIP solver.
 
 \begin{algorithm}
-\caption{Greedy Solution}
+\caption{Greedy Algorithm}\label{alg:greedy}
 \begin{algorithmic}[1]
-\REQUIRE $guard\_to\_witnesses, initial\_witnesses, G_{vis}$
+\REQUIRE $guard\_to\_witnesses, all\_witnesses, G_{vis}$
 \STATE Initialize empty set: $solution$
-\STATE $uncovered\gets initial\_witnesses$
-\STATE $size\gets 0$
+\STATE $uncovered\gets all\_witnesses$
+\STATE $color\gets 0$
 \WHILE{$uncovered$ is not empty}
-    \STATE Initialize weights with pair (g\_id, size of intersection of witnesses and uncovered) for each g\_id, witnesses in guard\_to\_witnesses
-    \STATE Initialize solver with weights and G
-    \STATE Solve the solver and get independent\_set
-    \FORALL{guard in independent\_set}
-        \STATE Add pair (guard, size) to solution
-        \STATE Remove guard\_to\_witnesses[guard] from uncovered
+    \STATE Initialize empty list: $weights$
+    \FORALL{$(guard, witnesses)$ in $guard\_to\_witnesses$}
+        \STATE $weights.insert((guard, |witnesses\cap uncovered|))$
     \ENDFOR
-    \STATE Increment size
+    \STATE $solver\gets WIS\_Solver(weights, G_{vis})$
+    \STATE $independent\_set\gets solver.solve()$
+    \FORALL{$guard$ in $independent\_set$}
+        \STATE $solution\gets solution\cup (guard, color)$
+        \STATE $uncovered\gets uncovered\setminus guard\_to\_witnesses[guard]$
+    \ENDFOR 
+    \STATE $color\gets color + 1$
 \ENDWHILE
-\RETURN size, solution
+\RETURN $color, solution$
 \end{algorithmic}
 \end{algorithm}
 
+\begin{align}
+\label{eq_MIP:f.0} \mbox{maximize}~& \;\sum_{(g, w)\in weights} x_{g}\cdot w& \\
+\label{eq_MIP:f.1} \mbox{s.t. } &x_{u} + x_{v} <= 1 & \forall (u,v) \in E_{G_{vis}}\\
+\label{eq_MIP:f.6}& x_{g} \in \{0,1\} & \forall g\in G
+\end{align}
+
 \section{Edge Clique Covers}
 
+
 \section{Lazy Constraints}
+For the CAGP, we can restrict ourselves to the shadow witness set to check for full coverage of the polygon. But as the number of shadow witnesses can still be quite large ($O(n^2)$), we initially limit ourselves to the $|G|$ many smallest shadow witnesses within the partial order. In the case of the MIP solver, we can add possible missing witnesses early, whenever we find an integral feasible solution, by checking whether the corresponding witnesses of the guards of the current solution fully contain all shadow witnesses, as MIP solvers allow for the use of lazy constraints. For the SAT solver, we add possible missing witnesses, whenever we find an optimal solution for the current witness set. More on the SAT procedure can be found in the section SAT color optimization. As for the CPSAT solver, we implement both the MIP and the SAT procedure, except that CPSAT does not allow for lazy constraints. So instead, for the MIP formulation, we solve for an optimal solution, and in the case that witnesses are missing we add them and solve again. As more witnesses can only increase the optimal objective value, we can stop the search early as soon as we encounter an integral feasible solution that is equal to the previously optimal objective value.\\
+For the CCAGP, according to \cref{thm:conflict-free_witnesses}, we cannot limit ourselves to either shadow or light witnesses. So instead, we have to check for all witnesses (one witness per AVP in the AVP arrangement). We will compare using the $|G|$ smallest, and largest and using all witnesses against each other. As for adding new witnesses, we proceed the same as for the CAGP, except that we cannot use lazy constraints for the MIP solver, because new witnesses add new unique color witness variables that cannot be added lazily. Thus, we use the same procedure as the CPSAT solver.
 
 \section{SAT color optimization}
