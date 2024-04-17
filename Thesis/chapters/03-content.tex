@@ -256,11 +256,9 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 \STATE $clique\gets \{u, v\}$
 \STATE $candidates\gets N(u)\cup N(v)$
 \WHILE{$candidates$ is not empty}
-    \STATE $v\gets$ pop a vertex from candidates
-    \IF{v is a neighbor of all vertices in clique}
-        \STATE $candidates\gets candidates\cup N(v)$
-        \STATE $clique\gets clique\cup {v}$
-    \ENDIF
+    \STATE $v\gets$ vertex from $candidates$ with the highest degree
+    \STATE $candidates\gets candidates\cup N(v)$
+    \STATE $clique\gets clique\cup {v}$
 \ENDWHILE
 \RETURN clique
 \end{algorithmic}
