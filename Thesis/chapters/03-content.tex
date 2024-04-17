@@ -162,7 +162,7 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
         \STATE $shadow\_index\gets shadow\_index + 1$
     \ENDIF
     \IF{$is\_light$}
-        \STATE $light\_guard\_sets.insert(g\_data)$
+        \STATE $light\_guard\_sets.append(g\_data)$
     \ENDIF
 \ENDFOR
 \RETURN $witness\_to\_guards, guard\_to\_witnesses, light\_guard\_sets, all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
@@ -187,7 +187,7 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
     \STATE $solver\gets WIS\_Solver(weights, G_{vis})$
     \STATE $independent\_set\gets solver.solve()$
     \FORALL{$guard$ in $independent\_set$}
-        \STATE $solution\gets solution\cup (guard, color)$
+        \STATE $solution\gets solution\cup \{(guard, color)\}$
         \STATE $uncovered\gets uncovered\setminus guard\_to\_witnesses[guard]$
     \ENDFOR 
     \STATE $color\gets color + 1$
@@ -216,13 +216,15 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
     \WHILE{${u, v}\cap covered\_vertices$}
         \STATE $(u, v)\gets$ next element of $sorted_edges$
     \ENDWHILE
-    \STATE Add edge to matching
-    \STATE Add vertices of edge to covered\_vertices
+    \STATE $edge\gets (u, v)$
+    \STATE $matching.append(edge)$
+    \STATE $covered_vertices\gets $
 \ENDFOR
+\FORALL{$edge$ in }
 \STATE Initialize Pool p
 \STATE Define function func as construct\_clique\_cover with G as argument
 \STATE Map func over matching[:K] with p and assign to edge\_clique\_covers
-\RETURN edge\_clique\_covers
+\RETURN $edge\_clique\_covers$
 \end{algorithmic}
 \end{algorithm}
 
