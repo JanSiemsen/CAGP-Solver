@@ -207,12 +207,12 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 \begin{algorithm}
 \caption{Generate Edge Clique Covers}
 \begin{algorithmic}[1]
-\REQUIRE G, K
+\REQUIRE $G, K$
 \STATE Initialize empty list: $edge\_clique\_covers$
 \STATE Sort edges in G by sum of degrees of their vertices
 \STATE Initialize empty list: $matching$
 \STATE Initialize empty set: $covered\_vertices$
-\FOR{$i$ in range(K)}
+\FOR{$i=0$ \TO $K$}
     \STATE Get next edge from sorted edges
     \WHILE{either vertex of edge is in covered\_vertices}
         \STATE Get next edge from sorted edges
