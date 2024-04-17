@@ -204,6 +204,70 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 
 \section{Edge Clique Covers}
 
+\begin{algorithm}
+\caption{Generate Edge Clique Covers}
+\begin{algorithmic}[1]
+\REQUIRE G, K
+\STATE Initialize empty list: edge\_clique\_covers
+\STATE Sort edges in G by sum of degrees of their vertices
+\STATE Initialize empty list: matching
+\STATE Initialize empty set: covered\_vertices
+\FOR{i in range(K)}
+    \STATE Get next edge from sorted edges
+    \WHILE{either vertex of edge is in covered\_vertices}
+        \STATE Get next edge from sorted edges
+    \ENDWHILE
+    \STATE Add edge to matching
+    \STATE Add vertices of edge to covered\_vertices
+\ENDFOR
+\STATE Initialize Pool p
+\STATE Define function func as construct\_clique\_cover with G as argument
+\STATE Map func over matching[:K] with p and assign to edge\_clique\_covers
+\RETURN edge\_clique\_covers
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Construct Clique Cover}
+\begin{algorithmic}[1]
+\REQUIRE G, edge
+\STATE Copy G to uncovered\_graph
+\STATE Build clique from edge and G and assign to clique
+\STATE Remove edges from uncovered\_graph that are in clique
+\STATE Initialize edge\_clique\_cover with clique
+\STATE Initialize edge\_map with edges in uncovered\_graph and their negative sum of degrees
+\STATE Initialize empty list: edge\_queue
+\FOR{each e in edge\_map}
+    \STATE Push e to edge\_queue
+\ENDWHILE
+\WHILE{uncovered\_graph has edges}
+    \STATE Get edge with highest priority from edge\_queue
+    \STATE Build clique from edge and uncovered\_graph and assign to clique
+    \STATE Remove edges from uncovered\_graph that are in clique
+    \STATE Add clique to edge\_clique\_cover
+    \STATE Mark removed edges as REMOVED in edge\_queue and keep track of affected edges
+    \STATE Update degrees in edge\_queue for affected edges
+\ENDWHILE
+\RETURN edge\_clique\_cover
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Build Clique}
+\begin{algorithmic}[1]
+\REQUIRE e, G
+\STATE Initialize clique with vertices of e
+\STATE Initialize candidates with neighbors of vertices of e
+\WHILE{candidates is not empty}
+    \STATE Pop a vertex from candidates and assign to v
+    \IF{v is a neighbor of all vertices in clique}
+        \STATE Update candidates with neighbors of v
+        \STATE Add v to clique
+    \ENDIF
+\ENDWHILE
+\RETURN clique
+\end{algorithmic}
+\end{algorithm}
 
 \section{Lazy Constraints}
 For the CAGP, we can restrict ourselves to the shadow witness set to check for full coverage of the polygon. But as the number of shadow witnesses can still be quite large ($O(n^2)$), we initially limit ourselves to the $|G|$ many smallest shadow witnesses within the partial order. In the case of the MIP solver, we can add possible missing witnesses early, whenever we find an integral feasible solution, by checking whether the corresponding witnesses of the guards of the current solution fully contain all shadow witnesses, as MIP solvers allow for the use of lazy constraints. For the SAT solver, we add possible missing witnesses, whenever we find an optimal solution for the current witness set. More on the SAT procedure can be found in the section SAT color optimization. As for the CPSAT solver, we implement both the MIP and the SAT procedure, except that CPSAT does not allow for lazy constraints. So instead, for the MIP formulation, we solve for an optimal solution, and in the case that witnesses are missing we add them and solve again. As more witnesses can only increase the optimal objective value, we can stop the search early as soon as we encounter an integral feasible solution that is equal to the previously optimal objective value.\\
