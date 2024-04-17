@@ -213,14 +213,14 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 \STATE $sorted\_edges\gets$ edges in G sorted by the sum of degrees of their vertices as an iterator
 \FOR{$i=0$ \TO $K$}
     \STATE $(u, v)\gets$ next element of $sorted\_edges$
-    \WHILE{${u, v}\cap covered\_vertices$}
+    \WHILE{$\{u, v\}\cap covered\_vertices$ is not empty}
         \STATE $(u, v)\gets$ next element of $sorted\_edges$
     \ENDWHILE
     \STATE $edge\gets (u, v)$
     \STATE $matching.append(edge)$
     \STATE $covered\_vertices\gets covered\_vertices\cup \{u, v\}$
 \ENDFOR
-\FORALL{$edge$ in matching}
+\FORALL{$edge$ in $matching$}
     \STATE $clique\_cover\gets$ Construct Clique Cover with $G, edge$
     \STATE $edge\_clique\_covers.append(clique\_cover)$
 \ENDFOR
@@ -231,32 +231,32 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 \begin{algorithm}
 \caption{Construct Clique Cover}
 \begin{algorithmic}[1]
-\REQUIRE G, edge
-\STATE Copy G to uncovered\_graph
-\STATE Build clique from edge and G and assign to clique
-\STATE Remove edges from uncovered\_graph that are in clique
-\STATE Initialize edge\_clique\_cover with clique
+\REQUIRE $G, edge$
+\STATE $uncovered\_graph\gets G$
+\STATE $clique\gets$ Build Clique with $G, edge$
+\STATE Remove edges from $uncovered\_graph$ that are in $clique$
+\STATE $edge\_clique\_cover\gets \{clique\}$
 \STATE Initialize edge\_map with edges in uncovered\_graph and their negative sum of degrees
 \STATE Initialize empty list: edge\_queue
 \FOR{each e in edge\_map}
     \STATE Push e to edge\_queue
-\ENDWHILE
+\ENDFOR
 \WHILE{uncovered\_graph has edges}
     \STATE Get edge with highest priority from edge\_queue
     \STATE Build clique from edge and uncovered\_graph and assign to clique
     \STATE Remove edges from uncovered\_graph that are in clique
-    \STATE Add clique to edge\_clique\_cover
+    \STATE $edge\_clique\_cover\gets edge\_clique\_cover\cup {clique}$
     \STATE Mark removed edges as REMOVED in edge\_queue and keep track of affected edges
     \STATE Update degrees in edge\_queue for affected edges
 \ENDWHILE
-\RETURN edge\_clique\_cover
+\RETURN $edge\_clique\_cover$
 \end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}
 \caption{Build Clique}
 \begin{algorithmic}[1]
-\REQUIRE e, G
+\REQUIRE G, edge
 \STATE Initialize clique with vertices of e
 \STATE Initialize candidates with neighbors of vertices of e
 \WHILE{candidates is not empty}
