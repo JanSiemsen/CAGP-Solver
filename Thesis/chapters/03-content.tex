@@ -236,7 +236,7 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 \STATE $clique\gets$ Build Clique with $G, edge$
 \STATE Remove edges from $uncovered\_graph$ that are in $clique$
 \STATE $edge\_clique\_cover\gets \{clique\}$
-\STATE Initialize edge\_map with edges in uncovered\_graph and their negative sum of degrees
+\STATE Initialize $edge\_map$ with edges in uncovered\_graph and their negative sum of degrees
 \STATE Initialize empty list: edge\_queue
 \FOR{each e in edge\_map}
     \STATE Push e to edge\_queue
