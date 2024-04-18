@@ -205,7 +205,7 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 \section{Edge Clique Covers}
 
 In this section, we take a look at how to generate the edge clique covers used by the MIP formulation. The algorithm is the one presented by de Souza et. al.\cite{zambon2014exact}. The reason for us using edge clique cover constraints instead of edge constraints for the MIP formulation is that they can significantly reduce the number of constraints, result in a tighter LP relaxation, which can lead to a smaller branch-and-bound search tree, and they better represent the graph structure, which can further speed up the solving process. On the other hand, SAT solvers are very efficient at solving large amounts of small clauses. That is why create clauses for every edge instead of using the edge clique covers. 
-As for the algorithm, we generate K-many different edge clique covers, K being the number of colors used by the greedy solution. By using different edge clique covers for each color, we further reduce the symmetry of the formulation. We start by finding a matching consisting of K edges with the smallest sum of degrees of their vertices. From each edge in the matching, we construct a clique cover. 
+As for the algorithm, we generate K-many different edge clique covers, K being the number of colors used by the greedy solution. By using different edge clique covers for each color, we further reduce the symmetry of the formulation. We start by finding a matching consisting of K edges with the smallest sum of degrees of their vertices. From each edge in the matching, we construct a clique cover as follows. We build a clique starting from our matching edge and remove all edges used from the graph. Then we take the next edge with the lowest sum of degrees of its vertices and build another clique. We repeat this process until the graph is empty, meaning we covered all edges with cliques. When building the cliques, we always choose the vertex with the highest degree from the set of candidate vertices. Lastly, notice that we generate all edge clique covers independently. Thus, we can easily parallelize this process by using multiprocessing to speed up the generation.
 
 \begin{algorithm}
 \caption{Generate Edge Clique Covers}
@@ -215,7 +215,7 @@ As for the algorithm, we generate K-many different edge clique covers, K being t
 \STATE Initialize empty set: $covered\_vertices$
 \STATE $edge\_queue\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
 \FOR{$i=0$ \TO $K$}
-    \STATE $(u, v)\gets$ 
+    \STATE $(u, v)\gets$ pop edge with highest priority from $edge\_queue$
     \WHILE{$\{u, v\}\cap covered\_vertices$ is not empty}
         \STATE $(u, v)\gets$ pop edge with highest priority from $edge\_queue$
     \ENDWHILE
