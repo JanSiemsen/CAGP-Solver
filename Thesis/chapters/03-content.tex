@@ -204,7 +204,8 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 
 \section{Edge Clique Covers}
 
-As 
+In this section, we take a look at how to generate the edge clique covers used by the MIP formulation. The algorithm is the one presented by de Souza et. al.\cite{zambon2014exact}. The reason for us using edge clique cover constraints instead of edge constraints for the MIP formulation is that they can significantly reduce the number of constraints, result in a tighter LP relaxation, which can lead to a smaller branch-and-bound search tree, and they better represent the graph structure, which can further speed up the solving process. On the other hand, SAT solvers are very efficient at solving large amounts of small clauses. That is why create clauses for every edge instead of using the edge clique covers. 
+As for the algorithm, we generate K-many different edge clique covers, K being the number of colors used by the greedy solution. By using different edge clique covers for each color, we further reduce the symmetry of the formulation. We start by finding a matching consisting of K edges with the smallest sum of degrees of their vertices. From each edge in the matching, we construct a clique cover. 
 
 \begin{algorithm}
 \caption{Generate Edge Clique Covers}
