@@ -296,7 +296,7 @@ As mentioned in the SAT formulation section, when solving SAT problems, we check
     \State $upper \gets K$
     \State $optimal\_solution \gets None$
     \While{$lower < upper$}
-        \State $mid \gets \floor{(lower + upper) / 2}$
+        \State $mid \gets \lfloor(lower + upper) / 2\rfloor$
         \State $solution \gets SATSolver.solve(deactivate\_guards(mid))$
         \If{$solution$}
             \State $optimal\_solution \gets solution$
