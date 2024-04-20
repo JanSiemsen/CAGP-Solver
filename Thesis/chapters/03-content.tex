@@ -166,6 +166,7 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
     \EndIf
 \EndFor
 \Return $witness\_to\_guards, guard\_to\_witnesses, light\_guard\_sets, all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
@@ -182,7 +183,7 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 \While{$uncovered$ is not empty}
     \State Initialize empty list: $weights$
     \For{$(guard, witnesses)$ in $guard\_to\_witnesses$}
-        \State $weights.insert((guard, |witnesses\cap uncovered|))$
+        \State $weights.append((guard, |witnesses\cap uncovered|))$
     \EndFor
     \State $solver\gets WIS\_Solver(weights, G_{vis})$
     \State $independent\_set\gets solver.solve()$
@@ -193,6 +194,7 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
     \State $color\gets color + 1$
 \EndWhile
 \Return $color, solution$
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
@@ -214,7 +216,7 @@ As for the algorithm, we generate K-many different edge clique covers, K being t
 \State Initialize empty lists: $matching, edge\_clique\_covers$
 \State Initialize empty set: $covered\_vertices$
 \State $edge\_queue\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
-\For{$i=0$ \TO $K$}
+\For{$i=0$, $i{+}{+}$, $K$}
     \State $(u, v)\gets$ pop edge with highest priority from $edge\_queue$
     \While{$\{u, v\}\cap covered\_vertices$ is not empty}
         \State $(u, v)\gets$ pop edge with highest priority from $edge\_queue$
@@ -268,23 +270,23 @@ As mentioned in the SAT formulation section, when solving SAT problems, we check
 \begin{algorithm}
 \caption{SAT color optimization}\label{alg:SAT_color_opt}
 \begin{algorithmic}[1]
-\Procedure{solve}{$color\_lim$}
+\Procedure{solve}{$K$, $SATSolver$}
     \State $color\_lim, solution \gets binary\_search()$
-    \State $missing\_witnesses \gets \_\_check\_coverage(solution)$
+    \State $missing\_witnesses \gets check\_coverage(solution)$
     \While{$missing\_witnesses$}
         \For{$witness$ in $missing\_witnesses$}
-            \State $subset \gets []$
+            \State $subset \gets \{\}$
             \For{$guard$ in $witness\_to\_guards[witness]$}
                 \For{$k$ in range($K$)}
-                    \State $subset.append((guard, k))$
+                    \State $subset\gets subset\cup \{(guard, k)\}$
                 \EndFor
             \EndFor
             \State $solver.add\_clause([guard\_to\_var[guard][color] \text{ for } (guard, color) \text{ in } subset])$
         \EndFor
         \State $color\_lim, solution \gets linear\_ascent(color\_lim)$
-        \State $missing\_witnesses \gets \_\_check\_coverage(solution)$
+        \State $missing\_witnesses \gets check\_coverage(solution)$
     \EndWhile
-    \State $solution \gets [seen.setdefault(g[0], g) \text{ for } g \text{ in } solution \text{ if } g[0] \text{ not in } seen]$
+    \State $solution \gets$ for every guard in $solution$ take the first guard color combination
     \State \Return $color\_lim, solution$
 \EndProcedure
 \Procedure{binary\_search}{}
@@ -293,7 +295,7 @@ As mentioned in the SAT formulation section, when solving SAT problems, we check
     \State $optimal\_solution \gets None$
     \While{$lower < upper$}
         \State $mid \gets (lower + upper) // 2$
-        \State $solution \gets \_\_solve(assumptions=\_\_deactivate\_guards(mid))$
+        \State $solution \gets SATSolver.solve(assumptions=deactivate\_guards(mid))$
         \If{$solution$}
             \State $optimal\_solution \gets solution$
             \State $upper \gets mid$
@@ -302,15 +304,15 @@ As mentioned in the SAT formulation section, when solving SAT problems, we check
         \EndIf
     \EndWhile
     \If{not $optimal\_solution$}
-        \State $optimal\_solution \gets \_\_solve(assumptions=\_\_deactivate\_guards(upper))$
+        \State $optimal\_solution \gets SATSolver.solve(assumptions=deactivate\_guards(upper))$
     \EndIf
     \State \Return $lower, optimal\_solution$
 \EndProcedure
 \Procedure{linear\_ascent}{$color\_lim$}
-    \State $solution \gets \_\_solve(assumptions=\_\_deactivate\_guards(color\_lim))$
+    \State $solution \gets SATSolver.solve(assumptions=deactivate\_guards(color\_lim))$
     \While{not $solution$ and $color\_lim <= K$}
         \State $color\_lim \gets color\_lim + 1$
-        \State $solution \gets \_\_solve(assumptions=\_\_deactivate\_guards(color\_lim))$
+        \State $solution \gets SATSolver.solve(assumptions=deactivate\_guards(color\_lim))$
     \EndWhile
     \State \Return $color\_lim, solution$
 \EndProcedure
