@@ -83,7 +83,7 @@ In the following sections, we introduce a MIP, a SAT, and a CPSAT formulation of
 \label{eq_MIP_cf:f.12}& c_{k}\in \{0,1\} & \forall k\in \{1,...,K\}
 \end{align}
 
-The MIP formulation for the CCAGP is similar to the one of the CAGP. We are still trying to minimize the number of colors \cref{eq_MIP_cf:f.0} and keep the same variables \cref{eq_MIP_cf:f.11} for colors and \cref{eq_MIP_cf:f.12} for guard color combinations. Additionally, we add auxiliary variables \cref{eq_MIP_cf:f.10}, called unique color witness variables, for all witness color combinations. They are true whenever there exists exactly one guard with that color in the neighborhood of that witness. To ensure that the color variables are true if and only if a guard variable of that color is true, we add the constraints in \cref{eq_MIP_cf:f.1} and \cref{eq_MIP_cf:f.2}. The constraints \cref{eq_MIP_cf:f.3} and \cref{eq_MIP_cf:f.4} ensure that if a unique color witness variable is true, exactly one guard in the neighborhood of that witness has that color. Otherwise, there can be arbitrarily many guards of that color in the neighborhood. Lastly, we keep the guard coloring constraints \cref{eq_MIP_cf:f.6} and symmetry breaker constraints \cref{eq_MIP_cf:f.7} and \cref{eq_MIP_cf:f.8} of the CAGP MIP Formulation.
+The MIP formulation for the CFCAGP is similar to the one of the CAGP. We are still trying to minimize the number of colors \cref{eq_MIP_cf:f.0} and keep the same variables \cref{eq_MIP_cf:f.11} for colors and \cref{eq_MIP_cf:f.12} for guard color combinations. Additionally, we add auxiliary variables \cref{eq_MIP_cf:f.10}, called unique color witness variables, for all witness color combinations. They are true whenever there exists exactly one guard with that color in the neighborhood of that witness. To ensure that the color variables are true if and only if a guard variable of that color is true, we add the constraints in \cref{eq_MIP_cf:f.1} and \cref{eq_MIP_cf:f.2}. The constraints \cref{eq_MIP_cf:f.3} and \cref{eq_MIP_cf:f.4} ensure that if a unique color witness variable is true, exactly one guard in the neighborhood of that witness has that color. Otherwise, there can be arbitrarily many guards of that color in the neighborhood. Lastly, we keep the guard coloring constraints \cref{eq_MIP_cf:f.6} and symmetry breaker constraints \cref{eq_MIP_cf:f.7} and \cref{eq_MIP_cf:f.8} of the CAGP MIP Formulation.
 
 \section{SAT Formulation}
 
@@ -96,7 +96,7 @@ The MIP formulation for the CCAGP is similar to the one of the CAGP. We are stil
 \label{eq_SAT_cf:f.5}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,...,K\}
 \end{align}
 
-For the SAT formulation of the CCAGP, we test the feasibility of the SAT formula for a fixed K in the same fashion as for the CAGP, until we find a feasible solution with a minimal number of colors. We again omit the color variables and keep the unique color witness variables \cref{eq_SAT_cf:f.4} and guard color variables \cref{eq_SAT_cf:f.5}. The clauses \cref{eq_SAT_cf:f.0} are equivalent to the constraints in \cref{eq_MIP_cf:f.3}. For all witness color combinations, if the unique color witness variable of that color and that witness is true, at least one guard of the color in the neighborhood of that witness has to be true. The clauses \cref{eq_SAT_cf:f.1} are equivalent to the constraints in \cref{eq_MIP_cf:f.4}. For all witness color combinations, if the unique color witness variable of that color and that witness is true, no two guards in the neighborhood of that witness can have that color. As for \cref{eq_SAT_cf:f.2}, these clauses represent the constraints in \cref{eq_MIP_cf:f.5}. Lastly, the witness coloring constraints \cref{eq_SAT_cf:f.3} are modeled using the same clauses as in the CAGP SAT Formulation.
+For the SAT formulation of the CFCAGP, we test the feasibility of the SAT formula for a fixed K in the same fashion as for the CAGP, until we find a feasible solution with a minimal number of colors. We again omit the color variables and keep the unique color witness variables \cref{eq_SAT_cf:f.4} and guard color variables \cref{eq_SAT_cf:f.5}. The clauses \cref{eq_SAT_cf:f.0} are equivalent to the constraints in \cref{eq_MIP_cf:f.3}. For all witness color combinations, if the unique color witness variable of that color and that witness is true, at least one guard of the color in the neighborhood of that witness has to be true. The clauses \cref{eq_SAT_cf:f.1} are equivalent to the constraints in \cref{eq_MIP_cf:f.4}. For all witness color combinations, if the unique color witness variable of that color and that witness is true, no two guards in the neighborhood of that witness can have that color. As for \cref{eq_SAT_cf:f.2}, these clauses represent the constraints in \cref{eq_MIP_cf:f.5}. Lastly, the witness coloring constraints \cref{eq_SAT_cf:f.3} are modeled using the same clauses as in the CAGP SAT Formulation.
 
 \section{CPSAT Formulation}
 Similar to the Chromatic Art Gallery Problem, we use both the MIP and the SAT formulation for CPSAT and compare them against each other in the Experiments chapter.
@@ -107,92 +107,96 @@ Similar to the Chromatic Art Gallery Problem, we use both the MIP and the SAT fo
 The instances are given as lists of points, which represent the outer boundaries of the polygons and possible holes. First, we create a CGAL Polygon\_with\_holes\_2 using the instance input. Then, using the vertices of the polygon and its holes as the guard set $G$, we calculate the visibility regions as polygons for each guard using CGAL's "Triangular\_expansion\_visibility\_2.h" and save each guard together with its visibility polygon in a list. Afterward, we recursively overlay the visibility polygons using CGAL's "Arr\_overlay\_2.h" to obtain the AVP arrangement (\cref{alg:AVP_generation}). To be able to form the partial order over the AVPs, we overload the overlay function to save for every face a set of guards from which it was created. 
 
 \begin{algorithm}
-\caption{generate\_AVP\_recursive(guards: list[tuple[int, Polygon\_with\_holes\_2]])}\label{alg:AVP_generation}
+\caption{AVP Generation}\label{alg:AVP_generation}
 \begin{algorithmic} 
-\STATE $half\gets len(guards)/2$
-\STATE $firstHalf\gets guards[:half]$ 
-\STATE $secondHalf\gets guards[half:]$
-\IF{$len(guards) = 1$}
-    \STATE $Arrangement(guards[0][0], guards[0][1])$
-\ELSE
-    \STATE $generate\_AVP\_recursive(firstHalf).overlay(generate\_AVP\_recursive(secondHalf))$
-\ENDIF
+\Procedure{Generate AVP Recursive}{}
+\State $half\gets len(guards)/2$
+\State $firstHalf\gets guards[:half]$ 
+\State $secondHalf\gets guards[half:]$
+\If{$len(guards) = 1$}
+    \State $Arrangement(guards[0][0], guards[0][1])$
+\Else
+    \State Generate AVP Recursive($firstHal$f).overlay(Generate AVP Recursive($secondHalf$))
+\EndIf
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
-For the CAGP, we calculate the shadow witness set. As geometric operations are expensive, instead of saving the shadow witness set as a set of points, we store each witness as an integer together with the set of guards that covers the witness as well as each guard together with the set of witnesses that the guard covers. Additionally, we store a list of the set of guards for each light AVP. For the CCAGP, we calculate the witness set as well. But because of \cref{thm:conflict-free_witnesses} just using shadow or light witnesses is not sufficient, thus we use a witness for every AVP instead. To calculate all of the above, we use \cref{alg:AVP_processing}. Afterward, we can use the light guard sets to create the visibility graph $G_{vis}$ by adding edges between guards within each set (\cref{thm:light_covers}). As for the covering graph $G_{cov}$, there is no need to create the overhead of an additional graph. Instead, we can simply check the corresponding guard set of a witness, whenever we need the neighborhood of that witness in $G_{vis}$. Lastly, we can sort the witnesses by the size of their guard sets and use the $|G|$ smallest witnesses as our initial witnesses.
+For the CAGP, we calculate the shadow witness set. As geometric operations are expensive, instead of saving the shadow witness set as a set of points, we store each witness as an integer together with the set of guards that covers the witness as well as each guard together with the set of witnesses that the guard covers. Additionally, we store a list of the set of guards for each light AVP. For the CFCAGP, we calculate the witness set as well. But because of \cref{thm:conflict-free_witnesses} just using shadow or light witnesses is not sufficient, thus we use a witness for every AVP instead. To calculate all of the above, we use \cref{alg:AVP_processing}. Afterward, we can use the light guard sets to create the visibility graph $G_{vis}$ by adding edges between guards within each set (\cref{thm:light_covers}). As for the covering graph $G_{cov}$, there is no need to create the overhead of an additional graph. Instead, we can simply check the corresponding guard set of a witness, whenever we need the neighborhood of that witness in $G_{vis}$. Lastly, we can sort the witnesses by the size of their guard sets and use the $|G|$ smallest witnesses as our initial witnesses.
 
 \begin{algorithm}
 \caption{Calculate witness sets and light guard sets}\label{alg:AVP_processing}
 \begin{algorithmic}[1]
-\REQUIRE $faces$ of the AVP arrangement
-\STATE Initialize empty maps: $witness\_to\_guards, guard\_to\_witnesses, all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
-\STATE Initialize empty list: $light\_guard\_sets$
-\STATE $shadow\_index\gets 0$
-\STATE $all\_index\gets 0$
-\FORALL{$face$ in $faces$}
-    \STATE $g\_data\gets$ guard set of the $face$
-    \IF{$g\_data$ is empty}
-        \STATE Continue
-    \ENDIF
-    \STATE $is\_shadow\gets \TRUE$
-    \STATE $is\_light\gets \TRUE$
-    \FORALL{$half\_edge$ in $face$}
-        \STATE $twin\_g\_data\gets$ guard set of the twin face of the $half\_edge$
-        \IF{$twin\_g\_data$ is empty}
-            \STATE Continue
-        \ENDIF
-        \IF{$g\_data\subset twin\_g\_data$}
-            \STATE $is\_shadow\gets \FALSE$
-        \ENDIF
-        \IF{$twin\_g\_data\subset g\_data$}
-            \STATE $is\_light\gets \FALSE$
-        \ENDIF
-    \ENDFOR
-    \STATE $all\_witness\_to\_guards[all\_index]\gets g\_data$
-    \FORALL{$g$ in $g\_data$}
-        \STATE $all\_guard\_to\_witnesses[g]\gets all\_guard\_to\_witnesses[g]\cup all\_index$
-    \ENDFOR
-    \STATE $all\_index\gets all\_index + 1$
-    \IF{$is\_shadow$}
-        \STATE $witness\_to\_guards[index]\gets g\_data$
-        \FORALL{$g$ in $g\_data$}
-            \STATE $guard\_to\_witnesses[g]\gets guard\_to\_witnesses[g]\cup index$
-        \ENDFOR
-        \STATE $shadow\_index\gets shadow\_index + 1$
-    \ENDIF
-    \IF{$is\_light$}
-        \STATE $light\_guard\_sets.append(g\_data)$
-    \ENDIF
-\ENDFOR
-\RETURN $witness\_to\_guards, guard\_to\_witnesses, light\_guard\_sets, all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
+\Procedure{AVP Processing}{$faces$ of the AVP arrangement}
+\State Initialize empty maps: $witness\_to\_guards, guard\_to\_witnesses, all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
+\State Initialize empty list: $light\_guard\_sets$
+\State $shadow\_index\gets 0$
+\State $all\_index\gets 0$
+\For{$face$ in $faces$}
+    \State $g\_data\gets$ guard set of the $face$
+    \If{$g\_data$ is empty}
+        \State Continue
+    \EndIf
+    \State $is\_shadow\gets true$
+    \State $is\_light\gets true$
+    \For{$half\_edge$ in $face$}
+        \State $twin\_g\_data\gets$ guard set of the twin face of the $half\_edge$
+        \If{$twin\_g\_data$ is empty}
+            \State Continue
+        \EndIf
+        \If{$g\_data\subset twin\_g\_data$}
+            \State $is\_shadow\gets false$
+        \EndIf
+        \If{$twin\_g\_data\subset g\_data$}
+            \State $is\_light\gets false$
+        \EndIf
+    \EndFor
+    \State $all\_witness\_to\_guards[all\_index]\gets g\_data$
+    \For{$g$ in $g\_data$}
+        \State $all\_guard\_to\_witnesses[g]\gets all\_guard\_to\_witnesses[g]\cup all\_index$
+    \EndFor
+    \State $all\_index\gets all\_index + 1$
+    \If{$is\_shadow$}
+        \State $witness\_to\_guards[index]\gets g\_data$
+        \For{$g$ in $g\_data$}
+            \State $guard\_to\_witnesses[g]\gets guard\_to\_witnesses[g]\cup index$
+        \EndFor
+        \State $shadow\_index\gets shadow\_index + 1$
+    \EndIf
+    \If{$is\_light$}
+        \State $light\_guard\_sets.append(g\_data)$
+    \EndIf
+\EndFor
+\Return $witness\_to\_guards, guard\_to\_witnesses, light\_guard\_sets, all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
 \section{Initial Upper Bound}
-Calculating a low initial upper bound is vital for efficiently solving the CAGP and CCAGP, as the possible number of colors K directly affects the size of the problem formulation. To achieve this, we implement the approach presented by de Souza et al. \cite{zambon2014exact}, for which K was on average only 1.7 larger than the number of colors used by the optimal solution (\cref{alg:greedy}). In the approach, we calculate weighted independent guard sets in $G_{vis}$ for as long as there are uncovered witnesses left and assign each independent guard set a different color. The weight of each guard is determined by the number of witnesses that the guard covers in the uncovered witnesses. To solve the weighted independent set formulation, we use a MIP solver.
+Calculating a low initial upper bound is vital for efficiently solving the CAGP and CFCAGP, as the possible number of colors K directly affects the size of the problem formulation. To achieve this, we implement the approach used by de Souza et al. \cite{zambon2014exact} to solve the CAGP, for which the greedy number of colors $K$ was on average only 1.7 larger than the number of colors used by the optimal solution (\cref{alg:greedy}). As the optimal solution for the CAGP is a feasible solution for the CFCAGP, we can also use the procedure for an upper bound of the CFCAGP. In the approach, we calculate weighted independent guard sets in $G_{vis}$ for as long as there are uncovered witnesses left and assign each independent guard set a different color. The weight of each guard is determined by the number of witnesses that the guard covers in the uncovered witnesses. To solve the weighted independent set formulation, we use a MIP solver.
 
 \begin{algorithm}
 \caption{Greedy Algorithm}\label{alg:greedy}
 \begin{algorithmic}[1]
-\REQUIRE $guard\_to\_witnesses, all\_witnesses, G_{vis}$
-\STATE Initialize empty set: $solution$
-\STATE $uncovered\gets all\_witnesses$
-\STATE $color\gets 0$
-\WHILE{$uncovered$ is not empty}
-    \STATE Initialize empty list: $weights$
-    \FORALL{$(guard, witnesses)$ in $guard\_to\_witnesses$}
-        \STATE $weights.insert((guard, |witnesses\cap uncovered|))$
-    \ENDFOR
-    \STATE $solver\gets WIS\_Solver(weights, G_{vis})$
-    \STATE $independent\_set\gets solver.solve()$
-    \FORALL{$guard$ in $independent\_set$}
-        \STATE $solution\gets solution\cup \{(guard, color)\}$
-        \STATE $uncovered\gets uncovered\setminus guard\_to\_witnesses[guard]$
-    \ENDFOR 
-    \STATE $color\gets color + 1$
-\ENDWHILE
-\RETURN $color, solution$
+\Procedure{Greedy}{$guard\_to\_witnesses, all\_witnesses, G_{vis}$}
+\State Initialize empty set: $solution$
+\State $uncovered\gets all\_witnesses$
+\State $color\gets 0$
+\While{$uncovered$ is not empty}
+    \State Initialize empty list: $weights$
+    \For{$(guard, witnesses)$ in $guard\_to\_witnesses$}
+        \State $weights.append((guard, |witnesses\cap uncovered|))$
+    \EndFor
+    \State $solver\gets WIS\_Solver(weights, G_{vis})$
+    \State $independent\_set\gets solver.solve()$
+    \For{$guard$ in $independent\_set$}
+        \State $solution\gets solution\cup \{(guard, color)\}$
+        \State $uncovered\gets uncovered\setminus guard\_to\_witnesses[guard]$
+    \EndFor 
+    \State $color\gets color + 1$
+\EndWhile
+\Return $color, solution$
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
@@ -204,68 +208,116 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 
 \section{Edge Clique Covers}
 
+In this section, we take a look at how to generate the edge clique covers used by the MIP formulation. The algorithm is the one presented by de Souza et. al.\cite{zambon2014exact}. The reason for us using edge clique cover constraints instead of edge constraints for the MIP formulation is that they can significantly reduce the number of constraints, result in a tighter LP relaxation, which can lead to a smaller branch-and-bound search tree, and they better represent the graph structure, which can further speed up the solving process. On the other hand, SAT solvers are very efficient at solving large amounts of small clauses. That is why create clauses for every edge instead of using the edge clique covers. 
+As for the algorithm, we generate K-many different edge clique covers, K being the number of colors used by the greedy solution. By using different edge clique covers for each color, we further reduce the symmetry of the formulation. We start by finding a matching consisting of K edges with the smallest sum of degrees of their vertices. From each edge in the matching, we construct a clique cover as follows. We build a clique starting from our matching edge and remove all edges used from the graph. Then we take the next edge with the lowest sum of degrees of its vertices and build another clique. We repeat this process until the graph is empty, meaning we covered all edges with cliques. When building the cliques, we always choose the vertex with the highest degree from the set of candidate vertices. Lastly, notice that we generate all edge clique covers independently. Thus, we can easily parallelize this process by using multiprocessing to speed up the generation.
+
 \begin{algorithm}
 \caption{Generate Edge Clique Covers}
 \begin{algorithmic}[1]
-\REQUIRE $G, K$
-\STATE Initialize empty lists: $matching, edge\_clique\_covers$
-\STATE Initialize empty set: $covered\_vertices$
-\STATE $edge\_queue\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
-\FOR{$i=0$ \TO $K$}
-    \STATE $(u, v)\gets$ 
-    \WHILE{$\{u, v\}\cap covered\_vertices$ is not empty}
-        \STATE $(u, v)\gets$ pop edge with highest priority from $edge\_queue$
-    \ENDWHILE
-    \STATE $edge\gets (u, v)$
-    \STATE $matching.append(edge)$
-    \STATE $covered\_vertices\gets covered\_vertices\cup \{u, v\}$
-\ENDFOR
-\FORALL{$edge$ in $matching$}
-    \STATE $clique\_cover\gets$ Construct Clique Cover with $G, edge$
-    \STATE $edge\_clique\_covers.append(clique\_cover)$
-\ENDFOR
-\RETURN $edge\_clique\_covers$
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}
-\caption{Construct Clique Cover}
-\begin{algorithmic}[1]
-\REQUIRE $G, edge$
-\STATE $uncovered\_graph\gets G$
-\STATE $clique\gets$ Build Clique with $G, edge$
-\STATE $edge\_clique\_cover\gets \{clique\}$
-\STATE Remove edges from $uncovered\_graph$ that are in $clique$
-\STATE $edge\_queue\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
-\WHILE{$uncovered\_graph$ has edges}
-    \STATE $edge\gets$ pop edge with highest priority from $edge\_queue$
-    \STATE $clique\gets$ Build Clique with $G, edge$
-    \STATE $edge\_clique\_cover\gets edge\_clique\_cover\cup {clique}$
-    \STATE Remove edges from $uncovered\_graph$ that consist of vertices in $clique$
-    \STATE Update priorities of edges in $edge\_queue$
-\ENDWHILE
-\RETURN $edge\_clique\_cover$
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}
-\caption{Build Clique}
-\begin{algorithmic}[1]
-\REQUIRE $G, edge$
-\STATE $(u, v)\gets edge$
-\STATE $clique\gets \{u, v\}$
-\STATE $candidates\gets N(u)\cup N(v)$
-\WHILE{$candidates$ is not empty}
-    \STATE $v\gets$ v from $candidates$ with max($\delta(v)$)
-    \STATE $candidates\gets candidates\cup N(v)$
-    \STATE $clique\gets clique\cup {v}$
-\ENDWHILE
-\RETURN clique
+\Procedure{Generate Edge Clique Covers}{$G$, $K$}
+\State Initialize empty lists: $matching, edge\_clique\_covers$
+\State Initialize empty set: $covered\_vertices$
+\State $edge\_queue\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
+\For{$i=0$, $i{+}{+}$, $K$}
+    \State $(u, v)\gets$ pop edge with highest priority from $edge\_queue$
+    \While{$\{u, v\}\cap covered\_vertices$ is not empty}
+        \State $(u, v)\gets$ pop edge with highest priority from $edge\_queue$
+    \EndWhile
+    \State $edge\gets (u, v)$
+    \State $matching.append(edge)$
+    \State $covered\_vertices\gets covered\_vertices\cup \{u, v\}$
+\EndFor
+\For{$edge$ in $matching$}
+    \State $clique\_cover\gets$ Construct Clique Cover($G$, $edge$)
+    \State $edge\_clique\_covers.append(clique\_cover)$
+\EndFor
+\Return $edge\_clique\_covers$
+\EndProcedure
+\Procedure{Construct Clique Cover}{$G$, $edge$}
+\State $uncovered\_graph\gets G$
+\State $clique\gets$ Build Clique with $G, edge$
+\State $edge\_clique\_cover\gets \{clique\}$
+\State Remove edges from $uncovered\_graph$ that are in $clique$
+\State $edge\_queue\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
+\While{$uncovered\_graph$ has edges}
+    \State $edge\gets$ pop edge with highest priority from $edge\_queue$
+    \State $clique\gets$ Build Clique($G, edge$)
+    \State $edge\_clique\_cover\gets edge\_clique\_cover\cup {clique}$
+    \State Remove edges from $uncovered\_graph$ that consist of vertices in $clique$
+    \State Update priorities of edges in $edge\_queue$
+\EndWhile
+\Return $edge\_clique\_cover$
+\EndProcedure
+\Procedure{Build Clique}{$G$, $edge$}
+\State $(u, v)\gets edge$
+\State $clique\gets \{u, v\}$
+\State $candidates\gets N(u)\cup N(v)$
+\While{$candidates$ is not empty}
+    \State $v\gets$ v from $candidates$ with max($\delta(v)$)
+    \State $candidates\gets candidates\cup N(v)$
+    \State $clique\gets clique\cup {v}$
+\EndWhile
+\Return clique
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
 \section{Lazy Constraints}
 For the CAGP, we can restrict ourselves to the shadow witness set to check for full coverage of the polygon. But as the number of shadow witnesses can still be quite large ($O(n^2)$), we initially limit ourselves to the $|G|$ many smallest shadow witnesses within the partial order. In the case of the MIP solver, we can add possible missing witnesses early, whenever we encounter an integral feasible solution, by checking whether the corresponding witnesses of the guards of the current solution fully contain all shadow witnesses, as MIP solvers allow for the use of lazy constraints. For the SAT solver, we add possible missing witnesses, whenever we find an optimal solution for the current witness set. More on the SAT procedure can be found in the section SAT color optimization. As for the CPSAT solver, we implement both the MIP and the SAT procedure, except that CPSAT does not allow for lazy constraints. So instead, for the MIP formulation, we solve for an optimal solution, and in the case that witnesses are missing we add them and solve again. As more witnesses can only increase the optimal objective value, we can stop the search early as soon as we encounter an integral feasible solution that is equal to the previously optimal objective value.\\
-For the CCAGP, according to \cref{thm:conflict-free_witnesses}, we cannot limit ourselves to either shadow or light witnesses. So instead, we have to check for all witnesses (one witness per AVP in the AVP arrangement). We will compare using the $|G|$ smallest, and largest and using all witnesses against each other. As for adding new witnesses, we proceed the same as for the CAGP, except that we cannot use lazy constraints for the MIP solver, because new witnesses add new unique color witness variables that cannot be added lazily. Thus, we use the same procedure as for the CPSAT solver.
+For the CFCAGP, according to \cref{thm:conflict-free_witnesses}, we cannot limit ourselves to either shadow or light witnesses. So instead, we have to check for all witnesses (one witness per AVP in the AVP arrangement). We will compare using the $|G|$ smallest, and largest and using all witnesses against each other. As for adding new witnesses, we proceed the same as for the CAGP, except that we cannot use lazy constraints for the MIP solver, because new witnesses add new unique color witness variables that cannot be added lazily. Thus, we use the same procedure as for the CPSAT solver.
 
 \section{SAT color optimization}
+As mentioned in the SAT formulation section, when solving SAT problems, we check for feasibility instead of having an objective function to minimize the number of colors. Thus, we use a procedure consisting of an initial binary search followed by a linear ascent whenever we add new witnesses \cref{alg:SAT_color_opt}. The binary search allows us to find the optimal number of colors for the initial witness set in $\mathcal{O}(\log(n))$ SAT solves. After adding new witnesses the required number of colors can only increase from the initial optimal solution. Thus, we use a linear ascent starting from the previous optimal solution. The reason for using a linear ascent, which has runtime $\mathcal{O}(n)$, instead of using a binary search with runtime $\mathcal{O}(\log(n))$ is that in most cases after adding new witnesses the number of colors required stays the same or only increases by 1.
+
+\begin{algorithm}
+\caption{SAT color optimization}\label{alg:SAT_color_opt}
+\begin{algorithmic}[1]
+\Procedure{solve}{$K$}
+    \State $color\_lim, solution \gets$ Binary Search
+    \State $missing\_witnesses \gets check\_coverage(solution)$
+    \While{$missing\_witnesses$}
+        \For{$witness$ in $missing\_witnesses$}
+            \State $subset \gets \{\}$
+            \For{$guard$ in $witness\_to\_guards[witness]$}
+                \For{$k$ in range($K$)}
+                    \State $subset\gets subset\cup \{(guard, k)\}$
+                \EndFor
+            \EndFor
+            \State $solver.add\_clause([guard\_to\_var[guard][color] \text{ for } (guard, color) \text{ in } subset])$
+        \EndFor
+        \State $color\_lim, solution \gets$ Linear Ascent($color\_lim$)
+        \State $missing\_witnesses \gets check\_coverage(solution)$
+    \EndWhile
+    \State $solution \gets$ for every guard in $solution$ take the first guard color combination
+    \State \Return $color\_lim, solution$
+\EndProcedure
+\Procedure{Binary Search}{}
+    \State $lower \gets 1$
+    \State $upper \gets K$
+    \State $optimal\_solution \gets None$
+    \While{$lower < upper$}
+        \State $mid \gets \lfloor(lower + upper) / 2\rfloor$
+        \State $solution \gets SATSolver.solve(deactivate\_guards(mid))$
+        \If{$solution$}
+            \State $optimal\_solution \gets solution$
+            \State $upper \gets mid$
+        \Else
+            \State $lower \gets mid + 1$
+        \EndIf
+    \EndWhile
+    \If{not $optimal\_solution$}
+        \State $optimal\_solution \gets SATSolver.solve(deactivate\_guards(upper))$
+    \EndIf
+    \State \Return $lower, optimal\_solution$
+\EndProcedure
+\Procedure{Linear Ascent}{$color\_lim$}
+    \State $solution \gets SATSolver.solve(deactivate\_guards(color\_lim))$
+    \While{not $solution$ and $color\_lim <= K$}
+        \State $color\_lim \gets color\_lim + 1$
+        \State $solution \gets SATSolver.solve(deactivate\_guards(color\_lim))$
+    \EndWhile
+    \State \Return $color\_lim, solution$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
