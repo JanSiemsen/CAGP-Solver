@@ -1,4 +1,6 @@
 \chapter{Theoretical Shenanigans}
+Based on the definitions in the previous chapter, we will prove a few theorems necessary for the implementation of the solvers.
+
 
 \begin{theorem}[Couto et al.~\cite{couto2011exact}]\label{thm:shadow_coverage}
 When given a polygon $P$ and a guard set $G$, a subset $G_{sub}$ of $G$ fully covers $P$ if and only if it covers all witnesses in the shadow witness set $W$ of $G$.
@@ -30,7 +32,7 @@ To prove this theorem, we present a simple example in \cref{fig:conflict-free_wi
 
 \chapter{Chromatic Art Gallery Problem Formulations}
 
-In the following sections, we introduce a MIP, a SAT, and a CPSAT formulation of the Chromatic Art Gallery Problem. The MIP formulation is the one proposed by de Souza et al. ~\cite{zambon2014exact}, which gets modified and turned into a SAT formula for the SAT and the CPSAT formulation.
+In the following sections, we introduce a MIP, a SAT, and a CP-SAT formulation of the Chromatic Art Gallery Problem. The MIP formulation is the one proposed by de Souza et al. ~\cite{zambon2014exact}, which gets modified and turned into a SAT formula for the SAT and the CP-SAT formulation.
 
 \section{MIP Formulation}
 
@@ -58,13 +60,13 @@ The MIP formulation of the problem introduces binary variables for every guard c
 
 The SAT formulation of the problem differs from the MIP formulation in the way that we are not trying to minimize the number of colors used. Instead, we test whether there exists a feasible solution given a fixed number of colors K. By doing so, we can solve the SAT formula for different numbers of colors, increasing the number whenever we encounter infeasibility and decreasing it on a feasible solution, until we find the smallest number of colors for which there exists a feasible solution. The exact procedure for choosing the number of colors will be discussed in the Implementation Details chapter. Because we have a fixed number of colors, we do not require color variables like \cref{eq_MIP:f.7} anymore and restrict ourselves to the guard color variables in \cref{eq:_SATf.3}. We also omit the symmetry breaker constraints \cref{eq_MIP:f.4} and \cref{eq_MIP:f.5}, as \cref{eq_MIP:f.4} uses color variables and we found no straightforward way to model them efficiently using SAT clauses. Now for the clauses in our SAT formulation, we ensure that no two guards that share an edge in the 2-link-visibility graph $G_{vis}$ share the same color using \cref{eq_SAT:f.0}. These clauses replace the edge clique cover constraints in \cref{eq_MIP:f.1}. The reason for simply using the edges of $G_{vis}$ and not cliques is that SAT solvers are very efficient at solving large numbers of small clauses, i.e. with only two variables. For the witness covering constraints \cref{eq_MIP:f.2}, we use the clauses in \cref{eq_MIP:f.1}, which have an equivalent meaning. Lastly, we use the clauses in \cref{eq_MIP:f.2} to replace the guard coloring constraints in \cref{eq_MIP:f.3}. Again, these constraints can be omitted by processing the solution at the end and we will compare the performance with and without them in the Experiments chapter below.
 
-\section{CPSAT Formulation}
+\section{CP-SAT Formulation}
 
-As CPSAT solvers allow for both MIP and SAT constraints, we use both the MIP and the SAT formulation and compare them against each other in the Experiments chapter.
+As CP-SAT solvers allow for both MIP and SAT constraints, we use both the MIP and the SAT formulation and compare them against each other in the Experiments chapter.
 
 \chapter{Conflict-free Chromatic Art Gallery Problem Formulations}
 
-In the following sections, we introduce a MIP, a SAT, and a CPSAT formulation of the Conflict-free Chromatic Art Gallery Problem.
+In the following sections, we introduce a MIP, a SAT, and a CP-SAT formulation of the Conflict-free Chromatic Art Gallery Problem.
 
 \section{MIP Formulation}
 
@@ -98,8 +100,8 @@ The MIP formulation for the CFCAGP is similar to the one of the CAGP. We are sti
 
 For the SAT formulation of the CFCAGP, we test the feasibility of the SAT formula for a fixed K in the same fashion as for the CAGP, until we find a feasible solution with a minimal number of colors. We again omit the color variables and keep the unique color witness variables \cref{eq_SAT_cf:f.4} and guard color variables \cref{eq_SAT_cf:f.5}. The clauses \cref{eq_SAT_cf:f.0} are equivalent to the constraints in \cref{eq_MIP_cf:f.3}. For all witness color combinations, if the unique color witness variable of that color and that witness is true, at least one guard of the color in the neighborhood of that witness has to be true. The clauses \cref{eq_SAT_cf:f.1} are equivalent to the constraints in \cref{eq_MIP_cf:f.4}. For all witness color combinations, if the unique color witness variable of that color and that witness is true, no two guards in the neighborhood of that witness can have that color. As for \cref{eq_SAT_cf:f.2}, these clauses represent the constraints in \cref{eq_MIP_cf:f.5}. Lastly, the witness coloring constraints \cref{eq_SAT_cf:f.3} are modeled using the same clauses as in the CAGP SAT Formulation.
 
-\section{CPSAT Formulation}
-Similar to the Chromatic Art Gallery Problem, we use both the MIP and the SAT formulation for CPSAT and compare them against each other in the Experiments chapter.
+\section{CP-SAT Formulation}
+Similar to the Chromatic Art Gallery Problem, we use both the MIP and the SAT formulation for CP-SAT and compare them against each other in the Experiments chapter.
 
 \chapter{Implementation Details}
 
@@ -267,11 +269,11 @@ As for the algorithm, we generate K-many different edge clique covers, K being t
 \end{algorithm}
 
 \section{Lazy Constraints}
-For the CAGP, we can restrict ourselves to the shadow witness set to check for full coverage of the polygon. But as the number of shadow witnesses can still be quite large ($O(n^2)$), we initially limit ourselves to the $|G|$ many smallest shadow witnesses within the partial order. In the case of the MIP solver, we can add possible missing witnesses early, whenever we encounter an integral feasible solution, by checking whether the corresponding witnesses of the guards of the current solution fully contain all shadow witnesses, as MIP solvers allow for the use of lazy constraints. For the SAT solver, we add possible missing witnesses, whenever we find an optimal solution for the current witness set. More on the SAT procedure can be found in the section SAT color optimization. As for the CPSAT solver, we implement both the MIP and the SAT procedure, except that CPSAT does not allow for lazy constraints. So instead, for the MIP formulation, we solve for an optimal solution, and in the case that witnesses are missing we add them and solve again. As more witnesses can only increase the optimal objective value, we can stop the search early as soon as we encounter an integral feasible solution that is equal to the previously optimal objective value.\\
-For the CFCAGP, according to \cref{thm:conflict-free_witnesses}, we cannot limit ourselves to either shadow or light witnesses. So instead, we have to check for all witnesses (one witness per AVP in the AVP arrangement). We will compare using the $|G|$ smallest, and largest and using all witnesses against each other. As for adding new witnesses, we proceed the same as for the CAGP, except that we cannot use lazy constraints for the MIP solver, because new witnesses add new unique color witness variables that cannot be added lazily. Thus, we use the same procedure as for the CPSAT solver.
+For the CAGP, we can restrict ourselves to the shadow witness set to check for full coverage of the polygon. But as the number of shadow witnesses can still be quite large ($O(n^2)$), we initially limit ourselves to the $|G|$ many smallest shadow witnesses within the partial order. In the case of the MIP solver, we can add possible missing witnesses early, whenever we encounter an integral feasible solution, by checking whether the corresponding witnesses of the guards of the current solution fully contain all shadow witnesses, as MIP solvers allow for the use of lazy constraints. For the SAT solver, we add possible missing witnesses, whenever we find an optimal solution for the current witness set. More on the SAT procedure can be found in the section SAT color optimization. As for the CP-SAT solver, we implement both the MIP and the SAT procedure, except that CP-SAT does not allow for lazy constraints. So instead, for the MIP formulation, we solve for an optimal solution, and in the case that witnesses are missing we add them and solve again. As more witnesses can only increase the optimal objective value, we can stop the search early as soon as we encounter an integral feasible solution that is equal to the previously optimal objective value.\\
+For the CFCAGP, according to \cref{thm:conflict-free_witnesses}, we cannot limit ourselves to either shadow or light witnesses. So instead, we have to check for all witnesses (one witness per AVP in the AVP arrangement). We will compare using the $|G|$ smallest, and largest and using all witnesses against each other. As for adding new witnesses, we proceed the same as for the CAGP, except that we cannot use lazy constraints for the MIP solver, because new witnesses add new unique color witness variables that cannot be added lazily. Thus, we use the same procedure as for the CP-SAT solver.
 
-\section{SAT color optimization}
-As mentioned in the SAT formulation section, when solving SAT problems, we check for feasibility instead of having an objective function to minimize the number of colors. Thus, we use a procedure consisting of an initial binary search followed by a linear ascent whenever we add new witnesses \cref{alg:SAT_color_opt}. The binary search allows us to find the optimal number of colors for the initial witness set in $\mathcal{O}(\log(n))$ SAT solves. After adding new witnesses the required number of colors can only increase from the initial optimal solution. Thus, we use a linear ascent starting from the previous optimal solution. The reason for using a linear ascent, which has runtime $\mathcal{O}(n)$, instead of using a binary search with runtime $\mathcal{O}(\log(n))$ is that in most cases after adding new witnesses the number of colors required stays the same or only increases by 1. The function deactivate\_guards(col) deactivates all guard variables with a larger color than col.
+\section{SAT Color Optimization}
+As mentioned in the SAT formulation section, when solving SAT problems, we check for feasibility instead of having an objective function to minimize the number of colors. Thus, we use a procedure consisting of an initial binary search followed by a linear ascent whenever we add new witnesses \cref{alg:SAT_color_opt}. The binary search allows us to find the optimal number of colors for the initial witness set in $\mathcal{O}(\log(n))$ SAT solves. After adding new witnesses the required number of colors can only increase from the initial optimal solution. Thus, we use a linear ascent starting from the previous optimal solution. The reason for using a linear ascent, which has runtime $\mathcal{O}(n)$, instead of using a binary search with runtime $\mathcal{O}(\log(n))$ is that in most cases after adding new witnesses the number of colors required stays the same or only increases by $1$. The function deactivate\_guards($col$) deactivates all guard variables with a larger color index than $col$.
 
 \begin{algorithm}
 \caption{SAT color optimization}\label{alg:SAT_color_opt}
