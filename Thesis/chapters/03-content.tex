@@ -58,7 +58,7 @@ The MIP formulation of the problem introduces binary variables for every guard c
 \label{eq:_SATf.3}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,\ldots,K\}
 \end{align}
 
-The SAT formulation of the problem differs from the MIP formulation in the way that we are not trying to minimize the number of colors used. Instead, we test whether there exists a feasible solution given a fixed number of colors K. By doing so, we can solve the SAT formula for different numbers of colors, increasing the number whenever we encounter infeasibility and decreasing it on a feasible solution, until we find the smallest number of colors for which there exists a feasible solution. The exact procedure for choosing the number of colors will be discussed in the Implementation Details chapter. Because we have a fixed number of colors, we do not require color variables like \cref{eq_MIP:f.7} anymore and restrict ourselves to the guard color variables in \cref{eq:_SATf.3}. We also omit the symmetry breaker constraints \cref{eq_MIP:f.4} and \cref{eq_MIP:f.5}, as \cref{eq_MIP:f.4} uses color variables and we found no straightforward way to model them efficiently using SAT clauses. Now for the clauses in our SAT formulation, we ensure that no two guards that share an edge in the 2-link-visibility graph $G_{vis}$ share the same color using \cref{eq_SAT:f.0}. These clauses replace the edge clique cover constraints in \cref{eq_MIP:f.1}. The reason for simply using the edges of $G_{vis}$ and not cliques is that SAT solvers are very efficient at solving large numbers of small clauses, i.e. with only two variables. For the witness covering constraints \cref{eq_MIP:f.2}, we use the clauses in \cref{eq_MIP:f.1}, which have an equivalent meaning. Lastly, we use the clauses in \cref{eq_MIP:f.2} to replace the guard coloring constraints in \cref{eq_MIP:f.3}. Again, these constraints can be omitted by processing the solution at the end and we will compare the performance with and without them in the Experiments chapter below.
+The SAT formulation of the problem differs from the MIP formulation in the way that we are not trying to minimize the number of colors used. Instead, we test whether there exists a feasible solution given a fixed number of colors K. By doing so, we can solve the SAT formula for different numbers of colors, increasing the number whenever we encounter infeasibility and decreasing it on a feasible solution, until we find the smallest number of colors for which there exists a feasible solution. The exact procedure for choosing the number of colors will be discussed in the Implementation Details chapter. Because we have a fixed number of colors, we do not require color variables like \cref{eq_MIP:f.7} anymore and restrict ourselves to the guard color variables in \cref{eq:_SATf.3}. We also omit the symmetry breaker constraints \cref{eq_MIP:f.4} and \cref{eq_MIP:f.5}, as \cref{eq_MIP:f.4} uses color variables and we found no straightforward way to model them efficiently using SAT clauses. Now for the clauses in our SAT formulation, we ensure that no two guards that share an edge in the 2-link-visibility graph $G_{vis}$ share the same color using \cref{eq_SAT:f.0}. These clauses replace the edge clique cover constraints in \cref{eq_MIP:f.1}. The reason for simply using the edges of $G_{vis}$ and not cliques is that SAT solvers are very efficient at solving large numbers of small clauses, i.e., with only two variables. For the witness covering constraints \cref{eq_MIP:f.2}, we use the clauses in \cref{eq_MIP:f.1}, which have an equivalent meaning. Lastly, we use the clauses in \cref{eq_MIP:f.2} to replace the guard coloring constraints in \cref{eq_MIP:f.3}. Again, these constraints can be omitted by processing the solution at the end and we will compare the performance with and without them in the Experiments chapter below.
 
 \section{CP-SAT Formulation}
 
@@ -161,13 +161,13 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
     \For{g in g\_data}
         \State guard\_to\_all\_witnesses[g] $\gets$ guard\_to\_all\_witnesses[g] $\cup$ all\_index
     \EndFor
-    \State all\_index $\gets$ all\_index $+ 1$
+    \State all\_index $\gets$ all\_index + $1$
     \If{is\_shadow}
         \State shadow\_witness\_to\_guards[index] $\gets$ g\_data
         \For{g in g\_data}
             \State guard\_to\_shadow\_witnesses[g] $\gets$ guard\_to\_shadow\_witnesses[g] $\cup$ index
         \EndFor
-        \State shadow\_index $\gets$ shadow\_index $+ 1$
+        \State shadow\_index $\gets$ shadow\_index + $1$
     \EndIf
     \If{is\_light}
         \State light\_guard\_sets.append(g\_data)
@@ -199,7 +199,7 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
         \State solution $\gets$ solution $\cup$ \{(guard, color)\}
         \State uncovered $\gets$ uncovered $\setminus$ guard\_to\_shadow\_witnesses[guard]
     \EndFor 
-    \State color $\gets$ color $+ 1$
+    \State color $\gets$ color + $1$
 \EndWhile
 \State \Return color, solution
 \EndProcedure
@@ -279,50 +279,50 @@ As mentioned in the SAT formulation section, when solving SAT problems, we check
 \caption{SAT color optimization}\label{alg:SAT_color_opt}
 \begin{algorithmic}[1]
 \Procedure{solve}{$K$}
-    \State $color\_lim, solution \gets$ Binary Search
-    \State $missing\_witnesses \gets check\_coverage(solution)$
-    \While{$missing\_witnesses$}
-        \For{$witness$ in $missing\_witnesses$}
-            \State $subset \gets \{\}$
-            \For{$guard$ in $witness\_to\_guards[witness]$}
+    \State color\_lim, solution $\gets$ Binary Search
+    \State missing\_witnesses $\gets$ check\_coverage(solution)
+    \While{missing\_witnesses}
+        \For{witness in missing\_witnesses}
+            \State subset $\gets \{\}$
+            \For{guard in witness\_to\_guards[witness]}
                 \For{$k$ in range($K$)}
-                    \State $subset\gets subset\cup \{(guard, k)\}$
+                    \State subset $\gets$ subset $\cup$ \{(guard, $k$)\}
                 \EndFor
             \EndFor
-            \State $solver.add\_clause([guard\_to\_var[guard][color] \text{ for } (guard, color) \text{ in } subset])$
+            \State solver.add\_clause([guard\_to\_var[guard][color] for (guard, color) in subset])
         \EndFor
-        \State $color\_lim, solution \gets$ Linear Ascent($color\_lim$)
-        \State $missing\_witnesses \gets check\_coverage(solution)$
+        \State color\_lim, solution $\gets$ Linear Ascent(color\_lim)
+        \State missing\_witnesses $\gets$ check\_coverage(solution)
     \EndWhile
-    \State $solution \gets$ for every guard in $solution$ take the first guard color combination
-    \State \Return $color\_lim, solution$
+    \State solution $\gets$ for every guard in solution take the first guard color combination
+    \State \Return color\_lim, solution
 \EndProcedure
 \Procedure{Binary Search}{}
-    \State $lower \gets 1$
-    \State $upper \gets K$
-    \State $optimal\_solution \gets None$
-    \While{$lower < upper$}
-        \State $mid \gets \lfloor(lower + upper) / 2\rfloor$
-        \State $solution \gets SATSolver.solve(deactivate\_guards(mid))$
-        \If{$solution$}
-            \State $optimal\_solution \gets solution$
-            \State $upper \gets mid$
+    \State lower $\gets 1$
+    \State upper $\gets K$
+    \State optimal\_solution $\gets$ None
+    \While{lower $<$ upper}
+        \State mid $\gets \lfloor$(lower + upper)$/2\rfloor$
+        \State solution $\gets$ SATSolver.solve(deactivate\_guards(mid))
+        \If{solution}
+            \State optimal\_solution $\gets$ solution
+            \State upper $\gets$ mid
         \Else
-            \State $lower \gets mid + 1$
+            \State lower $\gets$ mid + $1$
         \EndIf
     \EndWhile
-    \If{not $optimal\_solution$}
-        \State $optimal\_solution \gets SATSolver.solve(deactivate\_guards(upper))$
+    \If{optimal\_solution is None}
+        \State optimal\_solution $\gets$ SATSolver.solve(deactivate\_guards(upper))
     \EndIf
-    \State \Return $lower, optimal\_solution$
+    \State \Return lower, optimal\_solution
 \EndProcedure
-\Procedure{Linear Ascent}{$color\_lim$}
-    \State $solution \gets SATSolver.solve(deactivate\_guards(color\_lim))$
-    \While{not $solution$ and $color\_lim <= K$}
-        \State $color\_lim \gets color\_lim + 1$
-        \State $solution \gets SATSolver.solve(deactivate\_guards(color\_lim))$
+\Procedure{Linear Ascent}{color\_lim}
+    \State solution $\gets$ SATSolver.solve(deactivate\_guards(color\_lim))
+    \While{not solution and color\_lim $\leq K$}
+        \State color\_lim $\gets$ color\_lim + $1$
+        \State solution $\gets$ SATSolver.solve(deactivate\_guards(color\_lim))
     \EndWhile
-    \State \Return $color\_lim, solution$
+    \State \Return color\_lim, solution
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
