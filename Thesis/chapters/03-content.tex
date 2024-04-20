@@ -272,7 +272,30 @@ For the CAGP, we can restrict ourselves to the shadow witness set to check for f
 For the CFCAGP, according to \cref{thm:conflict-free_witnesses}, we cannot limit ourselves to either shadow or light witnesses. So instead, we have to check for all witnesses (one witness per AVP in the AVP arrangement). We will compare using the $|G|$ smallest, and largest and using all witnesses against each other. As for adding new witnesses, we proceed the same as for the CAGP, except that we cannot use lazy constraints for the MIP solver, because new witnesses add new unique color witness variables that cannot be added lazily. Thus, we use the same procedure as for the CPSAT solver.
 
 \section{SAT color optimization}
-As mentioned in the SAT formulation section, when solving SAT problems, we check for feasibility instead of having an objective function to minimize the number of colors. Thus, we use a procedure consisting of an initial binary search followed by a linear ascent whenever we add new witnesses. The binary search allows us to find the optimal number of colors for the initial witness set in $\mathcal{O}(\log(n))$ SAT solves. After adding new witnesses the required number of colors can only increase from the initial optimal solution. Thus, we use a linear ascent starting from the previous optimal solution. The reason for using a linear ascent, which has runtime $\mathcal{O}(n)$, instead of using a binary search with runtime $\mathcal{O}(\log(n))$ is that in most cases after adding new witnesses the number of colors required stays the same or only increases by 1.
+As mentioned in the SAT formulation section, when solving SAT problems, we check for feasibility instead of having an objective function to minimize the number of colors. Thus, we use a procedure consisting of an initial binary search followed by a linear ascent whenever we add new witnesses \cref{alg:SAT_color_opt}. The binary search allows us to find the optimal number of colors for the initial witness set in $\mathcal{O}(\log(n))$ SAT solves. After adding new witnesses the required number of colors can only increase from the initial optimal solution. Thus, we use a linear ascent starting from the previous optimal solution. The reason for using a linear ascent, which has runtime $\mathcal{O}(n)$, instead of using a binary search with runtime $\mathcal{O}(\log(n))$ is that in most cases after adding new witnesses the number of colors required stays the same or only increases by 1.
 
-
+\begin{algorithm}
+\caption{SAT color optimization}\label{alg:SAT_color_opt}
+\begin{algorithmic}[1]
+\Procedure{solve}{$color\_lim$}
+    \State $color\_lim, solution \gets binary\_search()$
+    \State $missing\_witnesses \gets \_\_check\_coverage(solution)$
+    \While{$missing\_witnesses$}
+        \For{$witness$ in $missing\_witnesses$}
+            \State $subset \gets []$
+            \For{$guard$ in $witness\_to\_guards[witness]$}
+                \For{$k$ in range($K$)}
+                    \State $subset.append((guard, k))$
+                \EndFor
+            \EndFor
+            \State $solver.add\_clause([guard\_to\_var[guard][color] \text{ for } (guard, color) \text{ in } subset])$
+        \EndFor
+        \State $color\_lim, solution \gets linear\_ascent(color\_lim)$
+        \State $missing\_witnesses \gets \_\_check\_coverage(solution)$
+    \EndWhile
+    \State $solution \gets [seen.setdefault(g[0], g) \text{ for } g \text{ in } solution \text{ if } g[0] \text{ not in } seen]$
+    \State \Return $color\_lim, solution$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
