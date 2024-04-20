@@ -109,14 +109,14 @@ The instances are given as lists of points, which represent the outer boundaries
 \begin{algorithm}
 \caption{generate\_AVP\_recursive(guards: list[tuple[int, Polygon\_with\_holes\_2]])}\label{alg:AVP_generation}
 \begin{algorithmic} 
-\STATE $half\gets len(guards)/2$
-\STATE $firstHalf\gets guards[:half]$ 
-\STATE $secondHalf\gets guards[half:]$
-\IF{$len(guards) = 1$}
-    \STATE $Arrangement(guards[0][0], guards[0][1])$
-\ELSE
-    \STATE $generate\_AVP\_recursive(firstHalf).overlay(generate\_AVP\_recursive(secondHalf))$
-\ENDIF
+\State $half\gets len(guards)/2$
+\State $firstHalf\gets guards[:half]$ 
+\State $secondHalf\gets guards[half:]$
+\If{$len(guards) = 1$}
+    \State $Arrangement(guards[0][0], guards[0][1])$
+\Else
+    \State $generate\_AVP\_recursive(firstHalf).overlay(generate\_AVP\_recursive(secondHalf))$
+\EndIf
 \end{algorithmic}
 \end{algorithm}
 
@@ -125,47 +125,47 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
 \begin{algorithm}
 \caption{Calculate witness sets and light guard sets}\label{alg:AVP_processing}
 \begin{algorithmic}[1]
-\REQUIRE $faces$ of the AVP arrangement
-\STATE Initialize empty maps: $witness\_to\_guards, guard\_to\_witnesses, all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
-\STATE Initialize empty list: $light\_guard\_sets$
-\STATE $shadow\_index\gets 0$
-\STATE $all\_index\gets 0$
-\FORALL{$face$ in $faces$}
-    \STATE $g\_data\gets$ guard set of the $face$
-    \IF{$g\_data$ is empty}
-        \STATE Continue
-    \ENDIF
-    \STATE $is\_shadow\gets \TRUE$
-    \STATE $is\_light\gets \TRUE$
-    \FORALL{$half\_edge$ in $face$}
-        \STATE $twin\_g\_data\gets$ guard set of the twin face of the $half\_edge$
-        \IF{$twin\_g\_data$ is empty}
-            \STATE Continue
-        \ENDIF
-        \IF{$g\_data\subset twin\_g\_data$}
-            \STATE $is\_shadow\gets \FALSE$
-        \ENDIF
-        \IF{$twin\_g\_data\subset g\_data$}
-            \STATE $is\_light\gets \FALSE$
-        \ENDIF
-    \ENDFOR
-    \STATE $all\_witness\_to\_guards[all\_index]\gets g\_data$
-    \FORALL{$g$ in $g\_data$}
-        \STATE $all\_guard\_to\_witnesses[g]\gets all\_guard\_to\_witnesses[g]\cup all\_index$
-    \ENDFOR
-    \STATE $all\_index\gets all\_index + 1$
-    \IF{$is\_shadow$}
-        \STATE $witness\_to\_guards[index]\gets g\_data$
-        \FORALL{$g$ in $g\_data$}
-            \STATE $guard\_to\_witnesses[g]\gets guard\_to\_witnesses[g]\cup index$
-        \ENDFOR
-        \STATE $shadow\_index\gets shadow\_index + 1$
-    \ENDIF
-    \IF{$is\_light$}
-        \STATE $light\_guard\_sets.append(g\_data)$
-    \ENDIF
-\ENDFOR
-\RETURN $witness\_to\_guards, guard\_to\_witnesses, light\_guard\_sets, all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
+\Procedure{AVP\_processing}{$faces$ of the AVP arrangement}
+\State Initialize empty maps: $witness\_to\_guards, guard\_to\_witnesses, all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
+\State Initialize empty list: $light\_guard\_sets$
+\State $shadow\_index\gets 0$
+\State $all\_index\gets 0$
+\For{$face$ in $faces$}
+    \State $g\_data\gets$ guard set of the $face$
+    \If{$g\_data$ is empty}
+        \State Continue
+    \EndIf
+    \State $is\_shadow\gets true$
+    \State $is\_light\gets true$
+    \For{$half\_edge$ in $face$}
+        \State $twin\_g\_data\gets$ guard set of the twin face of the $half\_edge$
+        \If{$twin\_g\_data$ is empty}
+            \State Continue
+        \EndIf
+        \If{$g\_data\subset twin\_g\_data$}
+            \State $is\_shadow\gets false$
+        \EndIf
+        \If{$twin\_g\_data\subset g\_data$}
+            \State $is\_light\gets false$
+        \EndIf
+    \EndFor
+    \State $all\_witness\_to\_guards[all\_index]\gets g\_data$
+    \For{$g$ in $g\_data$}
+        \State $all\_guard\_to\_witnesses[g]\gets all\_guard\_to\_witnesses[g]\cup all\_index$
+    \EndFor
+    \State $all\_index\gets all\_index + 1$
+    \If{$is\_shadow$}
+        \State $witness\_to\_guards[index]\gets g\_data$
+        \For{$g$ in $g\_data$}
+            \State $guard\_to\_witnesses[g]\gets guard\_to\_witnesses[g]\cup index$
+        \EndFor
+        \State $shadow\_index\gets shadow\_index + 1$
+    \EndIf
+    \If{$is\_light$}
+        \State $light\_guard\_sets.append(g\_data)$
+    \EndIf
+\EndFor
+\Return $witness\_to\_guards, guard\_to\_witnesses, light\_guard\_sets, all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
 \end{algorithmic}
 \end{algorithm}
 
@@ -175,24 +175,24 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 \begin{algorithm}
 \caption{Greedy Algorithm}\label{alg:greedy}
 \begin{algorithmic}[1]
-\REQUIRE $guard\_to\_witnesses, all\_witnesses, G_{vis}$
-\STATE Initialize empty set: $solution$
-\STATE $uncovered\gets all\_witnesses$
-\STATE $color\gets 0$
-\WHILE{$uncovered$ is not empty}
-    \STATE Initialize empty list: $weights$
-    \FORALL{$(guard, witnesses)$ in $guard\_to\_witnesses$}
-        \STATE $weights.insert((guard, |witnesses\cap uncovered|))$
-    \ENDFOR
-    \STATE $solver\gets WIS\_Solver(weights, G_{vis})$
-    \STATE $independent\_set\gets solver.solve()$
-    \FORALL{$guard$ in $independent\_set$}
-        \STATE $solution\gets solution\cup \{(guard, color)\}$
-        \STATE $uncovered\gets uncovered\setminus guard\_to\_witnesses[guard]$
-    \ENDFOR 
-    \STATE $color\gets color + 1$
-\ENDWHILE
-\RETURN $color, solution$
+\Procedure{greedy}{$guard\_to\_witnesses, all\_witnesses, G_{vis}$}
+\State Initialize empty set: $solution$
+\State $uncovered\gets all\_witnesses$
+\State $color\gets 0$
+\While{$uncovered$ is not empty}
+    \State Initialize empty list: $weights$
+    \For{$(guard, witnesses)$ in $guard\_to\_witnesses$}
+        \State $weights.insert((guard, |witnesses\cap uncovered|))$
+    \EndFor
+    \State $solver\gets WIS\_Solver(weights, G_{vis})$
+    \State $independent\_set\gets solver.solve()$
+    \For{$guard$ in $independent\_set$}
+        \State $solution\gets solution\cup \{(guard, color)\}$
+        \State $uncovered\gets uncovered\setminus guard\_to\_witnesses[guard]$
+    \EndFor 
+    \State $color\gets color + 1$
+\EndWhile
+\Return $color, solution$
 \end{algorithmic}
 \end{algorithm}
 
@@ -210,60 +210,51 @@ As for the algorithm, we generate K-many different edge clique covers, K being t
 \begin{algorithm}
 \caption{Generate Edge Clique Covers}
 \begin{algorithmic}[1]
-\REQUIRE $G, K$
-\STATE Initialize empty lists: $matching, edge\_clique\_covers$
-\STATE Initialize empty set: $covered\_vertices$
-\STATE $edge\_queue\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
-\FOR{$i=0$ \TO $K$}
-    \STATE $(u, v)\gets$ pop edge with highest priority from $edge\_queue$
-    \WHILE{$\{u, v\}\cap covered\_vertices$ is not empty}
-        \STATE $(u, v)\gets$ pop edge with highest priority from $edge\_queue$
-    \ENDWHILE
-    \STATE $edge\gets (u, v)$
-    \STATE $matching.append(edge)$
-    \STATE $covered\_vertices\gets covered\_vertices\cup \{u, v\}$
-\ENDFOR
-\FORALL{$edge$ in $matching$}
-    \STATE $clique\_cover\gets$ Construct Clique Cover with $G, edge$
-    \STATE $edge\_clique\_covers.append(clique\_cover)$
-\ENDFOR
-\RETURN $edge\_clique\_covers$
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}
-\caption{Construct Clique Cover}
-\begin{algorithmic}[1]
-\REQUIRE $G, edge$
-\STATE $uncovered\_graph\gets G$
-\STATE $clique\gets$ Build Clique with $G, edge$
-\STATE $edge\_clique\_cover\gets \{clique\}$
-\STATE Remove edges from $uncovered\_graph$ that are in $clique$
-\STATE $edge\_queue\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
-\WHILE{$uncovered\_graph$ has edges}
-    \STATE $edge\gets$ pop edge with highest priority from $edge\_queue$
-    \STATE $clique\gets$ Build Clique with $G, edge$
-    \STATE $edge\_clique\_cover\gets edge\_clique\_cover\cup {clique}$
-    \STATE Remove edges from $uncovered\_graph$ that consist of vertices in $clique$
-    \STATE Update priorities of edges in $edge\_queue$
-\ENDWHILE
-\RETURN $edge\_clique\_cover$
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}
-\caption{Build Clique}
-\begin{algorithmic}[1]
-\REQUIRE $G, edge$
-\STATE $(u, v)\gets edge$
-\STATE $clique\gets \{u, v\}$
-\STATE $candidates\gets N(u)\cup N(v)$
-\WHILE{$candidates$ is not empty}
-    \STATE $v\gets$ v from $candidates$ with max($\delta(v)$)
-    \STATE $candidates\gets candidates\cup N(v)$
-    \STATE $clique\gets clique\cup {v}$
-\ENDWHILE
-\RETURN clique
+\Procedure{edge\_clique\_covers}{$G, K$}
+\State Initialize empty lists: $matching, edge\_clique\_covers$
+\State Initialize empty set: $covered\_vertices$
+\State $edge\_queue\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
+\For{$i=0$ \TO $K$}
+    \State $(u, v)\gets$ pop edge with highest priority from $edge\_queue$
+    \While{$\{u, v\}\cap covered\_vertices$ is not empty}
+        \State $(u, v)\gets$ pop edge with highest priority from $edge\_queue$
+    \EndWhile
+    \State $edge\gets (u, v)$
+    \State $matching.append(edge)$
+    \State $covered\_vertices\gets covered\_vertices\cup \{u, v\}$
+\EndFor
+\For{$edge$ in $matching$}
+    \State $clique\_cover\gets$ Construct Clique Cover with $G, edge$
+    \State $edge\_clique\_covers.append(clique\_cover)$
+\EndFor
+\Return $edge\_clique\_covers$
+\EndProcedure
+\Procedure{Construct Clique Cover}{$G, edge$}
+\State $uncovered\_graph\gets G$
+\State $clique\gets$ Build Clique with $G, edge$
+\State $edge\_clique\_cover\gets \{clique\}$
+\State Remove edges from $uncovered\_graph$ that are in $clique$
+\State $edge\_queue\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
+\While{$uncovered\_graph$ has edges}
+    \State $edge\gets$ pop edge with highest priority from $edge\_queue$
+    \State $clique\gets$ Build Clique with $G, edge$
+    \State $edge\_clique\_cover\gets edge\_clique\_cover\cup {clique}$
+    \State Remove edges from $uncovered\_graph$ that consist of vertices in $clique$
+    \State Update priorities of edges in $edge\_queue$
+\EndWhile
+\Return $edge\_clique\_cover$
+\EndProcedure
+\Procedure{Build Clique}{$G, edge$}
+\State $(u, v)\gets edge$
+\State $clique\gets \{u, v\}$
+\State $candidates\gets N(u)\cup N(v)$
+\While{$candidates$ is not empty}
+    \State $v\gets$ v from $candidates$ with max($\delta(v)$)
+    \State $candidates\gets candidates\cup N(v)$
+    \State $clique\gets clique\cup {v}$
+\EndWhile
+\Return clique
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
