@@ -107,16 +107,18 @@ Similar to the Chromatic Art Gallery Problem, we use both the MIP and the SAT fo
 The instances are given as lists of points, which represent the outer boundaries of the polygons and possible holes. First, we create a CGAL Polygon\_with\_holes\_2 using the instance input. Then, using the vertices of the polygon and its holes as the guard set $G$, we calculate the visibility regions as polygons for each guard using CGAL's "Triangular\_expansion\_visibility\_2.h" and save each guard together with its visibility polygon in a list. Afterward, we recursively overlay the visibility polygons using CGAL's "Arr\_overlay\_2.h" to obtain the AVP arrangement (\cref{alg:AVP_generation}). To be able to form the partial order over the AVPs, we overload the overlay function to save for every face a set of guards from which it was created. 
 
 \begin{algorithm}
-\caption{generate\_AVP\_recursive(guards: list[tuple[int, Polygon\_with\_holes\_2]])}\label{alg:AVP_generation}
+\caption{AVP Generation}\label{alg:AVP_generation}
 \begin{algorithmic} 
+\Procedure{Generate AVP Recursive}{}
 \State $half\gets len(guards)/2$
 \State $firstHalf\gets guards[:half]$ 
 \State $secondHalf\gets guards[half:]$
 \If{$len(guards) = 1$}
     \State $Arrangement(guards[0][0], guards[0][1])$
 \Else
-    \State $generate\_AVP\_recursive(firstHalf).overlay(generate\_AVP\_recursive(secondHalf))$
+    \State Generate AVP Recursive($firstHal$f).overlay(Generate AVP Recursive($secondHalf$))
 \EndIf
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
@@ -125,7 +127,7 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
 \begin{algorithm}
 \caption{Calculate witness sets and light guard sets}\label{alg:AVP_processing}
 \begin{algorithmic}[1]
-\Procedure{AVP\_processing}{$faces$ of the AVP arrangement}
+\Procedure{AVP Processing}{$faces$ of the AVP arrangement}
 \State Initialize empty maps: $witness\_to\_guards, guard\_to\_witnesses, all\_witness\_to\_guards,\linebreak all\_guard\_to\_witnesses$
 \State Initialize empty list: $light\_guard\_sets$
 \State $shadow\_index\gets 0$
@@ -176,7 +178,7 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 \begin{algorithm}
 \caption{Greedy Algorithm}\label{alg:greedy}
 \begin{algorithmic}[1]
-\Procedure{greedy}{$guard\_to\_witnesses, all\_witnesses, G_{vis}$}
+\Procedure{Greedy}{$guard\_to\_witnesses, all\_witnesses, G_{vis}$}
 \State Initialize empty set: $solution$
 \State $uncovered\gets all\_witnesses$
 \State $color\gets 0$
@@ -212,7 +214,7 @@ As for the algorithm, we generate K-many different edge clique covers, K being t
 \begin{algorithm}
 \caption{Generate Edge Clique Covers}
 \begin{algorithmic}[1]
-\Procedure{edge\_clique\_covers}{$G, K$}
+\Procedure{Generate Edge Clique Covers}{$G$, $K$}
 \State Initialize empty lists: $matching, edge\_clique\_covers$
 \State Initialize empty set: $covered\_vertices$
 \State $edge\_queue\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
@@ -226,12 +228,12 @@ As for the algorithm, we generate K-many different edge clique covers, K being t
     \State $covered\_vertices\gets covered\_vertices\cup \{u, v\}$
 \EndFor
 \For{$edge$ in $matching$}
-    \State $clique\_cover\gets$ Construct Clique Cover with $G, edge$
+    \State $clique\_cover\gets$ Construct Clique Cover($G$, $edge$)
     \State $edge\_clique\_covers.append(clique\_cover)$
 \EndFor
 \Return $edge\_clique\_covers$
 \EndProcedure
-\Procedure{Construct Clique Cover}{$G, edge$}
+\Procedure{Construct Clique Cover}{$G$, $edge$}
 \State $uncovered\_graph\gets G$
 \State $clique\gets$ Build Clique with $G, edge$
 \State $edge\_clique\_cover\gets \{clique\}$
@@ -239,14 +241,14 @@ As for the algorithm, we generate K-many different edge clique covers, K being t
 \State $edge\_queue\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
 \While{$uncovered\_graph$ has edges}
     \State $edge\gets$ pop edge with highest priority from $edge\_queue$
-    \State $clique\gets$ Build Clique with $G, edge$
+    \State $clique\gets$ Build Clique($G, edge$)
     \State $edge\_clique\_cover\gets edge\_clique\_cover\cup {clique}$
     \State Remove edges from $uncovered\_graph$ that consist of vertices in $clique$
     \State Update priorities of edges in $edge\_queue$
 \EndWhile
 \Return $edge\_clique\_cover$
 \EndProcedure
-\Procedure{Build Clique}{$G, edge$}
+\Procedure{Build Clique}{$G$, $edge$}
 \State $(u, v)\gets edge$
 \State $clique\gets \{u, v\}$
 \State $candidates\gets N(u)\cup N(v)$
@@ -270,8 +272,8 @@ As mentioned in the SAT formulation section, when solving SAT problems, we check
 \begin{algorithm}
 \caption{SAT color optimization}\label{alg:SAT_color_opt}
 \begin{algorithmic}[1]
-\Procedure{solve}{$K$, $SATSolver$}
-    \State $color\_lim, solution \gets binary\_search()$
+\Procedure{solve}{$K$}
+    \State $color\_lim, solution \gets$ Binary Search
     \State $missing\_witnesses \gets check\_coverage(solution)$
     \While{$missing\_witnesses$}
         \For{$witness$ in $missing\_witnesses$}
@@ -283,19 +285,19 @@ As mentioned in the SAT formulation section, when solving SAT problems, we check
             \EndFor
             \State $solver.add\_clause([guard\_to\_var[guard][color] \text{ for } (guard, color) \text{ in } subset])$
         \EndFor
-        \State $color\_lim, solution \gets linear\_ascent(color\_lim)$
+        \State $color\_lim, solution \gets$ Linear Ascent($color\_lim$)
         \State $missing\_witnesses \gets check\_coverage(solution)$
     \EndWhile
     \State $solution \gets$ for every guard in $solution$ take the first guard color combination
     \State \Return $color\_lim, solution$
 \EndProcedure
-\Procedure{binary\_search}{}
+\Procedure{Binary Search}{}
     \State $lower \gets 1$
     \State $upper \gets K$
     \State $optimal\_solution \gets None$
     \While{$lower < upper$}
         \State $mid \gets (lower + upper) // 2$
-        \State $solution \gets SATSolver.solve(assumptions=deactivate\_guards(mid))$
+        \State $solution \gets SATSolver.solve(deactivate\_guards(mid))$
         \If{$solution$}
             \State $optimal\_solution \gets solution$
             \State $upper \gets mid$
@@ -304,15 +306,15 @@ As mentioned in the SAT formulation section, when solving SAT problems, we check
         \EndIf
     \EndWhile
     \If{not $optimal\_solution$}
-        \State $optimal\_solution \gets SATSolver.solve(assumptions=deactivate\_guards(upper))$
+        \State $optimal\_solution \gets SATSolver.solve(deactivate\_guards(upper))$
     \EndIf
     \State \Return $lower, optimal\_solution$
 \EndProcedure
-\Procedure{linear\_ascent}{$color\_lim$}
-    \State $solution \gets SATSolver.solve(assumptions=deactivate\_guards(color\_lim))$
+\Procedure{Linear Ascent}{$color\_lim$}
+    \State $solution \gets SATSolver.solve(deactivate\_guards(color\_lim))$
     \While{not $solution$ and $color\_lim <= K$}
         \State $color\_lim \gets color\_lim + 1$
-        \State $solution \gets SATSolver.solve(assumptions=deactivate\_guards(color\_lim))$
+        \State $solution \gets SATSolver.solve(deactivate\_guards(color\_lim))$
     \EndWhile
     \State \Return $color\_lim, solution$
 \EndProcedure
