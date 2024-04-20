@@ -111,18 +111,18 @@ The instances are given as lists of points, which represent the outer boundaries
 \begin{algorithm}
 \caption{AVP Generation}\label{alg:AVP_generation}
 \begin{algorithmic} 
-\Procedure{Generate AVP Recursive}{$guards$}
-\If{$len(guards) = 1$}
-    \State $guard\_id\gets$ id of the remaining guard
-    \State $guard\_vis\_poly\gets$ visibility polygon of the remaining guard
-    \State \Return $Arrangement(guard\_id, guard\_vis\_poly)$
+\Procedure{Generate AVP Recursive}{guards}
+\If{len(guards) = $1$}
+    \State guard\_id $\gets$ id of the remaining guard
+    \State guard\_vis\_poly $\gets$ visibility polygon of the remaining guard
+    \State \Return Arrangement(guard\_id, guard\_vis\_poly)
 \Else
-    \State $half\gets len(guards)/2$
-    \State $firstHalf\gets$ first half of $guards$ 
-    \State $secondHalf\gets$ second half of $guards$
-    \State $AVP\_1\gets$ Generate AVP Recursive($firstHalf$)
-    \State $AVP\_2\gets$ Generate AVP Recursive($secondHalf$)
-    \State \Return $AVP\_1$.overlay($AVP\_2$)
+    \State half $\gets$ len(guards)/$2$
+    \State first\_half $\gets$ first half of guards
+    \State second\_half $\gets$ second half of guards
+    \State AVP\_$1$ $\gets$ Generate AVP Recursive(first\_half)
+    \State AVP\_$2$ $\gets$ Generate AVP Recursive(second\_half)
+    \State \Return AVP\_$1$.overlay(AVP\_$2$)
 \EndIf
 \EndProcedure
 \end{algorithmic}
@@ -134,46 +134,46 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
 \caption{Calculate witness sets and light guard sets}\label{alg:AVP_processing}
 \begin{algorithmic}[1]
 \Procedure{AVP Processing}{$faces$ of the AVP arrangement}
-\State Initialize empty maps: $witness\_to\_guards$, $guard\_to\_witnesses$, $all\_witness\_to\_guards$, $all\_guard\_to\_witnesses$
-\State Initialize empty list: $light\_guard\_sets$
-\State $shadow\_index\gets 0$
-\State $all\_index\gets 0$
-\For{$face$ in $faces$}
-    \State $g\_data\gets$ guard set of the $face$
-    \If{$g\_data$ is empty}
+\State Initialize empty maps: shadow\_witness\_to\_guards, guard\_to\_shadow\_witnesses, all\_witness\_to\_guards, guard\_to\_all\_witnesses
+\State Initialize empty list: light\_guard\_sets
+\State shadow\_index $\gets 0$
+\State all\_index $\gets 0$
+\For{face in faces}
+    \State g\_data $\gets$ guard set of the face
+    \If{g\_data is empty}
         \State Continue
     \EndIf
-    \State $is\_shadow\gets true$
-    \State $is\_light\gets true$
-    \For{$half\_edge$ in $face$}
-        \State $twin\_g\_data\gets$ guard set of the twin face of the $half\_edge$
-        \If{$twin\_g\_data$ is empty}
+    \State is\_shadow $\gets$ true
+    \State is\_light $\gets$ true
+    \For{half\_edge in face}
+        \State twin\_g\_data $\gets$ guard set of the twin face of the half\_edge
+        \If{twin\_g\_data is empty}
             \State Continue
         \EndIf
-        \If{$g\_data\subset twin\_g\_data$}
-            \State $is\_shadow\gets false$
+        \If{g\_data $\subset$ twin\_g\_data}
+            \State is\_shadow $\gets$ false
         \EndIf
-        \If{$twin\_g\_data\subset g\_data$}
-            \State $is\_light\gets false$
+        \If{twin\_g\_data $\subset$ g\_data}
+            \State is\_light $\gets$ false
         \EndIf
     \EndFor
-    \State $all\_witness\_to\_guards[all\_index]\gets g\_data$
-    \For{$g$ in $g\_data$}
-        \State $all\_guard\_to\_witnesses[g]\gets all\_guard\_to\_witnesses[g]\cup all\_index$
+    \State all\_witness\_to\_guards[all\_index] $\gets$ g\_data
+    \For{g in g\_data}
+        \State guard\_to\_all\_witnesses[g] $\gets$ guard\_to\_all\_witnesses[g] $\cup$ all\_index
     \EndFor
-    \State $all\_index\gets all\_index + 1$
-    \If{$is\_shadow$}
-        \State $witness\_to\_guards[index]\gets g\_data$
-        \For{$g$ in $g\_data$}
-            \State $guard\_to\_witnesses[g]\gets guard\_to\_witnesses[g]\cup index$
+    \State all\_index $\gets$ all\_index $+ 1$
+    \If{is\_shadow}
+        \State shadow\_witness\_to\_guards[index] $\gets$ g\_data
+        \For{g in g\_data}
+            \State guard\_to\_shadow\_witnesses[g] $\gets$ guard\_to\_shadow\_witnesses[g] $\cup$ index
         \EndFor
-        \State $shadow\_index\gets shadow\_index + 1$
+        \State shadow\_index $\gets$ shadow\_index $+ 1$
     \EndIf
-    \If{$is\_light$}
-        \State $light\_guard\_sets.append(g\_data)$
+    \If{is\_light}
+        \State light\_guard\_sets.append(g\_data)
     \EndIf
 \EndFor
-\State \Return $witness\_to\_guards$, $guard\_to\_witnesses$, $light\_guard\_sets$, $all\_witness\_to\_guards$, $all\_guard\_to\_witnesses$
+\State \Return shadow\_witness\_to\_guards, guard\_to\_shadow\_witnesses, light\_guard\_sets, all\_witness\_to\_guards, guard\_to\_all\_witnesses
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
