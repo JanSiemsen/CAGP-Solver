@@ -296,6 +296,33 @@ As mentioned in the SAT formulation section, when solving SAT problems, we check
     \State $solution \gets [seen.setdefault(g[0], g) \text{ for } g \text{ in } solution \text{ if } g[0] \text{ not in } seen]$
     \State \Return $color\_lim, solution$
 \EndProcedure
+\Procedure{binary\_search}{}
+    \State $lower \gets 1$
+    \State $upper \gets K$
+    \State $optimal\_solution \gets None$
+    \While{$lower < upper$}
+        \State $mid \gets (lower + upper) // 2$
+        \State $solution \gets \_\_solve(assumptions=\_\_deactivate\_guards(mid))$
+        \If{$solution$}
+            \State $optimal\_solution \gets solution$
+            \State $upper \gets mid$
+        \Else
+            \State $lower \gets mid + 1$
+        \EndIf
+    \EndWhile
+    \If{not $optimal\_solution$}
+        \State $optimal\_solution \gets \_\_solve(assumptions=\_\_deactivate\_guards(upper))$
+    \EndIf
+    \State \Return $lower, optimal\_solution$
+\EndProcedure
+\Procedure{linear\_ascent}{$color\_lim$}
+    \State $solution \gets \_\_solve(assumptions=\_\_deactivate\_guards(color\_lim))$
+    \While{not $solution$ and $color\_lim <= K$}
+        \State $color\_lim \gets color\_lim + 1$
+        \State $solution \gets \_\_solve(assumptions=\_\_deactivate\_guards(color\_lim))$
+    \EndWhile
+    \State \Return $color\_lim, solution$
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
