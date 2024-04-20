@@ -5,7 +5,7 @@ import seaborn as sns
 import numpy as np
 
 data_set = read_as_pandas(
-    "./mini_benchmark_MIP_with_holes",
+    "benchmarks/mini_benchmark_MIP_with_holes_2",
     lambda instance: {
         "instance_name": instance["parameters"]["args"]["metadata"]["instance_name"],
         "parameter_set": instance["parameters"]["args"]["alg_params"]["parameter_set"],
@@ -28,9 +28,23 @@ data_set = read_as_pandas(
 
 # exit()
 
-data_set = data_set.loc[(data_set['status'] == 'success') & (data_set['time'] < 600)]
+# data_set = data_set.loc[(data_set['status'] == 'timeout')]
 
-# # Convert inf values to NaN before operating
+# for index, row in data_set.iterrows():
+#     print(row['instance_name'], row['parameter_set'])
+
+# exit()
+
+data_set = data_set.loc[(data_set['status'] == 'success') & (data_set['time'] < 200) & (data_set['parameter_set'] == 2)]
+
+# Find the instance with the largest time
+max_time_instance = data_set.loc[data_set['time'].idxmax()]
+print("Instance with the largest time:")
+print(max_time_instance['instance_name'])
+print(max_time_instance['time'])
+exit()
+
+# # # Convert inf values to NaN before operating
 # data_set.replace([np.inf, -np.inf], np.nan, inplace=True)
 
 # # Group the data by label
@@ -88,14 +102,14 @@ ax.axis('off')
 cell_colors = np.array([[(1, 0, 0) if val < 30 else (0, 1, 0) for val in row] for row in pivot.values])
 
 # # Create a color matrix for the table
-cell_colors = np.array([[(1, 1, 1) for _ in range(pivot.shape[1])] for _ in range(pivot.shape[0])])
+# cell_colors = np.array([[(1, 1, 1) for _ in range(pivot.shape[1])] for _ in range(pivot.shape[0])])
 
-# Find the smallest 'Average runtime' in each row and color it
-for i, row in enumerate(pivot.values):
-    avg_runtime_cols = [j for j, col in enumerate(pivot.columns)]
-    sorted_avg_runtime_cols = sorted(avg_runtime_cols, key=lambda j: row[j])
-    if len(sorted_avg_runtime_cols) > 0:
-        cell_colors[i, sorted_avg_runtime_cols[0]] = (0, 1, 0)  # smallest, lime
+# # Find the smallest 'Average runtime' in each row and color it
+# for i, row in enumerate(pivot.values):
+#     avg_runtime_cols = [j for j, col in enumerate(pivot.columns)]
+#     sorted_avg_runtime_cols = sorted(avg_runtime_cols, key=lambda j: row[j])
+#     if len(sorted_avg_runtime_cols) > 0:
+#         cell_colors[i, sorted_avg_runtime_cols[0]] = (0, 1, 0)  # smallest, lime
 # if len(sorted_avg_runtime_cols) > 1:
 #     cell_colors[i, sorted_avg_runtime_cols[1]] = (1, 1, 0)  # second smallest, yellow
 # if len(sorted_avg_runtime_cols) > 2:
@@ -117,5 +131,5 @@ fig.set_size_inches(len(pivot.columns)*0.9, len(pivot.index)*0.9)
 # Adjust the layout to minimize padding
 plt.tight_layout()
 
-plt.savefig("plots/instances_solved_MIP_with_holes.png", dpi=300)
+plt.savefig("plots/instances_solved_MIP_with_holes_2.png", dpi=300)
 # plt.savefig("table_average_runtime_solver.png", dpi=300)

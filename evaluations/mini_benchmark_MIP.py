@@ -2,31 +2,30 @@ import glob
 from importlib.metadata import files
 import os
 import time
-from pyvispoly import Point, PolygonWithHoles
+from CAGP_Solver import Point, PolygonWithHoles
 from algbench import describe, read_as_pandas, Benchmark
-from CAGPSolverMIP import CAGPSolverMIP as CAGPSolver_MIP
-import solver_utils
-from GreedyCAGP import get_greedy_solution
+from CAGP_Solver import CAGPSolverMIP, generate_solver_input, get_greedy_solution, generate_edge_clique_covers, verify_solver_solution
 
-benchmark = Benchmark("/home/yanyan/PythonProjects/CAGP-Solver/cagp_solver/mini_benchmark_MIP_with_holes")
+benchmark = Benchmark("/home/yanyan/PythonProjects/CAGP-Solver/cagp_solver/benchmarks/mini_benchmark_MIP_with_holes_2")
 
 alg_params_to_evaluate = [
     {"parameter_set": 0},
     {"parameter_set": 1},
+    {"parameter_set": 2},
 ]
 
 if __name__ == "__main__":
 
     def load_instance_and_run(instance, metadata, alg_params):
 
-        solver = CAGPSolver_MIP(instance[0], instance[1], instance[2], instance[3], instance[4], instance[6], alg_params["parameter_set"])
+        solver = CAGPSolverMIP(instance[0], instance[1], instance[2], instance[3], instance[4], instance[6], alg_params["parameter_set"])
 
         def eval_SAT(metadata, alg_params, _instance, _solver):
             # arguments starting with `_` are not saved.
 
             colors, solution, iteration, number_of_witnesses, status = _solver.solve()
 
-            if not status == "timeout" and not solver_utils.verify_solver_solution(solution, _instance[5]):
+            if not status == "timeout" and not verify_solver_solution(solution, _instance[5]):
                 status = "invalid"
             
             return {  # the returned values are saved to the database
@@ -78,7 +77,7 @@ if __name__ == "__main__":
     #         except Exception as e:
     #             print(f"Error with {alg_params['solver']} for {instance_name}: {e}")
 
-    relative_path = 'cagp_solver/mini_benchmark_instances/simple-polygons-with-holes/*.pol'
+    relative_path = 'cagp_solver/benchmark_instances/mini_benchmark_instances/simple-polygons-with-holes/*.pol'
 
     print(os.path.join(root_path, relative_path))
     files = glob.glob(os.path.join(root_path, relative_path))
@@ -114,11 +113,11 @@ if __name__ == "__main__":
                 linear_rings.append(linear_ring)  # Add hole to linear_rings
             poly = PolygonWithHoles(linear_rings[0], linear_rings[1:])
 
-        guards, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, GC, guard_to_witnesses_cf, witness_to_guards_cf, initial_witnesses_cf, all_witnesses_cf = solver_utils.generate_solver_input(poly, guards_on_holes=True)
+        guards, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, GC, guard_to_witnesses_cf, witness_to_guards_cf, initial_witnesses_cf, all_witnesses_cf = generate_solver_input(poly, guards_on_holes=True)
 
         greedyColors, greedySolution = get_greedy_solution(guard_to_witnesses, all_witnesses, GC)
 
-        edge_clique_covers = solver_utils.generate_edge_clique_covers(GC, greedyColors)
+        edge_clique_covers = generate_edge_clique_covers(GC, greedyColors)
 
         for alg_params in alg_params_to_evaluate:
             try:

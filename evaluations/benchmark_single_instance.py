@@ -1,5 +1,5 @@
 import time
-from pyvispoly import Point, PolygonWithHoles, plot_polygon
+from CAGP_Solver import Point, PolygonWithHoles, plot_polygon
 from CAGP_Solver import get_greedy_solution, generate_solver_input, generate_edge_clique_covers, verify_solver_solution
 from CAGP_Solver import CAGPSolverMIP
 from CAGP_Solver import CAGPSolverSAT
@@ -25,7 +25,7 @@ def convert_to_LinearRing(edges: list, pos: dict) -> list[Point]:
     return ring
 
 # to parse simple polygons from Salzburg Benchmark
-# G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000030000.graphml.xz').read())
+# G = nx.parse_graphml(lzma.open('/home/yanyan/PythonProjects/CAGP-Solver/db/sbgdb-20200507/polygons/random/fpg/fpg-poly_0000006000.graphml.xz').read())
 # pos = {}
 # for node in G.nodes(data=True):
 #     node_location = tuple(node[1].values())
@@ -46,7 +46,7 @@ def convert_to_LinearRing(edges: list, pos: dict) -> list[Point]:
 #     poly = PolygonWithHoles(linear_ring)
 
 # to parse simple polygons from AGP2009 Benchmark with holes
-with open('/home/yanyan/PythonProjects/CAGP-Solver/simple-polygons-with-holes/g1_simple-simple_75:300v-30h_14.pol') as f:
+with open('/home/yanyan/PythonProjects/CAGP-Solver/simple-polygons-with-holes/g1_simple-simple_75:300v-30h_25.pol') as f:
     vertices = f.readline().split()
     linear_rings = []
     num_points = int(vertices.pop(0))
@@ -107,7 +107,7 @@ end = time.time()
 print('Time to generate edge clique covers:', end - start, 'seconds')
 
 print('Creating MIP solver...')
-solverMIP = CAGPSolverMIP(greedyColors, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, edge_clique_covers, parameter_set=0, solution=greedySolution)
+solverMIP = CAGPSolverMIP(greedyColors, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, edge_clique_covers, parameter_set=2, solution=greedySolution)
 print('Solving MIP...')
 num_colors, solution, iterations, number_of_witnesses, status = solverMIP.solve()
 # print([(guard, color) for guard, color in solution])

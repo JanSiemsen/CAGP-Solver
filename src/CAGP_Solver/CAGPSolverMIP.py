@@ -15,6 +15,7 @@ class CAGPSolverMIP:
         self.model = grb.Model()
         # self.model.Params.MemLimit = 16
         self.model.Params.TimeLimit = 600
+        self.model.Params.lazyConstraints = 1
 
         self.__make_vars()
         self.__add_witness_covering_constraints()
@@ -29,7 +30,6 @@ class CAGPSolverMIP:
         # Set solver parameters for faster computation
         if parameter_set == 0:
             # parameters generated from DCAGP paper benchmark instance (randsimple-2500-1)
-            self.model.Params.lazyConstraints = 1
             self.model.Params.Method = 0
             self.model.Params.Heuristics = 0
             self.model.Params.MIPFocus = 2 # important
@@ -38,20 +38,21 @@ class CAGPSolverMIP:
             self.model.Params.PrePasses = 1 # important
         elif parameter_set == 1:
             # parameters generated from salzburg benchmark instance (fpg-poly_0000002500)
-            self.model.Params.lazyConstraints = 1
             self.model.Params.MIPFocus = 2
             self.model.Params.PrePasses = 1
             self.model.Params.Method = 0
             self.model.Params.DegenMoves = 2
             self.model.Params.Cuts = 1
+        elif parameter_set == 2:
+            self.model.Params.Cuts = 0
+            self.model.Params.Presolve = 2
+            self.model.Params.Method = 0
+            self.model.Params.Heuristics = 0
+            self.model.Params.NumericFocus = 2
         # self.model.Params.LogFile = 'mip.log'
 
         # Set the objective
         self.model.setObjective(sum(self.color_vars.values()), grb.GRB.MINIMIZE)
-
-        # Tune the solver
-        # self.model.Params.TuneTimeLimit = 30000
-        # self.model.tune()
 
     def __make_vars(self):
         # Create binary variables for every color
@@ -112,6 +113,7 @@ class CAGPSolverMIP:
             print('Adding new witnesses...')
             self.iteration += 1
             self.number_of_witnesses += len(missing_witnesses)
+            self.added_witnesses = self.added_witnesses.union(missing_witnesses)
             for witness in missing_witnesses:
                 subset = []
                 for guard in self.witness_to_guards[witness]:
@@ -135,6 +137,7 @@ class CAGPSolverMIP:
 
     def solve(self):
         self.iteration = 1
+        self.added_witnesses = set()
         callback = lambda model, where: self.callback(where, model, self.guard_vars)
         self.model.optimize(callback)
         if self.model.status != grb.GRB.OPTIMAL:
@@ -144,6 +147,16 @@ class CAGPSolverMIP:
         print(f"[CAGP SOLVER]: Found the minimum amount of colors required: {obj_val}")
         print(f"[CAGP SOLVER]: Iterations: {self.iteration}")
         print(f"[CAGP SOLVER]: Witnesses used: {self.number_of_witnesses}")
+
+        # code for saving the model
+        # for witness in self.added_witnesses:
+        #     subset = []
+        #     for guard in self.witness_to_guards[witness]:
+        #         for k in range(self.K):
+        #             subset.append((guard, k))
+        #     self.model.addConstr(1 <= sum(self.guard_vars[guard][k] for guard, k in subset))
+        # self.model.write('CAGP_MIP_model.mps')
+
         return obj_val, [(guard, color) for guard, color_dict in self.guard_vars.items() for color, variable in color_dict.items() if variable.x >= 0.5], self.iteration, self.number_of_witnesses, "success"
 
     def __provide_init_solution(self, solution):

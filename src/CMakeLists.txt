@@ -1,1 +1,1 @@
-add_subdirectory(pyvispoly-modified)
+add_subdirectory(CAGP_Solver)

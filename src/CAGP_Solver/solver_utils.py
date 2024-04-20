@@ -1,6 +1,6 @@
 from functools import partial
 from itertools import combinations
-from pyvispoly_modified import Point, PolygonWithHoles, VisibilityPolygonCalculator, AVP_Arrangement
+from ._cgal_bindings import Point, PolygonWithHoles, VisibilityPolygonCalculator, AVP_Arrangement
 import rustworkx as rx
 from heapq import heappop, heappush
 from collections import defaultdict
