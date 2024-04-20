@@ -133,7 +133,7 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
 \begin{algorithm}
 \caption{Calculate witness sets and light guard sets}\label{alg:AVP_processing}
 \begin{algorithmic}[1]
-\Procedure{AVP Processing}{$faces$ of the AVP arrangement}
+\Procedure{AVP Processing}{faces of the AVP arrangement}
 \State Initialize empty maps: shadow\_witness\_to\_guards, guard\_to\_shadow\_witnesses, all\_witness\_to\_guards, guard\_to\_all\_witnesses
 \State Initialize empty list: light\_guard\_sets
 \State shadow\_index $\gets 0$
@@ -184,24 +184,24 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 \begin{algorithm}
 \caption{Greedy Algorithm}\label{alg:greedy}
 \begin{algorithmic}[1]
-\Procedure{Greedy}{$guard\_to\_witnesses, all\_witnesses, G_{vis}$}
-\State Initialize empty set: $solution$
-\State $uncovered\gets all\_witnesses$
-\State $color\gets 0$
-\While{$uncovered$ is not empty}
-    \State Initialize empty list: $weights$
-    \For{$(guard, witnesses)$ in $guard\_to\_witnesses$}
-        \State $weights.append((guard, |witnesses\cap uncovered|))$
+\Procedure{Greedy}{guard\_to\_shadow\_witnesses, all\_shadow\_witnesses, $G_{vis}$}
+\State Initialize empty set: solution
+\State uncovered $\gets$ all\_shadow\_witnesses
+\State color $\gets 0$
+\While{uncovered is not empty}
+    \State Initialize empty list: weights
+    \For{(guard, witnesses) in guard\_to\_shadow\_witnesses}
+        \State weights.append((guard, |witnesses $\cap$ uncovered|))
     \EndFor
-    \State $solver\gets WIS\_Solver(weights, G_{vis})$
-    \State $independent\_set\gets solver.solve()$
-    \For{$guard$ in $independent\_set$}
-        \State $solution\gets solution\cup \{(guard, color)\}$
-        \State $uncovered\gets uncovered\setminus guard\_to\_witnesses[guard]$
+    \State solver $\gets$ WIS\_Solver(weights, $G_{vis}$)
+    \State independent\_set $\gets$ solver.solve()
+    \For{guard in independent\_set}
+        \State solution $\gets$ solution $\cup$ \{(guard, color)\}
+        \State uncovered $\gets$ uncovered $\setminus$ guard\_to\_shadow\_witnesses[guard]
     \EndFor 
-    \State $color\gets color + 1$
+    \State color $\gets$ color $+ 1$
 \EndWhile
-\Return $color, solution$
+\State \Return color, solution
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
@@ -221,47 +221,47 @@ As for the algorithm, we generate K-many different edge clique covers, K being t
 \caption{Generate Edge Clique Covers}
 \begin{algorithmic}[1]
 \Procedure{Generate Edge Clique Covers}{$G$, $K$}
-\State Initialize empty lists: $matching, edge\_clique\_covers$
-\State Initialize empty set: $covered\_vertices$
-\State $edge\_queue\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
+\State Initialize empty lists: matching, edge\_clique\_covers
+\State Initialize empty set: covered\_vertices
+\State edge\_queue $\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
 \For{$i=0$, $i{+}{+}$, $K$}
     \State $(u, v)\gets$ pop edge with highest priority from $edge\_queue$
-    \While{$\{u, v\}\cap covered\_vertices$ is not empty}
+    \While{$\{u, v\}\cap$ covered\_vertices is not empty}
         \State $(u, v)\gets$ pop edge with highest priority from $edge\_queue$
     \EndWhile
-    \State $edge\gets (u, v)$
-    \State $matching.append(edge)$
-    \State $covered\_vertices\gets covered\_vertices\cup \{u, v\}$
+    \State edge $\gets (u, v)$
+    \State matching.append(edge)
+    \State covered\_vertices $\gets$ covered\_vertices $\cup \{u, v\}$
 \EndFor
-\For{$edge$ in $matching$}
-    \State $clique\_cover\gets$ Construct Clique Cover($G$, $edge$)
-    \State $edge\_clique\_covers.append(clique\_cover)$
+\For{edge in matching}
+    \State clique\_cover $\gets$ Construct Clique Cover($G$, edge)
+    \State edge\_clique\_covers.append(clique\_cover)
 \EndFor
-\Return $edge\_clique\_covers$
+\State \Return edge\_clique\_covers
 \EndProcedure
-\Procedure{Construct Clique Cover}{$G$, $edge$}
-\State $uncovered\_graph\gets G$
-\State $clique\gets$ Build Clique with $G, edge$
-\State $edge\_clique\_cover\gets \{clique\}$
-\State Remove edges from $uncovered\_graph$ that are in $clique$
-\State $edge\_queue\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
-\While{$uncovered\_graph$ has edges}
-    \State $edge\gets$ pop edge with highest priority from $edge\_queue$
-    \State $clique\gets$ Build Clique($G, edge$)
-    \State $edge\_clique\_cover\gets edge\_clique\_cover\cup {clique}$
-    \State Remove edges from $uncovered\_graph$ that consist of vertices in $clique$
-    \State Update priorities of edges in $edge\_queue$
+\Procedure{Construct Clique Cover}{$G$, edge}
+\State uncovered\_graph $\gets G$
+\State clique $\gets$ Build Clique($G$, edge)
+\State edge\_clique\_cover $\gets$ \{clique\}
+\State Remove edges from uncovered\_graph that are in clique
+\State edge\_queue $\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
+\While{uncovered\_graph has edges}
+    \State edge $\gets$ pop edge with highest priority from edge\_queue
+    \State clique $\gets$ Build Clique($G$, edge)
+    \State edge\_clique\_cover $\gets$ edge\_clique\_cover $\cup$ \{clique\}
+    \State Remove edges from uncovered\_graph that consist of vertices in clique
+    \State Update priorities of edges in edge\_queue
 \EndWhile
-\Return $edge\_clique\_cover$
+\State \Return edge\_clique\_cover
 \EndProcedure
-\Procedure{Build Clique}{$G$, $edge$}
-\State $(u, v)\gets edge$
-\State $clique\gets \{u, v\}$
-\State $candidates\gets N(u)\cup N(v)$
-\While{$candidates$ is not empty}
-    \State $v\gets$ v from $candidates$ with max($\delta(v)$)
-    \State $candidates\gets candidates\cup N(v)$
-    \State $clique\gets clique\cup {v}$
+\Procedure{Build Clique}{$G$, edge}
+\State $(u, v)\gets$ edge
+\State clique $\gets \{u, v\}$
+\State candidates $\gets N(u)\cup N(v)$
+\While{candidates is not empty}
+    \State $v\gets v$ from candidates with max($\delta(v)$)
+    \State candidates $\gets$ candidates $\cup N(v)$
+    \State clique $\gets$ clique $\cup \{v\}$
 \EndWhile
 \Return clique
 \EndProcedure
