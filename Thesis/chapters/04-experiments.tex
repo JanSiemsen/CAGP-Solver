@@ -1,10 +1,18 @@
 \chapter{Experiments}
-If you have experiments, write down:
-\begin{itemize}
-	\item Implementation details (e.g., libraries, third-party programs, \dots): CGAL, gurobi, pysat, ortools cpsat
-	\item In which environment are you testing (e.g., system specifications): AMD Ryzen 7 7800X3D 8-Core Processor 4.20 GHz, 32.0 GB RAM
-	\item What are you testing? (e.g., runtime, space needed, fps, \dots): runtime
-	\item What are the results? Show fancy figures!
-	\item What does the results mean? (e.g., give a little discussion on your results)
-	\item \dots
-\end{itemize}
+\section{Experiment Environment}
+All geometric operations were implemented using the C++ library CGAL. The visibility graph creation as well as all solvers were implemented in Python (version 3.10.14). For the MIP solvers, we used Gurobi (gurobipy version 11.0.1). The SAT solvers were implemented using PySAT (python-sat version 0.1.8.dev9). Lastly, the CP-SAT solvers were implemented with OR-tools CP-SAT solver (ortools version 9.9.3963).
+The benchmarks were run in WSL2 (Windows 11, version 22H2) using an AMD Ryzen 7 7800X3D 8-Core Processor 4.20 GHz and the WSL was assigned 28 GB of RAM.
+
+\section{SAT Solver Choice}
+
+\section{CP-SAT Formulation Comparison}
+
+\section{MIP vs. SAT vs. CP-SAT}
+
+\subsection{Simple Polygons}
+
+\subsection{Orthogonal Polygons}
+
+\subsection{Simple Polygons with Holes}
+
+\subsection{Random von Koch Polygons}
