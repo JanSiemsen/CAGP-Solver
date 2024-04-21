@@ -45,36 +45,29 @@ def generate_solver_input(polygon: PolygonWithHoles, guards_on_holes: bool=True)
     avp = generate_AVP_recursive(list(guards.items()))
     # progress.refresh()
     # progress.close()
-    witness_to_guards, guard_to_witnesses, light_guard_sets, witness_to_guards_cf, guard_to_witnesses_cf = avp.get_shadow_witnesses_and_light_guard_sets(list(guards.keys()))
+    witness_to_guards, guard_to_witnesses, light_guard_sets, witness_to_guards_cf, guard_to_witnesses_cf, all_guard_sets = avp.get_shadow_witnesses_and_light_guard_sets(list(guards.keys()))
+
+    shadow_avps, light_avps = avp.get_shadow_and_light_avps()
+
+    all_avps = avp.get_avps()
 
     # print('Creating visibility graph...')
     # progress = tqdm(total=len(light_guard_sets))
-    for guard_set in light_guard_sets:
+    for guard_set in all_guard_sets:
         for g1, g2 in combinations(guard_set, 2):
             GC.add_edge(g1, g2, None)
         # progress.update()
     # progress.close()
 
     # print('Creating witness set...')
-    initial_witnesses = []
     all_witnesses = sorted(witness_to_guards.keys(), key=lambda x: len(witness_to_guards[x]))
-    amount = 0
-    # progress = tqdm(total=len(all_witnesses))
-    for witness in all_witnesses:
-        if amount < len(guards):
-            index = GC.add_node(None)
-            if index != witness:
-                Exception("Witness index does not match the index returned by the graph")
-            initial_witnesses.append(witness)
-        amount += 1
-        # progress.update()
-    # progress.close()
+    initial_witnesses = all_witnesses[:len(guards)]
 
     # print('Creating initial witnesses and all witnesses for conflict-free...')
     all_witnesses_cf = sorted(witness_to_guards_cf.keys(), key=lambda x: len(witness_to_guards_cf[x]), reverse=True)
     initial_witnesses_cf = all_witnesses_cf[:len(guards)]
 
-    return guards, guard_to_witnesses, witness_to_guards, initial_witnesses, set(all_witnesses), GC, guard_to_witnesses_cf, witness_to_guards_cf, initial_witnesses_cf, set(all_witnesses_cf)
+    return guards, guard_to_witnesses, witness_to_guards, initial_witnesses, set(all_witnesses), GC, guard_to_witnesses_cf, witness_to_guards_cf, initial_witnesses_cf, set(all_witnesses_cf), shadow_avps, light_avps, all_avps, light_guard_sets, all_guard_sets
 
 def sort_edge(e: tuple[int, int]):
     return (min(e[0], e[1]), max(e[0], e[1]))
@@ -171,64 +164,3 @@ def verify_solver_solution(solution: list[(str, int)], G: rx.PyGraph) -> bool:
             return False
 
     return True
-
-# def generate_edge_clique_covers(G: rx.PyGraph, K: int) -> list[list[list[int]]]:
-#     edge_clique_covers = []
-
-#     # Construct a matching composed of K edges with the lowest sum of degrees of their vertices
-#     sorted_edges = iter(sorted(G.edge_index_map().values(), key=lambda x: G.degree(x[0]) + G.degree(x[1])))
-#     matching = []
-#     covered_vertices = set()
-#     for i in range(K):
-#         edge = next(sorted_edges)
-#         while(edge[0] in covered_vertices or edge[1] in covered_vertices):
-#             edge = next(sorted_edges)
-#         matching.append(edge)
-#         covered_vertices.add(edge[0])
-#         covered_vertices.add(edge[1])
-
-#     # Construct a clique cover for each edge in the matching
-#     for i in range(K):
-#         clique = build_clique(matching[i], G)
-#         uncovered_graph = G.copy()
-#         uncovered_graph.remove_edges_from(list(combinations(clique, 2)))
-#         edge_clique_cover = [clique]
-
-#         # Build a priority queue of edges, with priority being the negative sum of degrees
-#         edge_map = {sort_edge((e[0], e[1])): [-uncovered_graph.degree(e[0]) - uncovered_graph.degree(e[1]), sort_edge((e[0], e[1]))] for e in uncovered_graph.edge_index_map().values()}
-#         edge_queue = []
-#         for e in edge_map.values():
-#             heappush(edge_queue, e.copy())
-
-#         while len(uncovered_graph.edge_indices()) > 0:
-#             # Get the edge with highest priority
-#             while True:
-#                 neg_degree, edge = heappop(edge_queue)
-#                 if edge is not REMOVED:
-#                     current_neg_degree = -uncovered_graph.degree(edge[0]) - uncovered_graph.degree(edge[1])
-#                     if neg_degree == current_neg_degree:
-#                         break
-
-#             clique = build_clique(edge, uncovered_graph)
-#             edges_to_remove = list(combinations(clique, 2))
-#             uncovered_graph.remove_edges_from(edges_to_remove)
-#             edge_clique_cover.append(clique)
-
-#             # Mark the removed edges as "REMOVED" in the queue and keep track of the affected edges
-#             affected_edges = set()
-#             for e in edges_to_remove:
-#                 e = (min(e[0], e[1]), max(e[0], e[1]))
-#                 if e in edge_map:
-#                     edge_map[e][1] = REMOVED
-#                 affected_edges.update((n, e[0]) for n in G.neighbors(e[0]))
-#                 affected_edges.update((n, e[1]) for n in G.neighbors(e[1]))
-
-#             # Update the degrees in the queue for the affected edges
-#             for e in affected_edges:
-#                 e = (min(e[0], e[1]), max(e[0], e[1]))
-#                 if e in edge_map and edge_map[e][1] is not REMOVED:
-#                     edge_map[e][0] = -uncovered_graph.degree(e[0]) - uncovered_graph.degree(e[1])
-#                     heappush(edge_queue, edge_map[e].copy())
-
-#         edge_clique_covers.append(edge_clique_cover)
-#     return edge_clique_covers

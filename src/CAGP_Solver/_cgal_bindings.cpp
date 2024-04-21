@@ -644,154 +644,94 @@ PYBIND11_MODULE(_cgal_bindings, m) {
              return result;
            },
            "Computes the overlay of two arrangements.")
-      .def("face_to_guards",
-            [](Ex_arrangement &self) {
-              std::vector<std::tuple<Polygon2WithHoles, std::set<int>>> face_to_guard_map;
-              for (auto f = self.faces_begin(); f != self.faces_end(); ++f) {
-                if (f->is_unbounded())
-                  continue;
-                face_to_guard_map.push_back(std::make_tuple(Polygon2WithHoles(_face_to_polygon(f)), f->data()));
-              }
-              return face_to_guard_map;
-            },
-            "Returns a list of tuples (face, sets of guards).")
-      .def("get_shadow_avps",
+      .def("get_avps",
           [](Ex_arrangement &self) {
-            std::vector<Polygon2WithHoles> result;
-            for (auto f = self.faces_begin(); f != self.faces_end(); ++f) {
+            std::vector<Polygon2WithHoles> avps;
+            std::vector<Ex_arrangement::Face_handle> faces;
+
+            for (auto fit = self.faces_begin(); fit != self.faces_end(); ++fit) {
+              faces.push_back(fit);
+            }
+
+            // std::cout << "Number of faces: " << faces.size() << std::endl;
+
+            for (auto f : faces) {
+              if (f->data().empty())
+                continue;
+              avps.push_back(Polygon2WithHoles(_face_to_polygon(f)));
+            }
+            return avps;
+          },
+          "Returns a list of polygons that represent the AVPs.")
+      .def("get_shadow_and_light_avps",
+          [](Ex_arrangement &self) {
+            std::vector<Polygon2WithHoles> shadow_avps;
+            std::vector<Polygon2WithHoles> light_avps;
+            std::vector<Ex_arrangement::Face_handle> faces;
+
+            for (auto fit = self.faces_begin(); fit != self.faces_end(); ++fit) {
+              faces.push_back(fit);
+            }
+
+            // std::cout << "Number of faces: " << faces.size() << std::endl;
+            // int counter = 0;
+            for (auto f : faces) {
               if (f->data().empty())
                 continue;
               bool is_shadow = true;
+              bool is_light = true;
+              // std::cout << "Face: " << counter << std::endl;
+              // std::cout << "Data of f: ";
+              // for (auto data : f->data()) {
+              //   std::cout << data << " ";
+              // }
+              // std::cout << std::endl;
+
+              // counter++;
               for (auto half_edge = f->outer_ccbs_begin(); half_edge != f->outer_ccbs_end(); ++half_edge) {
                 Ex_arrangement::Ccb_halfedge_circulator curr = *half_edge;
-                if (curr->twin()->face()->data().empty())
-                  continue;
-                if (std::includes(f->data().begin(), f->data().end(), curr->twin()->face()->data().begin(), curr->twin()->face()->data().end())) {
-                  is_shadow = false;
-                  break;
-                }
+                Ex_arrangement::Ccb_halfedge_circulator done = curr;
+                do {
+                  if (curr->twin()->face()->data().empty()) {
+                    // std::cout << "empty twin" << std::endl;
+                    ++curr;
+                    continue;
+                  }
+                  if (!is_shadow && !is_light)
+                    break;
+
+                  // std::cout << "Data of twin face: ";
+                  // for (auto data : curr->twin()->face()->data()) {
+                  //   std::cout << data << " ";
+                  // }
+
+                  // std::cout << std::endl;
+                  if (std::includes(f->data().begin(), f->data().end(), curr->twin()->face()->data().begin(), curr->twin()->face()->data().end())) {
+                    // std::cout << "not_shadow" << std::endl;
+                    is_shadow = false;
+                  }
+                  if (std::includes(curr->twin()->face()->data().begin(), curr->twin()->face()->data().end(), f->data().begin(), f->data().end())) {
+                    // std::cout << "not_light" << std::endl;
+                    is_light = false;
+                  }
+                  ++curr;
+                } while (curr != done);
+                
               }
               if (is_shadow) {
-                result.push_back(Polygon2WithHoles(_face_to_polygon(f)));
+                // std::cout << "shadow" << std::endl;
+                shadow_avps.push_back(Polygon2WithHoles(_face_to_polygon(f)));
+              }
+              if (is_light) {
+                // std::cout << "light" << std::endl;
+                light_avps.push_back(Polygon2WithHoles(_face_to_polygon(f)));
               }
             }
+            std::tuple<std::vector<Polygon2WithHoles>, std::vector<Polygon2WithHoles>> result;
+            result = make_tuple(shadow_avps, light_avps);
             return result;
           },
-          "Returns a list of polygons that represent the shadow AVPs.")
-      // .def("get_shadow_witnesses",
-      //     [](Ex_arrangement &self) {
-      //       std::vector<Point> result;
-      //       for (auto f = self.faces_begin(); f != self.faces_end(); ++f) {
-      //         if (f->is_unbounded() || f->data().empty())
-      //           continue;
-      //         bool is_shadow = true;
-      //         for (auto half_edge = f->outer_ccbs_begin(); half_edge != f->outer_ccbs_end(); ++half_edge) {
-      //           Ex_arrangement::Ccb_halfedge_circulator curr = *half_edge;
-      //           if (curr->twin()->face()->is_unbounded())
-      //             continue;
-      //           if (std::includes(f->data().begin(), f->data().end(), curr->twin()->face()->data().begin(), curr->twin()->face()->data().end())) {
-      //             is_shadow = false;
-      //             break;
-      //           }
-      //         }
-      //         if (is_shadow) {
-      //           Polygon2 poly = _face_to_polygon(f);
-      //           result.push_back(CGAL::centroid(poly.vertices_begin(), poly.vertices_end()));
-      //         }
-      //       }
-      //       return result;
-      //     },
-      //     "Returns a list of points that represent the shadow witnesses.");
-      // .def("get_shadow_witnesses",
-      //     [](Ex_arrangement &self) {
-      //       std::vector<Point> result;
-      //       std::vector<Ex_arrangement::Face_handle> faces;
-
-      //       for (auto fit = self.faces_begin(); fit != self.faces_end(); ++fit) {
-      //         faces.push_back(fit);
-      //       }
-
-      //       // Sort the faces by the size of their data
-      //       std::sort(faces.begin(), faces.end(), [](const Ex_arrangement::Face_handle &a, const Ex_arrangement::Face_handle &b) {
-      //         return a->data().size() < b->data().size();
-      //       });
-
-      //       for (auto f : faces) {
-      //         if (f->is_unbounded() || f->data().empty())
-      //           continue;
-      //         bool is_shadow = true;
-      //         for (auto half_edge = f->outer_ccbs_begin(); half_edge != f->outer_ccbs_end(); ++half_edge) {
-      //           Ex_arrangement::Ccb_halfedge_circulator curr = *half_edge;
-      //           if (curr->twin()->face()->is_unbounded())
-      //             continue;
-      //           if (std::includes(f->data().begin(), f->data().end(), curr->twin()->face()->data().begin(), curr->twin()->face()->data().end())) {
-      //             is_shadow = false;
-      //             break;
-      //           }
-      //         }
-      //         if (is_shadow) {
-      //           Polygon2 poly = _face_to_polygon(f);
-      //           result.push_back(CGAL::centroid(poly.vertices_begin(), poly.vertices_end()));
-      //         }
-      //       }
-      //       return result;
-      //     },
-      //     "Returns a list of points that represent the shadow witnesses.");
-      // .def("get_shadow_witnesses_and_light_guard_sets",
-      //     [](Ex_arrangement &self, const std::list<int> &guard) {
-      //       std::unordered_map<int, std::unordered_set<int>> witness_to_guards;
-      //       std::unordered_map<int, std::unordered_set<int>> guard_to_witnesses;
-      //       std::vector<std::set<int>> light_guard_sets;
-      //       std::vector<Ex_arrangement::Face_handle> faces;
-
-      //       for (auto fit = self.faces_begin(); fit != self.faces_end(); ++fit) {
-      //         faces.push_back(fit);
-      //       }
-
-      //       // Sort the faces by the size of their data
-      //       // std::sort(faces.begin(), faces.end(), [](const Ex_arrangement::Face_handle &a, const Ex_arrangement::Face_handle &b) {
-      //       //   return a->data().size() < b->data().size();
-      //       // });
-
-      //       int index = guard.size();
-
-      //       for (auto f : faces) {
-      //         if (f->data().empty())
-      //           continue;
-      //         bool is_shadow = true;
-      //         bool is_light = true;
-      //         for (auto half_edge = f->outer_ccbs_begin(); half_edge != f->outer_ccbs_end(); ++half_edge) {
-      //           if (!is_shadow && !is_light)
-      //             break;
-      //           Ex_arrangement::Ccb_halfedge_circulator curr = *half_edge;
-      //           if (curr->twin()->face()->data().empty())
-      //             continue;
-      //           if (std::includes(f->data().begin(), f->data().end(), curr->twin()->face()->data().begin(), curr->twin()->face()->data().end())) {
-      //             is_shadow = false;
-      //           }
-      //           if (std::includes(curr->twin()->face()->data().begin(), curr->twin()->face()->data().end(), f->data().begin(), f->data().end())) {
-      //             is_light = false;
-      //           }
-      //         }
-      //         if (is_shadow) {
-      //           std::set<int> tempSet = f->data();
-      //           std::unordered_set<int> tempUnorderedSet(tempSet.begin(), tempSet.end());
-      //           witness_to_guards.insert(std::make_pair(index, tempUnorderedSet));
-      //           for (auto g : f->data()) {
-      //             guard_to_witnesses[g].insert(index);
-      //           }
-      //           index++;
-      //         }
-      //         if (is_light) {
-      //           light_guard_sets.push_back(f->data());
-      //         }
-      //       }
-
-      //       std::tuple<std::unordered_map<int, std::unordered_set<int>>, std::unordered_map<int, std::unordered_set<int>>, std::vector<std::set<int>>> result;
-      //       result = std::make_tuple(witness_to_guards, guard_to_witnesses, light_guard_sets);
-      //       return result;
-      //     },
-      //     "Returns a dictionary shadow AVP witness -> guard set, a dictionary guard -> shadow AVP witness set and a list of light AVP guard sets.");
+          "Returns a lists of polygons that represent the shadow and light AVPs.")
       .def("get_shadow_witnesses_and_light_guard_sets",
           [](Ex_arrangement &self, const std::list<int> &guard) {
             std::map<int, std::set<int>> witness_to_guards;
@@ -799,6 +739,7 @@ PYBIND11_MODULE(_cgal_bindings, m) {
             std::map<int, std::set<int>> all_witness_to_guards;
             std::map<int, std::set<int>> all_guard_to_witnesses;
             std::vector<std::set<int>> light_guard_sets;
+            std::vector<std::set<int>> all_guard_sets;
             std::vector<Ex_arrangement::Face_handle> faces;
 
             for (auto fit = self.faces_begin(); fit != self.faces_end(); ++fit) {
@@ -819,17 +760,23 @@ PYBIND11_MODULE(_cgal_bindings, m) {
               bool is_shadow = true;
               bool is_light = true;
               for (auto half_edge = f->outer_ccbs_begin(); half_edge != f->outer_ccbs_end(); ++half_edge) {
-                if (!is_shadow && !is_light)
-                  break;
                 Ex_arrangement::Ccb_halfedge_circulator curr = *half_edge;
-                if (curr->twin()->face()->data().empty())
-                  continue;
-                if (std::includes(f->data().begin(), f->data().end(), curr->twin()->face()->data().begin(), curr->twin()->face()->data().end())) {
-                  is_shadow = false;
-                }
-                if (std::includes(curr->twin()->face()->data().begin(), curr->twin()->face()->data().end(), f->data().begin(), f->data().end())) {
-                  is_light = false;
-                }
+                Ex_arrangement::Ccb_halfedge_circulator done = curr;
+                do {
+                  if (!is_shadow && !is_light)
+                    break;
+                  if (curr->twin()->face()->data().empty()) {
+                    ++curr;
+                    continue;
+                  }
+                  if (std::includes(f->data().begin(), f->data().end(), curr->twin()->face()->data().begin(), curr->twin()->face()->data().end())) {
+                    is_shadow = false;
+                  }
+                  if (std::includes(curr->twin()->face()->data().begin(), curr->twin()->face()->data().end(), f->data().begin(), f->data().end())) {
+                    is_light = false;
+                  }
+                  ++curr;
+                } while (curr != done);
               }
 
               all_witness_to_guards.insert({all_index, f->data()});
@@ -837,6 +784,8 @@ PYBIND11_MODULE(_cgal_bindings, m) {
                 all_guard_to_witnesses[g].insert(all_index);
               }
               all_index++;
+
+              all_guard_sets.push_back(f->data());
 
               if (is_shadow) {
                 witness_to_guards.insert({index, f->data()});
@@ -850,8 +799,8 @@ PYBIND11_MODULE(_cgal_bindings, m) {
               }
             }
 
-            std::tuple<std::map<int, std::set<int>>, std::map<int, std::set<int>>, std::vector<std::set<int>>, std::map<int, std::set<int>>, std::map<int, std::set<int>>> result;
-            result = std::make_tuple(witness_to_guards, guard_to_witnesses, light_guard_sets, all_witness_to_guards, all_guard_to_witnesses);
+            std::tuple<std::map<int, std::set<int>>, std::map<int, std::set<int>>, std::vector<std::set<int>>, std::map<int, std::set<int>>, std::map<int, std::set<int>>, std::vector<std::set<int>>> result;
+            result = std::make_tuple(witness_to_guards, guard_to_witnesses, light_guard_sets, all_witness_to_guards, all_guard_to_witnesses, all_guard_sets);
             return result;
           },
           "Returns a dictionary shadow AVP witness -> guard set, a dictionary guard -> shadow AVP witness set and a list of light AVP guard sets.");

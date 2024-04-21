@@ -35,53 +35,58 @@ def convert_to_LinearRing(edges: list, pos: dict) -> list[Point]:
 # poly = PolygonWithHoles(ring)
 
 # to parse simple polygons from AGP2009 Benchmark
-# with open('/home/yanyan/PythonProjects/CAGP-Solver/cagp_solver/mini_benchmark/agp2009a-simplerand/randsimple-500-3.pol') as f:
-#     vertices = f.readline().split()
-#     vertices = vertices[1:]
-#     linear_ring = []
-#     for i in range(0, len(vertices), 2):
-#         x = int(vertices[i].split('/')[0])/int(vertices[i].split('/')[1])
-#         y = int(vertices[i+1].split('/')[0])/int(vertices[i+1].split('/')[1])
-#         linear_ring.append(Point(x, y))
-#     poly = PolygonWithHoles(linear_ring)
+with open('/home/yanyan/PythonProjects/CAGP-Solver/agp2009a-simplerand/randsimple-200-1.pol') as f:
+    vertices = f.readline().split()
+    vertices = vertices[1:]
+    linear_ring = []
+    seen_points = set()
+    for i in range(0, len(vertices), 2):
+        x = int(vertices[i].split('/')[0])/int(vertices[i].split('/')[1])
+        y = int(vertices[i+1].split('/')[0])/int(vertices[i+1].split('/')[1])
+        if (x, y) in seen_points:
+            raise ValueError(f"Duplicate point: ({x}, {y})")
+        seen_points.add((x, y))
+        linear_ring.append(Point(x, y))
+    poly = PolygonWithHoles(linear_ring)
+    assert len(linear_ring) == 200
 
 # to parse simple polygons from AGP2009 Benchmark with holes
-with open('/home/yanyan/PythonProjects/CAGP-Solver/simple-polygons-with-holes/g1_simple-simple_75:300v-30h_25.pol') as f:
-    vertices = f.readline().split()
-    linear_rings = []
-    num_points = int(vertices.pop(0))
-    linear_ring = []
-    for _ in range(num_points):
-        x_str = vertices.pop(0).split('/')
-        x = int(x_str[0])/int(x_str[1])
-        y_str = vertices.pop(0).split('/')
-        y = int(y_str[0])/int(y_str[1])
-        linear_ring.append(Point(x, y))
-    linear_rings.append(linear_ring)  # Add outer boundary to linear_rings
-    num_holes = int(vertices.pop(0))  # Get the number of holes
-    for _ in range(num_holes):  # Repeat the process for each hole
-        num_points = int(vertices.pop(0))
-        linear_ring = []
-        for _ in range(num_points):
-            x_str = vertices.pop(0).split('/')
-            x = int(x_str[0])/int(x_str[1])
-            y_str = vertices.pop(0).split('/')
-            y = int(y_str[0])/int(y_str[1])
-            linear_ring.append(Point(x, y))
-        linear_rings.append(linear_ring)  # Add hole to linear_rings
-    poly = PolygonWithHoles(linear_rings[0], linear_rings[1:])
+# with open('/home/yanyan/PythonProjects/CAGP-Solver/simple-polygons-with-holes/g1_simple-simple_75:300v-30h_25.pol') as f:
+#     vertices = f.readline().split()
+#     linear_rings = []
+#     num_points = int(vertices.pop(0))
+#     linear_ring = []
+#     for _ in range(num_points):
+#         x_str = vertices.pop(0).split('/')
+#         x = int(x_str[0])/int(x_str[1])
+#         y_str = vertices.pop(0).split('/')
+#         y = int(y_str[0])/int(y_str[1])
+#         linear_ring.append(Point(x, y))
+#     linear_rings.append(linear_ring)  # Add outer boundary to linear_rings
+#     num_holes = int(vertices.pop(0))  # Get the number of holes
+#     for _ in range(num_holes):  # Repeat the process for each hole
+#         num_points = int(vertices.pop(0))
+#         linear_ring = []
+#         for _ in range(num_points):
+#             x_str = vertices.pop(0).split('/')
+#             x = int(x_str[0])/int(x_str[1])
+#             y_str = vertices.pop(0).split('/')
+#             y = int(y_str[0])/int(y_str[1])
+#             linear_ring.append(Point(x, y))
+#         linear_rings.append(linear_ring)  # Add hole to linear_rings
+#     poly = PolygonWithHoles(linear_rings[0], linear_rings[1:])
 
 # fig, ax = plt.subplots()
 # plot_polygon(poly, ax=ax, color="lightgrey")
 # plt.show()
 
-print('Generating solver input:')
-guards, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, GC, guard_to_witnesses_cf, witness_to_guards_cf, initial_witnesses_cf, all_witnesses_cf = generate_solver_input(poly, guards_on_holes=True)
+# print('Generating solver input:')
+# guards, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, GC, guard_to_witnesses_cf, witness_to_guards_cf, initial_witnesses_cf, all_witnesses_cf = generate_solver_input(poly, guards_on_holes=True)
 
-print('Calculating greedy solution...')
-greedyColors, greedySolution = get_greedy_solution(guard_to_witnesses, all_witnesses, GC)
-print("number of colors in greedy solution: ", greedyColors)
-print("number of guards in greedy solution: ", len(greedySolution))
+# print('Calculating greedy solution...')
+# greedyColors, greedySolution = get_greedy_solution(guard_to_witnesses, all_witnesses, GC)
+# print("number of colors in greedy solution: ", greedyColors)
+# print("number of guards in greedy solution: ", len(greedySolution))
 
 # print('Creating MIP solver...')
 # CFsolverMIP = CFCAGPSolverMIP(greedyColors, guard_to_witnesses_cf, witness_to_guards_cf, initial_witnesses_cf, all_witnesses_cf, solution=greedySolution)
@@ -99,20 +104,20 @@ print("number of guards in greedy solution: ", len(greedySolution))
 # CFsolverSAT.__del__()
 # print('Time to solve:', end - start)
 
-print('Generating edge clique covers...')
-start = time.time()
-edge_clique_covers = generate_edge_clique_covers(GC, greedyColors)
-end = time.time()
-# print(edge_clique_covers)
-print('Time to generate edge clique covers:', end - start, 'seconds')
+# print('Generating edge clique covers...')
+# start = time.time()
+# edge_clique_covers = generate_edge_clique_covers(GC, greedyColors)
+# end = time.time()
+# # print(edge_clique_covers)
+# print('Time to generate edge clique covers:', end - start, 'seconds')
 
-print('Creating MIP solver...')
-solverMIP = CAGPSolverMIP(greedyColors, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, edge_clique_covers, parameter_set=2, solution=greedySolution)
-print('Solving MIP...')
-num_colors, solution, iterations, number_of_witnesses, status = solverMIP.solve()
-# print([(guard, color) for guard, color in solution])
-print(verify_solver_solution(solution, GC))
-print('Average vertex degree:', (2 * len(GC.edge_indices())) / len(GC.node_indices()))
+# print('Creating MIP solver...')
+# solverMIP = CAGPSolverMIP(greedyColors, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, edge_clique_covers, parameter_set=2, solution=greedySolution)
+# print('Solving MIP...')
+# num_colors, solution, iterations, number_of_witnesses, status = solverMIP.solve()
+# # print([(guard, color) for guard, color in solution])
+# print(verify_solver_solution(solution, GC))
+# print('Graph Density:', (2 * len(GC.edge_indices())) / (len(GC.node_indices()) * (len(GC.node_indices()) - 1)))
 
 # print('Creating CPSAT solver...')
 # solverCPSAT_MIP = CAGPSolverCPSAT_MIP(greedyColors, guard_to_witnesses, witness_to_guards, initial_witnesses, all_witnesses, edge_clique_covers, solution=greedySolution)
@@ -180,18 +185,18 @@ print('Average vertex degree:', (2 * len(GC.edge_indices())) / len(GC.node_indic
 # fig, ax = plt.subplots()
 # plot_polygon(poly, ax=ax, color="lightgrey")
 
-print('Plotting...')
-colors = distcolors.get_colors(greedyColors)
-fig, ax = plt.subplots()
-plot_polygon(poly, ax=ax, color="lightgrey", zorder=0)
-progress = tqdm(solution)
-for s in solution:
-    (point, visibility) = guards[s[0]]
-    plot_polygon(visibility, ax=ax, color=colors[s[1]], alpha=0.2, zorder=0, linewidth=0.01)
-    plt.scatter(point.x(), point.y(), color=colors[s[1]], s=10, zorder=1, edgecolors='none')
-    progress.update()
-progress.close()
+# print('Plotting...')
+# colors = distcolors.get_colors(greedyColors)
+# fig, ax = plt.subplots()
+# plot_polygon(poly, ax=ax, color="lightgrey", zorder=0)
+# progress = tqdm(solution)
+# for s in solution:
+#     (point, visibility) = guards[s[0]]
+#     plot_polygon(visibility, ax=ax, color=colors[s[1]], alpha=0.2, zorder=0, linewidth=0.01)
+#     plt.scatter(point.x(), point.y(), color=colors[s[1]], s=10, zorder=1, edgecolors='none')
+#     progress.update()
+# progress.close()
 
-plt.show()
+# plt.show()
 
 # plt.savefig("polygon_solution_plot.png", dpi=1200)
