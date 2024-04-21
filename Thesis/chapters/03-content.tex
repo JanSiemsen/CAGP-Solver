@@ -1,13 +1,14 @@
 \chapter{Theoretical Shenanigans}
-Based on the definitions in the previous chapter, we will prove a few theorems necessary for the implementation of the solvers.
-
+Based on the definitions in the previous chapter, we will prove a few theorems necessary for the implementation of the solvers. First of all, we will show that it suffices to check the coverage of the shadow witness set instead of all AVPs, which greatly reduces the size of the formulations for the CAGP.
 
 \begin{theorem}[Couto et al.~\cite{couto2011exact}]\label{thm:shadow_coverage}
-When given a polygon $P$ and a guard set $G$, a subset $G_{sub}$ of $G$ fully covers $P$ if and only if it covers all witnesses in the shadow witness set $W$ of $G$.
+When given a polygon $P$ and a guard set $G$, a subset $G_{sub}$ of $G$ fully covers $P$ if and only if it covers all witnesses in the shadow witness set $W$ of $G$. 
 \end{theorem}
 \begin{proof}
 The necessity condition follows trivially from $W\subset P$. As for the sufficiency condition, consider the largest area $R$ that is not covered by $G_{sub}$. Because of the atomicity of AVPs, $R$ must consist of one or more AVPs. Now consider the AVP $f$ with minimal guard subset $G_{f}$ in $R$. We show that $f$ must be a shadow AVP, a contradiction. If $f = R$, then $f$ trivially must be a shadow AVP. Otherwise, consider the neighbors of $f$. For all neighbors in $R$, $G_{f}$ can not contain their guard subset as $G_{f}$ is minimal in $R$. As for the neighbors not in $R$, if there exists a neighbor of which the guard subset is contained in $G_{f}$, then $f$ must be covered by one of the guards in that subset and can not be part of $R$. Otherwise, $G_{f}$ does not contain any of its neighbors' guard subsets and thus is a shadow AVP.
 \end{proof}
+
+Next, we will show that instead of creating the 2-link-visibility graph $G_{vis}$ from checking for an intersection between all combinations of guard visibility polygons, we can use the guard subsets of the light AVPs. This greatly reduces the graph creation runtime as many polygon operations can be expensive.
 
 \begin{theorem}\label{thm:light_covers}
 When given a polygon $P$ and a guard set $G$, the guard subsets of a light polygon form a clique in the 2-link-visibility graph $G_{vis}$ of $G$, and the cliques of all light polygons cover all edges of $G_{vis}$.
@@ -22,6 +23,8 @@ The guard subset of a light polygon is formed by all the guards whose visibility
 \caption{Illustration for the proof of \cref{thm:conflict-free_witnesses}.}
 \label{fig:conflict-free_witnesses}
 \end{figure}
+
+Lastly, we will prove that, unlike the CAGP, we cannot restrict ourselves to either shadow or light witness set to check the conflict-freeness for the CCAGP.
 
 \begin{theorem}\label{thm:conflict-free_witnesses}
 For a polygon $P$ and a guard set $G$, neither conflict-freeness of all shadow witnesses nor all light witnesses guarantees conflict-freeness within all AVPs.
