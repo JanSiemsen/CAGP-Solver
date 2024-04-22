@@ -1,14 +1,25 @@
 \chapter{Preliminaries}
+In this chapter, we will formally define a few terms used throughout the following chapters.
+First of all, our input is given as a simple polygon possibly with holes.
+
 \begin{definition}[Simple polygon]
 When given a list of distinct points in the plane, the line segments between consecutive points in the list and the last and first point form the outer boundary of a simple polygon as long as none cross each other. This outer boundary is a Jordan polygonal curve, and together with its interior face, it forms a simple polygon. A simple polygon with holes $P$ additionally contains one or more smaller simple polygons fully contained in its interior. The interior of these smaller polygons is then considered as the exterior of $P$.
 \end{definition}
+
+Within this polygon, we use guards to cover it using their visibility polygons and witnesses to check if certain areas are covered.
 
 \begin{definition}[Visibility polygon]
 For a simple polygon $P$ (possibly with holes), two points $p,q\in P$ are mutually visible if the line segment between them is fully contained in $P$. Given a point $p\in P$, $p$ and all points in $P$ visible to it form a simple polygon. We call this polygon visibility polygon of $p$.
 \end{definition}
 
+\begin{definition}[Guards and witnesses]
+A guard is a point inside a simple polygon $P$ (possibly with holes) that covers the area within its visibility polygon. A witness is a point inside $P$ that must be covered by at least one guard.
+\end{definition}
+
+As we want to cover 
+
 \begin{definition}[Guard set]
-For a simple polygon $P$ (possibly with holes), a guard set $G$ is a set of points in $P$ s.t. all points in $P$ are contained in at least one of the visibility polygons of $G$. We call the points of the guard set guards.
+For a simple polygon $P$ (possibly with holes), a guard set $G$ is a set of guards in $P$ s.t. all points in $P$ are contained in at least one of the visibility polygons of $G$.
 \end{definition}
 
 \begin{definition}[Atomic visibility polygon (AVP)]
@@ -16,7 +27,7 @@ When given a guard set $G$ of a polygon $P$, we can overlay the visibility polyg
 \end{definition}
 
 \begin{definition}[Witness set]
-When given a guard set $G$ of a polygon $P$, a witness set $W$ is a set of points inside $P$ that must be covered by $G$. $W$ is called a shadow witness set when it consists of a point within each shadow AVP of $G$. We call these points shadow witnesses.
+When given a guard set $G$ of a polygon $P$, a witness set $W$ is a set of points inside $P$ that $G$ must cover. $W$ is called a shadow witness set when it consists of a point within each shadow AVP of $G$. We call these points shadow witnesses.
 \end{definition}
 
 \begin{definition}[2-link-visibility graph]
