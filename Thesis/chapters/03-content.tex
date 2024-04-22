@@ -58,10 +58,10 @@ The MIP formulation of the problem introduces binary variables for every guard c
 \label{eq_SAT:f.0}&\lnot x_{uk} \lor \lnot x_{vk} & \forall (u,v)\in E_{G_{vis}}, \forall k\in \{1,\ldots,K\}\\
 \label{eq_SAT:f.1}&\bigvee_{g\in N(w), k\in \{1,\ldots,K\}}x_{gk} & \forall w\in W\\
 \label{eq_SAT:f.2}&\bigwedge_{1 \leq i < j \leq K} (\lnot x_{gi} \lor \lnot x_{gj}) & \forall g\in G\\
-\label{eq:_SAT:f.3}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,\ldots,K\}
+\label{eq_SAT:f.3}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,\ldots,K\}
 \end{align}
 
-The SAT formulation of the problem differs from the MIP formulation in the way that we are not trying to minimize the number of colors used. Instead, we test whether there exists a feasible solution given a fixed number of colors K. By doing so, we can solve the SAT formula for different numbers of colors, increasing the number whenever we encounter infeasibility and decreasing it on a feasible solution, until we find the smallest number of colors for which there exists a feasible solution. The exact procedure for choosing the number of colors will be discussed in the Implementation Details chapter. Because we have a fixed number of colors, we do not require color variables like \cref{eq_MIP:f.7} anymore and restrict ourselves to the guard color variables in \cref{eq:_SAT:f.3}. We also omit the symmetry breaker constraints \cref{eq_MIP:f.4} and \cref{eq_MIP:f.5}, as \cref{eq_MIP:f.4} uses color variables and we found no straightforward way to model them efficiently using SAT clauses. Now for the clauses in our SAT formulation, we ensure that no two guards that share an edge in the 2-link-visibility graph $G_{vis}$ share the same color using \cref{eq_SAT:f.0}. These clauses replace the edge clique cover constraints in \cref{eq_MIP:f.1}. The reason for simply using the edges of $G_{vis}$ and not cliques is that SAT solvers are very efficient at solving large numbers of small clauses, i.e., with only two variables. For the witness covering constraints \cref{eq_MIP:f.2}, we use the clauses in \cref{eq_MIP:f.1}, which have an equivalent meaning. Lastly, we use the clauses in \cref{eq_MIP:f.2} to replace the guard coloring constraints in \cref{eq_MIP:f.3}. Again, these constraints can be omitted by processing the solution at the end and we will compare the performance with and without them in the Experiments chapter below.
+The SAT formulation of the problem differs from the MIP formulation in the way that we are not trying to minimize the number of colors used. Instead, we test whether there exists a feasible solution given a fixed number of colors K. By doing so, we can solve the SAT formula for different numbers of colors, increasing the number whenever we encounter infeasibility and decreasing it on a feasible solution, until we find the smallest number of colors for which there exists a feasible solution. The exact procedure for choosing the number of colors will be discussed in the Implementation Details chapter. Because we have a fixed number of colors, we do not require color variables like \cref{eq_MIP:f.7} anymore and restrict ourselves to the guard color variables in \cref{eq_SAT:f.3}. We also omit the symmetry breaker constraints \cref{eq_MIP:f.4} and \cref{eq_MIP:f.5}, as \cref{eq_MIP:f.4} uses color variables and we found no straightforward way to model them efficiently using SAT clauses. Now for the clauses in our SAT formulation, we ensure that no two guards that share an edge in the 2-link-visibility graph $G_{vis}$ share the same color using \cref{eq_SAT:f.0}. These clauses replace the edge clique cover constraints in \cref{eq_MIP:f.1}. The reason for simply using the edges of $G_{vis}$ and not cliques is that SAT solvers are very efficient at solving large numbers of small clauses, i.e., with only two variables. For the witness covering constraints \cref{eq_MIP:f.2}, we use the clauses in \cref{eq_MIP:f.1}, which have an equivalent meaning. Lastly, we use the clauses in \cref{eq_MIP:f.2} to replace the guard coloring constraints in \cref{eq_MIP:f.3}. Again, these constraints can be omitted by processing the solution at the end and we will compare the performance with and without them in the Experiments chapter below.
 
 \section{CP-SAT Formulation}
 
@@ -210,9 +210,9 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 \end{algorithm}
 
 \begin{align}
-\label{eq_MIP:f.0} \mbox{maximize}~& \;\sum_{(g, w)\in weights} x_{g}\cdot w& \\
-\label{eq_MIP:f.1} \mbox{s.t. } &x_{u} + x_{v} <= 1 & \forall (u,v) \in E_{G_{vis}}\\
-\label{eq_MIP:f.6}& x_{g} \in \{0,1\} & \forall g\in G
+\label{eq_MIP_IS:f.0} \mbox{maximize}~& \;\sum_{(g, w)\in weights} x_{g}\cdot w& \\
+\label{eq_MIP_IS:f.1} \mbox{s.t. } &x_{u} + x_{v} <= 1 & \forall (u,v) \in E_{G_{vis}}\\
+\label{eq_MIP_IS:f.2}& x_{g} \in \{0,1\} & \forall g\in G
 \end{align}
 
 \section{Edge Clique Covers}
