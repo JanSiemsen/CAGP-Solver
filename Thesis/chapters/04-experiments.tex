@@ -13,6 +13,8 @@ PySAT provides several different SAT solvers. That is why in this section, we wi
 \label{fig:cactus_SAT}
 \end{figure}
 
+\begin{table}[]
+\centering
 \begin{tabular}{llrrrrrrr}
 \toprule
  &  & Cadical103 & Cadical153 & Glucose4 & Glucose42 & MergeSat3 & Minicard & Minisat22 \\
@@ -29,27 +31,33 @@ vertices & holes &  &  &  &  &  &  &  \\
 500 & 50 & 4 & 0 & 1 & 3 & 0 & 2 & 0 \\
 \cline{1-9}
 \bottomrule
-\caption{Number instances with the lowest runtime for version1 solvers}
 \end{tabular}
+\caption{Number instances with the lowest runtime for version 1 solvers}
+\label{tab:SAT_small_time_v2}
+\end{table}
 
-% \begin{tabular}{llrrrrrrrrr}\label{tab:SAT_small_time_v2}
-% \toprule
-%  & & Cadical103 & Cadical153 & Glucose4 & Glucose42 & Gluecard4 & MapleChrono & MergeSat3 & Minicard & Minisat22 \\
-% vertices & holes &  &  &  &  &  &  &  &  &  \\
-% \midrule
-% 100 & 10 & 3 & 2 & 0 & 4 & 2 & 0 & 0 & 3 & 5 \\
-% \cline{1-11}
-% 200 & 20 & 6 & 1 & 1 & 2 & 2 & 0 & 1 & 0 & 1 \\
-% \cline{1-11}
-% 300 & 30 & 9 & 2 & 1 & 2 & 1 & 0 & 0 & 0 & 1 \\
-% \cline{1-11}
-% 400 & 40 & 3 & 3 & 1 & 3 & 4 & 0 & 0 & 1 & 0 \\
-% \cline{1-11}
-% 500 & 50 & 10 & 0 & 1 & 4 & 1 & 2 & 1 & 0 & 1 \\
-% \cline{1-11}
-% \bottomrule
-% \caption{Number instances with lowest runtime for version2 solvers}
-% \end{tabular}
+\begin{table}[]
+\centering
+\begin{tabular}{llrrrrrrrrr}
+\toprule
+ & & Cadical103 & Cadical153 & Glucose4 & Glucose42 & Gluecard4 & MapleChrono & MergeSat3 & Minicard & Minisat22 \\
+vertices & holes &  &  &  &  &  &  &  &  &  \\
+\midrule
+100 & 10 & 3 & 2 & 0 & 4 & 2 & 0 & 0 & 3 & 5 \\
+\cline{1-11}
+200 & 20 & 6 & 1 & 1 & 2 & 2 & 0 & 1 & 0 & 1 \\
+\cline{1-11}
+300 & 30 & 9 & 2 & 1 & 2 & 1 & 0 & 0 & 0 & 1 \\
+\cline{1-11}
+400 & 40 & 3 & 3 & 1 & 3 & 4 & 0 & 0 & 1 & 0 \\
+\cline{1-11}
+500 & 50 & 10 & 0 & 1 & 4 & 1 & 2 & 1 & 0 & 1 \\
+\cline{1-11}
+\bottomrule
+\end{tabular}
+\caption{Number instances with the lowest runtime for version 2 solvers}
+\label{tab:SAT_small_time_v2}
+\end{table}
 
 \section{CP-SAT Formulation Comparison}
 In this section, we will compare using the MIP formulation against the SAT formulation with and without the clauses \cref{eq_SAT:f.3}(CAGP)/\cref{eq_SAT_cf:f.3}(CFCAGP) for the CP-SAT solver. 
