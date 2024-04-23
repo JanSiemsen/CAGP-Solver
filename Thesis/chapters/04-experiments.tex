@@ -6,6 +6,13 @@ The benchmarks were run in WSL2 (Windows 11, version 22H2) using an AMD Ryzen 7 
 \section{SAT Solver Choice}
 PySAT provides several different SAT solvers. That is why in this section, we will compare them against each other to determine, which one performs the best on our model. Additionally, we will compare using the clauses \cref{eq:_SAT:f.3}(CAGP)/\cref{eq_SAT_cf:f.3}(CFCAGP) (version 1) against leaving them out and filtering the solution afterward as described in the SAT Color Optimization chapter (version 2). Due to the parameter sets becoming quite large when comparing all of the SAT solvers, we filtered out a few that performed poorly during testing beforehand. The testing was done using random simple polygons from 100 to 500 vertices and from 10 to 50 holes and each instance size had 30 polygons ~\cite{art-gallery-unicamp-page}.
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[scale=1.3]{Thesis/figures/minibenchmark_cactus_plot_runtime_SAT_with_holes.png}
+\caption{Illustration for the proof of \cref{thm:conflict-free_witnesses}.}
+\label{fig:conflict-free_witnesses}
+\end{figure}
+
 
 \section{CP-SAT Formulation Comparison}
 In this section, we will compare using the MIP formulation against the SAT formulation with and without the clauses \cref{eq:_SAT:f.3}(CAGP)/\cref{eq_SAT_cf:f.3}(CFCAGP) for the CP-SAT solver. 
