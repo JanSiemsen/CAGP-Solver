@@ -11,6 +11,10 @@ PySAT provides several different SAT solvers. That is why in this section, we wi
 \section{CP-SAT Formulation Comparison}
 In this section, we will compare using the MIP formulation against the SAT formulation with and without the clauses \cref{eq:_SATf.3}(CAGP)/\cref{eq_SAT_cf:f.3}(CFCAGP) for the CP-SAT solver. 
 
+\section{MIP Parameter Set}
+Gurobi allows to set various different parameters, which can help improve the runtime of the solver depending on the model. During testing, we used the model.tune() function on a few handpicked instances to determine a good parameter set. Note that setting the parameters drastically improves the runtime of the solver and one might want to further improve them in the future. In the following, we will list the parameters for CAGP MIP solver:
+
+
 \section{MIP vs. SAT vs. CP-SAT}
 In this section, we will compare the performance of the MIP, SAT, and CP-SAT solver against each other on various polygon types.
 
