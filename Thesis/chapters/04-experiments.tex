@@ -33,7 +33,7 @@ vertices & holes &  &  &  &  &  &  &  \\
 \cline{1-9}
 \bottomrule
 \end{tabular}
-\caption{Number instances with the lowest runtime for version 1 solvers}
+\caption{Number of instances with the lowest runtime for version 1 solvers}
 \label{tab:SAT_small_time_v2}
 \end{table}
 
@@ -57,8 +57,27 @@ vertices & holes &  &  &  &  &  &  &  &  &  \\
 \cline{1-11}
 \bottomrule
 \end{tabular}
-\caption{Number instances with the lowest runtime for version 2 solvers}
+\caption{Number of instances with the lowest runtime for version 2 solvers}
 \label{tab:SAT_small_time_v2}
+\end{table}
+
+\begin{table}[htbp]
+    \tiny
+    \centering
+    \begin{tabular}{llllllllll}
+\toprule
+ & Cadical103 & Cadical153 & Glucose4 & Glucose42 & Gluecard4 & MapleChrono & MergeSat3 & Minicard & Minisat22 \\
+vertices &  &  &  &  &  &  &  &  &  \\
+\midrule
+100 & 0.31 (0.02, 1.21) & 0.40 (0.02, 2.05) & 0.51 (0.01, 2.69) & 0.43 (0.01, 2.33) & 0.53 (0.01, 2.76) & 3.92 (1.74, 10.06) & 2.37 (0.03, 5.63) & 0.50 (0.01, 2.50) & 0.50 (0.01, 2.49) \\
+200 & 8.38 (0.25, 126.02) & 13.56 (0.20, 193.29) & 7.15 (0.10, 93.77) & 6.63 (0.18, 83.31) & 7.24 (0.10, 94.73) & 5.76 (2.15, 32.44) & 11.21 (1.80, 140.99) & 22.95 (0.10, 299.35) & 22.84 (0.10, 297.74) \\
+300 & 27.56 (0.36, 143.56) & 46.65 (0.32, 259.42) & 66.18 (0.22, 545.91) & 56.65 (0.27, 414.39) & 66.65 (0.22, 552.79) & 32.55 (3.14, 208.97) & 49.19 (1.63, 362.41) & 84.55 (0.18, 569.67) & 83.34 (0.18, 559.12) \\
+400 & 6.42 (0.52, 49.18) & 9.18 (0.50, 77.48) & 7.59 (0.14, 53.58) & 5.94 (0.26, 51.72) & 7.76 (0.15, 55.90) & 11.11 (2.78, 57.11) & 9.26 (1.71, 59.87) & 36.02 (0.27, 273.44) & 36.22 (0.27, 271.87) \\
+500 & 40.92 (0.39, 534.00) & 54.20 (0.51, 347.89) & 55.87 (0.21, 496.94) & 46.15 (0.43, 295.56) & 56.47 (0.22, 501.75) & 75.73 (4.30, 564.11) & 56.32 (1.62, 470.89) & 129.31 (0.17, 494.79) & 128.88 (0.17, 497.51) \\
+\bottomrule
+\end{tabular}
+\caption{Mean, lowest, and highest runtime for version 1 solvers}
+\label{tab:my_label}
 \end{table}
 
 \section{CP-SAT Formulation Comparison}
