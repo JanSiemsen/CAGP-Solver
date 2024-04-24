@@ -143,7 +143,7 @@ In this section, we will compare using the MIP formulation against the SAT formu
 \centering
 \begin{tabular}{llll}
 \toprule
-label & \makecell{CPSAT\_MIP} & \makecell{CPSAT\_SAT (version 1)} & \makecell{CPSAT\_SAT (version 2)} \\
+ & \makecell{CPSAT\_MIP} & \makecell{CPSAT\_SAT (version 1)} & \makecell{CPSAT\_SAT (version 2)} \\
 vertices &  &  &  \\
 \midrule
 100 & \makecell{0.61\\(0.13, 1.97)} & \makecell{0.58\\(0.09, 2.36)} & \makecell{0.50\\(0.10, 1.70)} \\
@@ -153,9 +153,16 @@ vertices &  &  &  \\
 500 & \makecell{69.27\\(16.03, 286.05)} & \makecell{67.91\\(4.67, 425.07)} & \makecell{64.40\\(2.78, 443.01)} \\
 \bottomrule
 \end{tabular}
-\caption{Caption}
+\caption{Mean (lowest, highest) runtime for solvers (CP-SAT)}
 \label{tab:mean_low_high_CPSAT}
 \end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[scale=0.7]{Thesis/figures/minibenchmark_cactus_plot_runtime_CPSAT_with_holes.png}
+\caption{Cactus Plot Comparing the CP-SAT Solver Performance}
+\label{fig:cactus_CP-SAT}
+\end{figure}
 
 \section{MIP Parameter Set}
 Gurobi allows us to set various parameters, which can help improve the runtime of the solver depending on the model. During testing, we used the model.tune() function on a few handpicked instances to determine a good parameter set. Note that setting the parameters drastically improves the runtime of the solver and one might want to further improve them in the future. In the following, we will list the parameters used for the CAGP MIP solver:
