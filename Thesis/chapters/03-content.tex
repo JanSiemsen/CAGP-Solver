@@ -228,9 +228,9 @@ As for the algorithm, we generate K-many different edge clique covers, K being t
 \State Initialize empty set: covered\_vertices
 \State edge\_queue $\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
 \For{$i=0$, $i{+}{+}$, $K$}
-    \State $(u, v)\gets$ pop edge with highest priority from $edge\_queue$
-    \While{$\{u, v\}\cap$ covered\_vertices is not empty}
-        \State $(u, v)\gets$ pop edge with highest priority from $edge\_queue$
+    \State $(u, v)\gets$ pop edge with highest priority from edge\_queue
+    \While{$\{u, v\} \cap$ covered\_vertices is not empty}
+        \State $(u, v)\gets$ pop edge with highest priority from edge\_queue
     \EndWhile
     \State edge $\gets (u, v)$
     \State matching.append(edge)
@@ -266,7 +266,7 @@ As for the algorithm, we generate K-many different edge clique covers, K being t
     \State candidates $\gets$ candidates $\cup N(v)$
     \State clique $\gets$ clique $\cup \{v\}$
 \EndWhile
-\Return clique
+\State \Return clique
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
