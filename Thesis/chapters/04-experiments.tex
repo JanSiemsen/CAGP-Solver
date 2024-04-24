@@ -17,6 +17,46 @@ PySAT provides several different SAT solvers. That is why in this section, we wi
 \centering
 \footnotesize
 \setlength{\tabcolsep}{2pt}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+ & Cadical103 & Cadical153 & Glucose4 & Glucose42 & Gluecard4 & MapleChrono & MergeSat3 & Minicard & Minisat22 \\
+vertices &  &  &  &  &  &  &  &  &  \\
+\midrule
+100 & 30 & 30 & 30 & 30 & 30 & 30 & 30 & 30 & 30 \\
+200 & 30 & 30 & 30 & 30 & 30 & 27 & 30 & 30 & 30 \\
+300 & 30 & 30 & 30 & 30 & 30 & 19 & 30 & 28 & 28 \\
+400 & 30 & 30 & 30 & 30 & 30 & 30 & 30 & 30 & 30 \\
+500 & 30 & 29 & 29 & 29 & 29 & 19 & 28 & 26 & 26 \\
+\bottomrule
+\end{tabular}
+\caption{Number of instances solved by the version 1 solvers}
+\label{tab:SAT_num_solved_v1}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+ & Cadical103 & Cadical153 & Glucose4 & Glucose42 & Gluecard4 & MapleChrono & MergeSat3 & Minicard & Minisat22 \\
+vertices &  &  &  &  &  &  &  &  &  \\
+\midrule
+100 & 30 & 30 & 30 & 30 & 30 & 30 & 30 & 30 & 30 \\
+200 & 30 & 30 & 30 & 30 & 30 & 27 & 30 & 30 & 30 \\
+300 & 30 & 30 & 29 & 30 & 29 & 20 & 30 & 27 & 27 \\
+400 & 30 & 30 & 30 & 30 & 30 & 30 & 30 & 29 & 30 \\
+500 & 30 & 30 & 28 & 29 & 28 & 21 & 28 & 27 & 28 \\
+\bottomrule
+\end{tabular}
+\caption{Number of instances solved by the version 2 solvers}
+\label{tab:SAT_num_solved_v2}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{2pt}
 \begin{tabular}{lrrrrrrr}
 \toprule
  & Cadical103 & Cadical153 & Glucose4 & Glucose42 & MergeSat3 & Minicard & Minisat22 \\
