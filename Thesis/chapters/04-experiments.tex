@@ -142,9 +142,13 @@ In this section, we will compare using the MIP formulation against the SAT formu
 \section{MIP Parameter Set}
 Gurobi allows us to set various parameters, which can help improve the runtime of the solver depending on the model. During testing, we used the model.tune() function on a few handpicked instances to determine a good parameter set. Note that setting the parameters drastically improves the runtime of the solver and one might want to further improve them in the future. In the following, we will list the parameters used for the CAGP MIP solver:
 \begin{itemize}
-  \item 
-  \item 
-  \item 
+  \item Method = 0
+  \item NumericFocus = 2
+  \item VarBranch = 1
+  \item Presolve = 2
+  \item PreSparsify = 0
+  \item Cuts = 0
+  \item Heuristics = 0
 \end{itemize}
 In the following, we will list the parameters used for the CFCAGP MIP solver:
 \begin{itemize}
