@@ -20,7 +20,7 @@ In the following, we consider a few upper bounds.
 For any monotone, orthogonal or general polygon $P_n$ with n vertices $\chi_G(P_n) = \mathcal{O}(n)$ ~\cite{bartschi2011coloring}.
 For any spiral polygon $P_{spi}$ $\chi_G(P_{spi}) \leq 2$ ~\cite{erickson2012art}.
 For any staircase polygon $P_{sta}$: $\chi_G(P_{sta}) \leq 3$ ~\cite{erickson2012art}.\par\noindent
-The only paper that has addressed practically solving the chromatic art gallery problem so far is by de Souza et al. The paper proposes a MIP formulation of the problem and provides practical results on it ~\cite{zambon2014exact}. The MIP solver used in this thesis is based on the approach presented in that paper.\par\noindent
+The only paper that has addressed practically solving the chromatic art gallery problem so far is by Zambon et al. The paper proposes a MIP formulation of the problem and provides practical results on it ~\cite{zambon2014exact}. The MIP solver used in this thesis is based on the approach presented in that paper.\par\noindent
 Now looking at the conflict-free chromatic art gallery problem, there has only been one paper considering its complexity so far.
 For a polygon with holes, determining whether there exists a conflict-free chromatic vertex guard set with $2$ colors is NP-hard ~\cite{iwamoto2022vertex}.\par\noindent
 As for lower and upper bounds, the following upper bounds were discovered.
@@ -42,7 +42,7 @@ As for practically solving the conflict-free chromatic art gallery problem, ther
 %         \item[-] add witness covering constraints
 %         \item[-] add at most one color per guard constraint (performance)
 %         \item[-] add symmetry breaker constraints (performance)
-%         \item[-] lazily add edge clique cover constraints (instead of edge constraints for conflicting guards)
+%         \item[-] lazily add clique edge cover constraints (instead of edge constraints for conflicting guards)
 %     \end{enumerate}
 % \end{enumerate}
 
