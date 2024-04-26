@@ -4,9 +4,10 @@ from .CAGPSolverMIP import CAGPSolverMIP
 from .CAGPSolverSAT import CAGPSolverSAT
 from .CFCAGPSolverMIP import CFCAGPSolverMIP
 from .CFCAGPSolverSAT import CFCAGPSolverSAT
-from .CFCAGPSolverCPSAT import CFCAGPSolverCPSAT
+from .CFCAGPSolverCPSAT_MIP import CFCAGPSolverCPSAT_MIP
+from .CFCAGPSolverCPSAT_SAT import CFCAGPSolverCPSAT_SAT
 from .CAGPGreedy import get_greedy_solution
-from .solver_utils import generate_solver_input, generate_edge_clique_covers, verify_solver_solution
+from .solver_utils import generate_solver_input, generate_solver_input_cf, generate_shadow_and_light_polygons, generate_edge_clique_covers, verify_solver_solution
 
 """
 This package provides the visibility polygons of CGAL as a
@@ -34,9 +35,12 @@ __all__ = ["CAGPSolverCPSAT_MIP",
            "CAGPSolverSAT", 
            "CFCAGPSolverMIP", 
            "CFCAGPSolverSAT", 
-           "CFCAGPSolverCPSAT", 
+           "CFCAGPSolverCPSAT_MIP",
+           "CFCAGPSolverCPSAT_SAT", 
            "get_greedy_solution", 
            "generate_solver_input", 
+           "generate_solver_input_cf",
+           "generate_shadow_and_light_polygons",
            "generate_edge_clique_covers", 
            "verify_solver_solution",
            "FieldNumber",

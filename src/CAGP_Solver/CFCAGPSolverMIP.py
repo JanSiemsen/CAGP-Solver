@@ -12,7 +12,6 @@ class CFCAGPSolverMIP:
         self.initial_witnesses = initial_witnesses
         self.all_witnesses = all_witnesses
         self.model = grb.Model()
-        # self.model.Params.MemLimit = 16
 
         self.__make_vars()
         self.__add_guard_coloring_constraints()
@@ -21,9 +20,6 @@ class CFCAGPSolverMIP:
         self.__add_color_symmetry_constraints()
         self.__add_guard_symmetry_constraints()
         self.__set_objective()
-
-        # if solution:
-        #     self.__provide_init_solution(solution)
         
     def __make_vars(self):
         self.color_vars = dict()
@@ -91,39 +87,6 @@ class CFCAGPSolverMIP:
                 witnesses_without_unique_guard.append(witness)
 
         return witnesses_without_unique_guard
-
-    # # not used
-    # def __callback_integral(self, model, guard_vars):
-    #     print('Checking coverage...')
-    #     missing_witnesses = self.__check_coverage(model, guard_vars)
-
-    #     if(missing_witnesses):
-    #         print('Adding new witnesses...')
-    #         for witness in missing_witnesses:
-    #             subset = []
-    #             for guard, witness_set in self.guard_to_witnesses.items():
-    #                 if witness_set.contains(witness):
-    #                     for k in range(self.K):
-    #                         subset.append((guard, k))
-    #             # TODO: add constraints for new witness and new variables which is not possible during solving time for gurobi
-    #             self.lazy_witnesses += 1
-    #         self.iteration += 1
-
-    # # not used
-    # def __callback_fractional(self, model, varmap):
-    #     # Nothing is being done here yet.
-    #     pass
-    
-    # # not used
-    # def callback(self, where, model, varmap):
-    #     if where == grb.GRB.Callback.MIPSOL:
-    #         # we have an integral solution (potentially valid solution)
-    #         self.__callback_integral(model, varmap)
-    #     elif where == grb.GRB.Callback.MIPNODE and \
-    #             model.cbGet(grb.GRB.Callback.MIPNODE_STATUS) == grb.GRB.OPTIMAL:
-    #         # we have a fractional solution
-    #         # (intermediate solution with fractional values for all booleans)
-    #         self.__callback_fractional(model, varmap)
 
     def solve(self):
         self.iteration = 0

@@ -4,7 +4,7 @@ import gurobipy as grb
 # New witnesses are added whenever a feasible solution is found
 class CAGPSolverMIP:
 
-    def __init__(self, K: int, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], edge_clique_covers: list[list[list[int]]], parameter_set: int, solution: list[list[int]]=None) -> list[tuple[int, int]]:
+    def __init__(self, K: int, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], edge_clique_covers: list[list[list[int]]], solution: list[list[int]]=None) -> list[tuple[int, int]]:
         self.K = K
         self.guard_to_witnesses = guard_to_witnesses
         self.witness_to_guards = witness_to_guards
@@ -13,7 +13,6 @@ class CAGPSolverMIP:
         self.all_witnesses = all_witnesses
         self.edge_clique_covers = edge_clique_covers
         self.model = grb.Model()
-        # self.model.Params.MemLimit = 16
         self.model.Params.TimeLimit = 600
         self.model.Params.lazyConstraints = 1
 
@@ -28,27 +27,13 @@ class CAGPSolverMIP:
             self.__provide_init_solution(solution)
 
         # Set solver parameters for faster computation
-        if parameter_set == 0:
-            # parameters generated from DCAGP paper benchmark instance (randsimple-2500-1)
-            self.model.Params.Method = 0
-            self.model.Params.Heuristics = 0
-            self.model.Params.MIPFocus = 2 # important
-            self.model.Params.Cuts = 0
-            self.model.Params.AggFill = 0
-            self.model.Params.PrePasses = 1 # important
-        elif parameter_set == 1:
-            # parameters generated from salzburg benchmark instance (fpg-poly_0000002500)
-            self.model.Params.MIPFocus = 2
-            self.model.Params.PrePasses = 1
-            self.model.Params.Method = 0
-            self.model.Params.DegenMoves = 2
-            self.model.Params.Cuts = 1
-        elif parameter_set == 2:
-            self.model.Params.Cuts = 0
-            self.model.Params.Presolve = 2
-            self.model.Params.Method = 0
-            self.model.Params.Heuristics = 0
-            self.model.Params.NumericFocus = 2
+        self.model.Params.Cuts = 0
+        self.model.Params.Presolve = 2
+        self.model.Params.Method = 0
+        self.model.Params.Heuristics = 0
+        self.model.Params.NumericFocus = 2
+        self.model.Params.VarBranch = 1
+        self.model.Params.PreSparsify = 0
         # self.model.Params.LogFile = 'mip.log'
 
         # Set the objective

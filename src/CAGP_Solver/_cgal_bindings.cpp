@@ -733,7 +733,7 @@ PYBIND11_MODULE(_cgal_bindings, m) {
           },
           "Returns a lists of polygons that represent the shadow and light AVPs.")
       .def("get_shadow_witnesses_and_light_guard_sets",
-          [](Ex_arrangement &self, const std::list<int> &guard) {
+          [](Ex_arrangement &self, int guards) {
             std::map<int, std::set<int>> witness_to_guards;
             std::map<int, std::set<int>> guard_to_witnesses;
             std::map<int, std::set<int>> all_witness_to_guards;
@@ -746,13 +746,8 @@ PYBIND11_MODULE(_cgal_bindings, m) {
               faces.push_back(fit);
             }
 
-            // Sort the faces by the size of their data
-            // std::sort(faces.begin(), faces.end(), [](const Ex_arrangement::Face_handle &a, const Ex_arrangement::Face_handle &b) {
-            //   return a->data().size() < b->data().size();
-            // });
-
-            int index = guard.size();
-            int all_index = guard.size();
+            int index = guards;
+            int all_index = guards;
 
             for (auto f : faces) {
               if (f->data().empty())

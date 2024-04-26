@@ -1,3 +1,4 @@
+from itertools import combinations
 import time
 from pysat.solvers import Solver
 import rustworkx as rx
@@ -13,13 +14,16 @@ class CAGPSolverSAT:
         self.witnesses = initial_witnesses
         self.number_of_witnesses = len(initial_witnesses)
         self.all_witnesses = all_witnesses
+        self.solver_name = solver_name
         self.solver = Solver(name=solver_name, with_proof=False)
         
         self.__make_vars()
         self.__add_witness_covering_constraints()
         self.__add_conflicting_guards_constraints()
-        if guard_color_constraints:
+        if guard_color_constraints and (solver_name == "Gluecard3" or solver_name == "Gluecard4" or solver_name == "Minicard"):
             self.__add_guard_coloring_constraints()
+        elif guard_color_constraints:
+            self.__add_guard_coloring_constraints_alternative()
 
     def __make_vars(self):
         self.guard_to_var = dict()
@@ -50,13 +54,10 @@ class CAGPSolverSAT:
         for color_dict in self.guard_to_var.values():
             self.solver.add_atmost(list(color_dict.values()), 1)
 
-    # These constraints are being replaced by the conflicting guards constraints
-    # def __add_edge_clique_cover_constraints(self):
-    #     color = 0
-    #     for cover in self.edge_clique_covers:
-    #         for clique in cover:
-    #             self.solver.add_clause([self.guard_to_var[guard][color] for guard in clique])
-    #         color += 1
+    def __add_guard_coloring_constraints_alternative(self):
+        for color_dict in self.guard_to_var.values():
+            for color1, color2 in combinations(color_dict.values(), 2):
+                self.solver.add_clause([-color1, -color2])
 
     def __deactivate_guards(self, color_lim: int):
         return [-self.guard_to_var[guard][k] for guard in self.guard_to_witnesses.keys() for k in range(color_lim, self.K)]
@@ -132,6 +133,7 @@ class CAGPSolverSAT:
 
             print('Checking coverage')
             missing_witnesses = self.__check_coverage(solution)
+            print('Number of missing witnesses:', len(missing_witnesses))
             self.number_of_witnesses += len(missing_witnesses)
 
         # Process solution such that each guard is only assigned one color
