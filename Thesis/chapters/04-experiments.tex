@@ -238,8 +238,11 @@ In this section, we will compare the performance of the MIP, SAT, and CP-SAT sol
 
 \subsection{Simple Polygons with Holes}
 
-\begin{table}[]
+\begin{table}[htbp]
+\fontsize{4}{4}\selectfont
 \centering
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{3} % Increase row spacing
 \begin{tabular}{lrrrrr}
 \toprule
 \makecell{vertices} & \makecell{CPSAT MIP} & \makecell{CPSAT SAT (version 1)} & \makecell{CPSAT SAT (version 2)} & \makecell{MIP} & \makecell{SAT} \\
@@ -255,6 +258,42 @@ In this section, we will compare the performance of the MIP, SAT, and CP-SAT sol
 \makecell{800} & \makecell{30} & \makecell{29} & \makecell{30} & \makecell{26} & \makecell{30} \\
 \makecell{900} & \makecell{30} & \makecell{29} & \makecell{28} & \makecell{27} & \makecell{30} \\
 \makecell{1000} & \makecell{27} & \makecell{26} & \makecell{27} & \makecell{25} & \makecell{26} \\
+\bottomrule
+\end{tabular}
+\caption{Caption}
+\label{tab:my_label}
+\end{table}
+
+\begin{table}[htbp]
+\fontsize{4}{4}\selectfont
+\centering
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{3} % Increase row spacing
+\begin{tabular}{llrrrrr}
+\toprule
+ & \makecell{min\_solver} & \makecell{CPSAT MIP} & \makecell{CPSAT SAT (version 1)} & \makecell{CPSAT SAT (version 2)} & \makecell{MIP} & \makecell{SAT} \\
+\makecell{vertices} & \makecell{holes} &  &  &  &  &  \\
+\midrule
+\makecell{100} & \makecell{10} & \makecell{0} & \makecell{0} & \makecell{0} & \makecell{12} & \makecell{18} \\
+\cline{1-7}
+\makecell{200} & \makecell{20} & \makecell{0} & \makecell{0} & \makecell{0} & \makecell{9} & \makecell{21} \\
+\cline{1-7}
+\makecell{300} & \makecell{30} & \makecell{0} & \makecell{0} & \makecell{0} & \makecell{15} & \makecell{15} \\
+\cline{1-7}
+\makecell{400} & \makecell{40} & \makecell{0} & \makecell{0} & \makecell{0} & \makecell{4} & \makecell{26} \\
+\cline{1-7}
+\makecell{500} & \makecell{50} & \makecell{2} & \makecell{1} & \makecell{0} & \makecell{8} & \makecell{19} \\
+\cline{1-7}
+\makecell{600} & \makecell{60} & \makecell{0} & \makecell{0} & \makecell{1} & \makecell{12} & \makecell{16} \\
+\cline{1-7}
+\makecell{700} & \makecell{70} & \makecell{0} & \makecell{1} & \makecell{1} & \makecell{7} & \makecell{21} \\
+\cline{1-7}
+\makecell{800} & \makecell{80} & \makecell{0} & \makecell{0} & \makecell{1} & \makecell{3} & \makecell{26} \\
+\cline{1-7}
+\makecell{900} & \makecell{90} & \makecell{0} & \makecell{1} & \makecell{0} & \makecell{2} & \makecell{27} \\
+\cline{1-7}
+\makecell{1000} & \makecell{100} & \makecell{1} & \makecell{0} & \makecell{1} & \makecell{4} & \makecell{22} \\
+\cline{1-7}
 \bottomrule
 \end{tabular}
 \caption{Caption}
