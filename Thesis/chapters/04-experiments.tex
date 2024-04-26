@@ -235,7 +235,7 @@ In this section, we will compare the performance of the MIP, SAT, and CP-SAT sol
 \begin{figure}[htbp]
 \centering
 \includegraphics[scale=0.7]{Thesis/figures/final_benchmark_cactus_plot_runtime_MIP_SAT_CPSAT_with_holes.png}
-\caption{Cactus Plot Comparing the MIP, SAT, and CP-SAT Solver Performance on simple polygons with holes}
+\caption{Cactus Plot Comparing the MIP, SAT, and CP-SAT solver Performance on simple polygons with holes}
 \label{fig:cactus_all_simple_with_holes}
 \end{figure}
 
@@ -246,7 +246,7 @@ In this section, we will compare the performance of the MIP, SAT, and CP-SAT sol
 \renewcommand{\arraystretch}{3} % Increase row spacing
 \begin{tabular}{lrrrrr}
 \toprule
-\makecell{vertices} & \makecell{CPSAT MIP} & \makecell{CPSAT SAT (version 1)} & \makecell{CPSAT SAT (version 2)} & \makecell{MIP} & \makecell{SAT} \\
+\makecell{vertices} & \makecell{CPSAT MIP} & \makecell{CPSAT SAT\\(version 1)} & \makecell{CPSAT SAT\\(version 2)} & \makecell{MIP} & \makecell{SAT} \\
 % \makecell{vertices} &  &  &  &  &  \\
 \midrule
 \makecell{100} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} \\
@@ -261,8 +261,8 @@ In this section, we will compare the performance of the MIP, SAT, and CP-SAT sol
 \makecell{1000} & \makecell{27} & \makecell{26} & \makecell{27} & \makecell{25} & \makecell{26} \\
 \bottomrule
 \end{tabular}
-\caption{Caption}
-\label{tab:my_label}
+\caption{Number of random simple polygons with holes solved by the MIP, SAT, and CP-SAT solver}
+\label{tab:instances_soved_all_simple_with_holes}
 \end{table}
 
 \begin{table}[htbp]
@@ -272,33 +272,23 @@ In this section, we will compare the performance of the MIP, SAT, and CP-SAT sol
 \renewcommand{\arraystretch}{3} % Increase row spacing
 \begin{tabular}{llrrrrr}
 \toprule
- & \makecell{min\_solver} & \makecell{CPSAT MIP} & \makecell{CPSAT SAT (version 1)} & \makecell{CPSAT SAT (version 2)} & \makecell{MIP} & \makecell{SAT} \\
-\makecell{vertices} & \makecell{holes} &  &  &  &  &  \\
+\makecell{vertices} & \makecell{CPSAT MIP} & \makecell{CPSAT SAT\\(version 1)} & \makecell{CPSAT SAT\\(version 2)} & \makecell{MIP} & \makecell{SAT} \\
+% \makecell{vertices} &  &  &  &  &  \\
 \midrule
-\makecell{100} & \makecell{10} & \makecell{0} & \makecell{0} & \makecell{0} & \makecell{12} & \makecell{18} \\
-\cline{1-7}
-\makecell{200} & \makecell{20} & \makecell{0} & \makecell{0} & \makecell{0} & \makecell{9} & \makecell{21} \\
-\cline{1-7}
-\makecell{300} & \makecell{30} & \makecell{0} & \makecell{0} & \makecell{0} & \makecell{15} & \makecell{15} \\
-\cline{1-7}
-\makecell{400} & \makecell{40} & \makecell{0} & \makecell{0} & \makecell{0} & \makecell{4} & \makecell{26} \\
-\cline{1-7}
-\makecell{500} & \makecell{50} & \makecell{2} & \makecell{1} & \makecell{0} & \makecell{8} & \makecell{19} \\
-\cline{1-7}
-\makecell{600} & \makecell{60} & \makecell{0} & \makecell{0} & \makecell{1} & \makecell{12} & \makecell{16} \\
-\cline{1-7}
-\makecell{700} & \makecell{70} & \makecell{0} & \makecell{1} & \makecell{1} & \makecell{7} & \makecell{21} \\
-\cline{1-7}
-\makecell{800} & \makecell{80} & \makecell{0} & \makecell{0} & \makecell{1} & \makecell{3} & \makecell{26} \\
-\cline{1-7}
-\makecell{900} & \makecell{90} & \makecell{0} & \makecell{1} & \makecell{0} & \makecell{2} & \makecell{27} \\
-\cline{1-7}
-\makecell{1000} & \makecell{100} & \makecell{1} & \makecell{0} & \makecell{1} & \makecell{4} & \makecell{22} \\
-\cline{1-7}
+\makecell{100} & \makecell{0} & \makecell{0} & \makecell{0} & \makecell{12} & \makecell{18} \\
+\makecell{200} & \makecell{0} & \makecell{0} & \makecell{0} & \makecell{9} & \makecell{21} \\
+\makecell{300} & \makecell{0} & \makecell{0} & \makecell{0} & \makecell{15} & \makecell{15} \\
+\makecell{400} & \makecell{0} & \makecell{0} & \makecell{0} & \makecell{4} & \makecell{26} \\
+\makecell{500} & \makecell{2} & \makecell{1} & \makecell{0} & \makecell{8} & \makecell{19} \\
+\makecell{600} & \makecell{0} & \makecell{0} & \makecell{1} & \makecell{12} & \makecell{16} \\
+\makecell{700} & \makecell{0} & \makecell{1} & \makecell{1} & \makecell{7} & \makecell{21} \\
+\makecell{800} & \makecell{0} & \makecell{0} & \makecell{1} & \makecell{3} & \makecell{26} \\
+\makecell{900} & \makecell{0} & \makecell{1} & \makecell{0} & \makecell{2} & \makecell{27} \\
+\makecell{1000} & \makecell{1} & \makecell{0} & \makecell{1} & \makecell{4} & \makecell{22} \\
 \bottomrule
 \end{tabular}
-\caption{Caption}
-\label{tab:my_label}
+\caption{Number of random simple polygons with holes solved with the lowest runtime by the MIP, SAT, and CP-SAT solver}
+\label{tab:lowest_runtime_all_simple_with_holes}
 \end{table}
 
 \begin{table}[htbp]
@@ -308,8 +298,8 @@ In this section, we will compare the performance of the MIP, SAT, and CP-SAT sol
 \renewcommand{\arraystretch}{3} % Increase row spacing
 \begin{tabular}{llllll}
 \toprule
-\makecell{label} & \makecell{CPSAT MIP} & \makecell{CPSAT SAT \\ (version 1)} & \makecell{CPSAT SAT \\ (version 2)} & \makecell{MIP} & \makecell{SAT} \\
-\makecell{vertices} &  &  &  &  &  \\
+\makecell{vertices} & \makecell{CPSAT MIP} & \makecell{CPSAT SAT \\ (version 1)} & \makecell{CPSAT SAT \\ (version 2)} & \makecell{MIP} & \makecell{SAT} \\
+% \makecell{vertices} &  &  &  &  &  \\
 \midrule
 \makecell{100} & \makecell{0.50 \\ (0.12, 1.28)} & \makecell{0.61 \\ (0.06, 2.03)} & \makecell{0.56 \\ (0.06, 2.71)} & \makecell{0.29 \\ (0.10, 0.78)} & \makecell{0.29 \\ (0.01, 1.29)} \\
 \makecell{200} & \makecell{8.86 \\ (0.40, 85.41)} & \makecell{9.96 \\ (0.38, 118.32)} & \makecell{9.94 \\ (0.46, 111.35)} & \makecell{1.60 \\ (0.24, 6.53)} & \makecell{7.38 \\ (0.08, 112.68)} \\
@@ -323,6 +313,6 @@ In this section, we will compare the performance of the MIP, SAT, and CP-SAT sol
 \makecell{1000} & \makecell{201.89 \\ (62.86, 518.47)} & \makecell{127.80 \\ (31.10, 453.32)} & \makecell{119.97 \\ (28.17, 553.33)} & \makecell{107.49 \\ (11.93, 417.70)} & \makecell{31.30 \\ (4.19, 181.87)} \\
 \bottomrule
 \end{tabular}
-\caption{Caption}
-\label{tab:my_label}
+\caption{Mean (lowest, highest) runtime for MIP, SAT, and CP-SAT solvers on random simple polygons with holes}
+\label{tab:min_low_high_all_simple_with_holes}
 \end{table}
