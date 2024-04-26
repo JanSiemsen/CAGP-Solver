@@ -209,29 +209,36 @@ In this section, we will compare the performance of the MIP, SAT, and CP-SAT sol
 \centering
 \setlength{\tabcolsep}{2pt}
 \renewcommand{\arraystretch}{3} % Increase row spacing
+\begin{table}[htbp]
+\fontsize{4}{4}\selectfont
+\centering
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{3} % Increase row spacing
 \begin{tabular}{llllll}
 \toprule
-\makecell{vertices} & \makecell{CPSAT MIP} & \makecell{CPSAT SAT\\(version 1)} & \makecell{CPSAT SAT\\(version 2)} & \makecell{MIP} & \makecell{SAT} \\
+\makecell{vertices} & \makecell{CPSAT MIP} & \makecell{CPSAT SAT (version 1)} & \makecell{CPSAT SAT (version 2)} & \makecell{MIP} & \makecell{SAT} \\
 % \makecell{vertices} &  &  &  &  &  \\
 \midrule
-\makecell{100} & \makecell{0.06\\(0.03, 0.20)} & \makecell{0.03\\(0.02, 0.13)} & \makecell{0.04\\(0.03, 0.08)} & \makecell{0.04\\(0.02, 0.09)} & \makecell{0.03\\(0.02, 0.05)} \\
-\makecell{200} & \makecell{0.26\\(0.07, 0.84)} & \makecell{0.11\\(0.04, 0.24)} & \makecell{0.12\\(0.06, 0.34)} & \makecell{0.12\\(0.06, 0.23)} & \makecell{0.06\\(0.05, 0.10)} \\
-\makecell{300} & \makecell{0.53\\(0.16, 1.39)} & \makecell{0.19\\(0.10, 0.46)} & \makecell{0.21\\(0.10, 0.80)} & \makecell{0.25\\(0.11, 0.88)} & \makecell{0.09\\(0.07, 0.35)} \\
-\makecell{400} & \makecell{1.03\\(0.26, 2.34)} & \makecell{0.46\\(0.14, 3.02)} & \makecell{0.41\\(0.15, 2.40)} & \makecell{0.41\\(0.19, 0.94)} & \makecell{0.11\\(0.07, 0.20)} \\
-\makecell{500} & \makecell{1.67\\(0.39, 3.48)} & \makecell{0.57\\(0.18, 2.40)} & \makecell{0.54\\(0.18, 1.08)} & \makecell{0.59\\(0.25, 1.49)} & \makecell{0.13\\(0.09, 0.19)} \\
-\makecell{600} & \makecell{3.64\\(0.62, 8.31)} & \makecell{1.03\\(0.28, 4.86)} & \makecell{0.80\\(0.22, 2.54)} & \makecell{0.94\\(0.39, 1.85)} & \makecell{0.18\\(0.11, 0.39)} \\
-\makecell{700} & \makecell{4.87\\(1.96, 9.34)} & \makecell{1.36\\(0.39, 4.18)} & \makecell{0.90\\(0.27, 2.00)} & \makecell{0.98\\(0.36, 2.87)} & \makecell{0.18\\(0.12, 0.52)} \\
-\makecell{800} & \makecell{5.36\\(0.72, 18.47)} & \makecell{1.61\\(0.34, 5.55)} & \makecell{1.17\\(0.38, 3.36)} & \makecell{1.19\\(0.54, 2.38)} & \makecell{0.19\\(0.12, 0.28)} \\
-\makecell{900} & \makecell{9.22\\(2.74, 17.79)} & \makecell{1.70\\(0.39, 5.61)} & \makecell{1.56\\(0.43, 5.55)} & \makecell{1.52\\(0.59, 2.98)} & \makecell{0.27\\(0.14, 0.64)} \\
-\makecell{1000} & \makecell{8.78\\(1.23, 21.35)} & \makecell{1.91\\(0.45, 11.39)} & \makecell{1.47\\(0.46, 5.68)} & \makecell{1.85\\(0.84, 3.38)} & \makecell{0.24\\(0.13, 0.42)} \\
-\makecell{1250} & \makecell{20.20\\(8.10, 40.86)} & \makecell{2.80\\(0.87, 12.32)} & \makecell{2.32\\(0.93, 7.30)} & \makecell{2.62\\(1.44, 7.02)} & \makecell{0.27\\(0.17, 0.45)} \\
-\makecell{1500} & \makecell{28.20\\(7.18, 59.46)} & \makecell{4.01\\(1.15, 14.92)} & \makecell{3.68\\(1.16, 11.44)} & \makecell{3.13\\(1.69, 5.59)} & \makecell{0.37\\(0.21, 0.99)} \\
-\makecell{1750} & \makecell{38.47\\(13.57, 63.67)} & \makecell{4.03\\(1.26, 22.04)} & \makecell{3.72\\(1.37, 13.70)} & \makecell{4.00\\(2.28, 10.73)} & \makecell{0.42\\(0.28, 0.90)} \\
-\makecell{2000} & \makecell{46.19\\(11.48, 80.21)} & \makecell{5.24\\(1.90, 31.53)} & \makecell{4.86\\(2.09, 21.83)} & \makecell{4.64\\(2.71, 8.56)} & \makecell{0.47\\(0.35, 0.85)} \\
-\makecell{2250} & \makecell{63.21\\(32.91, 113.89)} & \makecell{5.69\\(2.41, 39.53)} & \makecell{5.27\\(2.40, 19.88)} & \makecell{5.83\\(3.55, 13.08)} & \makecell{0.57\\(0.45, 0.95)} \\
-\makecell{2500} & \makecell{68.61\\(29.46, 120.69)} & \makecell{6.64\\(3.50, 31.91)} & \makecell{6.43\\(2.97, 12.53)} & \makecell{7.81\\(3.27, 16.56)} & \makecell{0.63\\(0.46, 1.14)} \\
+\makecell{100} & \makecell{0.06\\(0.03, 0.20)} & \makecell{0.03\\(0.02, 0.13)} & \makecell{0.04\\(0.03, 0.08)} & \makecell{0.04\\(0.02, 0.09)} & \makecell{0.00\\(0.00, 0.00)} \\
+\makecell{200} & \makecell{0.26\\(0.07, 0.84)} & \makecell{0.11\\(0.04, 0.24)} & \makecell{0.12\\(0.06, 0.34)} & \makecell{0.12\\(0.06, 0.23)} & \makecell{0.01\\(0.00, 0.02)} \\
+\makecell{300} & \makecell{0.53\\(0.16, 1.39)} & \makecell{0.19\\(0.10, 0.46)} & \makecell{0.21\\(0.10, 0.80)} & \makecell{0.25\\(0.11, 0.88)} & \makecell{0.01\\(0.00, 0.10)} \\
+\makecell{400} & \makecell{1.03\\(0.26, 2.34)} & \makecell{0.46\\(0.14, 3.02)} & \makecell{0.41\\(0.15, 2.40)} & \makecell{0.41\\(0.19, 0.94)} & \makecell{0.01\\(0.00, 0.06)} \\
+\makecell{500} & \makecell{1.67\\(0.39, 3.48)} & \makecell{0.57\\(0.18, 2.40)} & \makecell{0.54\\(0.18, 1.08)} & \makecell{0.59\\(0.25, 1.49)} & \makecell{0.02\\(0.00, 0.05)} \\
+\makecell{600} & \makecell{3.64\\(0.62, 8.31)} & \makecell{1.03\\(0.28, 4.86)} & \makecell{0.80\\(0.22, 2.54)} & \makecell{0.94\\(0.39, 1.85)} & \makecell{0.03\\(0.01, 0.12)} \\
+\makecell{700} & \makecell{4.87\\(1.96, 9.34)} & \makecell{1.36\\(0.39, 4.18)} & \makecell{0.90\\(0.27, 2.00)} & \makecell{0.98\\(0.36, 2.87)} & \makecell{0.03\\(0.01, 0.16)} \\
+\makecell{800} & \makecell{5.36\\(0.72, 18.47)} & \makecell{1.61\\(0.34, 5.55)} & \makecell{1.17\\(0.38, 3.36)} & \makecell{1.19\\(0.54, 2.38)} & \makecell{0.03\\(0.01, 0.05)} \\
+\makecell{900} & \makecell{9.22\\(2.74, 17.79)} & \makecell{1.70\\(0.39, 5.61)} & \makecell{1.56\\(0.43, 5.55)} & \makecell{1.52\\(0.59, 2.98)} & \makecell{0.04\\(0.01, 0.11)} \\
+\makecell{1000} & \makecell{8.78\\(1.23, 21.35)} & \makecell{1.91\\(0.45, 11.39)} & \makecell{1.47\\(0.46, 5.68)} & \makecell{1.85\\(0.84, 3.38)} & \makecell{0.03\\(0.01, 0.08)} \\
+\makecell{1250} & \makecell{20.20\\(8.10, 40.86)} & \makecell{2.80\\(0.87, 12.32)} & \makecell{2.32\\(0.93, 7.30)} & \makecell{2.62\\(1.44, 7.02)} & \makecell{0.04\\(0.01, 0.09)} \\
+\makecell{1500} & \makecell{28.20\\(7.18, 59.46)} & \makecell{4.01\\(1.15, 14.92)} & \makecell{3.68\\(1.16, 11.44)} & \makecell{3.13\\(1.69, 5.59)} & \makecell{0.05\\(0.02, 0.37)} \\
+\makecell{1750} & \makecell{38.47\\(13.57, 63.67)} & \makecell{4.03\\(1.26, 22.03)} & \makecell{3.72\\(1.37, 13.70)} & \makecell{4.00\\(2.28, 10.73)} & \makecell{0.05\\(0.02, 0.09)} \\
+\makecell{2000} & \makecell{46.19\\(11.48, 80.20)} & \makecell{5.24\\(1.90, 31.53)} & \makecell{4.86\\(2.09, 21.83)} & \makecell{4.64\\(2.71, 8.56)} & \makecell{0.05\\(0.02, 0.13)} \\
+\makecell{2250} & \makecell{63.21\\(32.91, 113.89)} & \makecell{5.69\\(2.41, 39.52)} & \makecell{5.27\\(2.40, 19.88)} & \makecell{5.83\\(3.55, 13.08)} & \makecell{0.07\\(0.03, 0.13)} \\
+\makecell{2500} & \makecell{68.61\\(29.46, 120.69)} & \makecell{6.64\\(3.50, 31.91)} & \makecell{6.43\\(2.97, 12.53)} & \makecell{7.81\\(3.26, 16.56)} & \makecell{0.07\\(0.04, 0.15)} \\
 \bottomrule
 \end{tabular}
+\end{table}
+
 \caption{Mean (lowest, highest) runtime for MIP, SAT and CP-SAT solvers on random simple polygons without holes}
 \label{tab:mean_low_high_all_simple_no_holes}
 \end{table}
