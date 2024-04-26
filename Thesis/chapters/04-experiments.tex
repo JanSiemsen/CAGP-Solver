@@ -238,6 +238,13 @@ In this section, we will compare the performance of the MIP, SAT, and CP-SAT sol
 
 \subsection{Simple Polygons with Holes}
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[scale=0.7]{Thesis/figures/final_benchmark_cactus_plot_runtime_MIP_SAT_CPSAT_with_holes.png}
+\caption{Cactus Plot Comparing the MIP, SAT and CP-SAT Solver Performance on simple polygons with holes}
+\label{fig:cactus_all_simple_with_holes}
+\end{figure}
+
 \begin{table}[htbp]
 \fontsize{4}{4}\selectfont
 \centering
@@ -294,6 +301,32 @@ In this section, we will compare the performance of the MIP, SAT, and CP-SAT sol
 \cline{1-7}
 \makecell{1000} & \makecell{100} & \makecell{1} & \makecell{0} & \makecell{1} & \makecell{4} & \makecell{22} \\
 \cline{1-7}
+\bottomrule
+\end{tabular}
+\caption{Caption}
+\label{tab:my_label}
+\end{table}
+
+\begin{table}[htbp]
+\fontsize{4}{4}\selectfont
+\centering
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{3} % Increase row spacing
+\begin{tabular}{llllll}
+\toprule
+\makecell{label} & \makecell{CPSAT MIP} & \makecell{CPSAT SAT \\ (version 1)} & \makecell{CPSAT SAT \\ (version 2)} & \makecell{MIP} & \makecell{SAT} \\
+\makecell{vertices} &  &  &  &  &  \\
+\midrule
+\makecell{100} & \makecell{0.50 \\ (0.12, 1.28)} & \makecell{0.61 \\ (0.06, 2.03)} & \makecell{0.56 \\ (0.06, 2.71)} & \makecell{0.29 \\ (0.10, 0.78)} & \makecell{0.29 \\ (0.01, 1.29)} \\
+\makecell{200} & \makecell{8.86 \\ (0.40, 85.41)} & \makecell{9.96 \\ (0.38, 118.32)} & \makecell{9.94 \\ (0.46, 111.35)} & \makecell{1.60 \\ (0.24, 6.53)} & \makecell{7.38 \\ (0.08, 112.68)} \\
+\makecell{300} & \makecell{38.26 \\ (2.91, 241.32)} & \makecell{36.92 \\ (1.18, 248.56)} & \makecell{41.70 \\ (1.36, 341.01)} & \makecell{8.46 \\ (0.97, 39.76)} & \makecell{31.67 \\ (0.16, 221.74)} \\
+\makecell{400} & \makecell{22.44 \\ (4.63, 77.96)} & \makecell{11.14 \\ (1.80, 61.91)} & \makecell{12.27 \\ (1.77, 61.64)} & \makecell{7.58 \\ (1.36, 25.27)} & \makecell{5.12 \\ (0.26, 50.69)} \\
+\makecell{500} & \makecell{66.71 \\ (15.26, 272.99)} & \makecell{53.97 \\ (3.56, 418.28)} & \makecell{60.57 \\ (4.13, 441.61)} & \makecell{21.83 \\ (3.60, 192.12)} & \makecell{41.87 \\ (0.23, 484.14)} \\
+\makecell{600} & \makecell{96.87 \\ (23.21, 380.71)} & \makecell{88.33 \\ (5.50, 495.50)} & \makecell{80.77 \\ (6.55, 343.77)} & \makecell{33.47 \\ (3.72, 117.94)} & \makecell{33.13 \\ (0.65, 166.00)} \\
+\makecell{700} & \makecell{126.96 \\ (38.10, 347.75)} & \makecell{82.98 \\ (16.03, 349.98)} & \makecell{78.52 \\ (11.23, 520.49)} & \makecell{67.92 \\ (12.32, 419.44)} & \makecell{44.18 \\ (1.42, 242.68)} \\
+\makecell{800} & \makecell{160.95 \\ (49.61, 555.81)} & \makecell{87.54 \\ (11.58, 273.35)} & \makecell{92.02 \\ (6.39, 378.87)} & \makecell{86.64 \\ (19.47, 551.34)} & \makecell{48.28 \\ (1.65, 541.23)} \\
+\makecell{900} & \makecell{227.93 \\ (65.70, 584.75)} & \makecell{127.28 \\ (15.94, 557.20)} & \makecell{107.13 \\ (25.91, 461.89)} & \makecell{93.58 \\ (18.99, 501.60)} & \makecell{37.16 \\ (1.15, 232.08)} \\
+\makecell{1000} & \makecell{201.89 \\ (62.86, 518.47)} & \makecell{127.80 \\ (31.10, 453.32)} & \makecell{119.97 \\ (28.17, 553.33)} & \makecell{107.49 \\ (11.93, 417.70)} & \makecell{31.30 \\ (4.19, 181.87)} \\
 \bottomrule
 \end{tabular}
 \caption{Caption}
