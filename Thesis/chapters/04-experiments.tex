@@ -204,11 +204,6 @@ In this section, we will compare the performance of the MIP, SAT, and CP-SAT sol
 \label{fig:cactus_all_simple_no_holes}
 \end{figure}
 
-\begin{table}[]
-\fontsize{4}{4}\selectfont
-\centering
-\setlength{\tabcolsep}{2pt}
-\renewcommand{\arraystretch}{3} % Increase row spacing
 \begin{table}[htbp]
 \fontsize{4}{4}\selectfont
 \centering
@@ -216,7 +211,7 @@ In this section, we will compare the performance of the MIP, SAT, and CP-SAT sol
 \renewcommand{\arraystretch}{3} % Increase row spacing
 \begin{tabular}{llllll}
 \toprule
-\makecell{vertices} & \makecell{CPSAT MIP} & \makecell{CPSAT SAT (version 1)} & \makecell{CPSAT SAT (version 2)} & \makecell{MIP} & \makecell{SAT} \\
+\makecell{vertices} & \makecell{CPSAT MIP} & \makecell{CPSAT SAT\\(version 1)} & \makecell{CPSAT SAT\\(version 2)} & \makecell{MIP} & \makecell{SAT} \\
 % \makecell{vertices} &  &  &  &  &  \\
 \midrule
 \makecell{100} & \makecell{0.06\\(0.03, 0.20)} & \makecell{0.03\\(0.02, 0.13)} & \makecell{0.04\\(0.03, 0.08)} & \makecell{0.04\\(0.02, 0.09)} & \makecell{0.00\\(0.00, 0.00)} \\
@@ -237,9 +232,7 @@ In this section, we will compare the performance of the MIP, SAT, and CP-SAT sol
 \makecell{2500} & \makecell{68.61\\(29.46, 120.69)} & \makecell{6.64\\(3.50, 31.91)} & \makecell{6.43\\(2.97, 12.53)} & \makecell{7.81\\(3.26, 16.56)} & \makecell{0.07\\(0.04, 0.15)} \\
 \bottomrule
 \end{tabular}
-\end{table}
-
-\caption{Mean (lowest, highest) runtime for MIP, SAT and CP-SAT solvers on random simple polygons without holes}
+\caption{Mean (lowest, highest) runtime for MIP, SAT, and CP-SAT solvers on random simple polygons without holes}
 \label{tab:mean_low_high_all_simple_no_holes}
 \end{table}
 
