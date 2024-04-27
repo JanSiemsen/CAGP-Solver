@@ -291,7 +291,7 @@ When plotting the solvers in a cactus plot, we can see that both version 1 and v
 \label{tab:mean_low_high_SAT_v2}
 \end{table}
 
-% \clearpage
+\clearpage
 \subsection{CP-SAT Formulation Comparison}
 In this section, we will compare using the MIP formulation against the SAT formulation with and without the clauses \cref{eq_SAT:f.3}(CAGP) for the CP-SAT solver. For the comparison, we use the same instances as for the SAT Solver Choice section~\cite{wireless-localization-instances-page}.\par\noindent
 All solver variations were able to solve all of the instances. Looking at the cactus plot, there is no clear best variation (\cref{fig:cactus_CP-SAT}). The SAT formulations perform better on a large number of instances, but on the other hand, the MIP formulation has less variance in runtimes and also a lower maximum runtime over all instances (\cref{tab:mean_low_high_CPSAT}). Because of this, we will use all three variations in the comparison between MIP, SAT, and CP-SAT. Since they can use up multiple cores, unlike the SAT solvers, we will test them separately.
