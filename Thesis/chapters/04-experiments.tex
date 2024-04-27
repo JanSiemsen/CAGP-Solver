@@ -103,42 +103,92 @@ PySAT provides several different SAT solvers. That is why in this section, we wi
 
 
 
-\begin{table}[htbp]
-\fontsize{4}{4}\selectfont
-\centering
-\setlength{\tabcolsep}{2pt}
-\renewcommand{\arraystretch}{3} % Increase row spacing
-\begin{tabular}{llllllllll}
-\toprule
-\makecell{vertices} & \makecell{Cadical103} & \makecell{Cadical153} & \makecell{Glucose4} & \makecell{Glucose42} & \makecell{Gluecard4} & \makecell{MapleChrono} & \makecell{MergeSat3} & \makecell{Minicard} & \makecell{Minisat22} \\
-% vertices &  &  &  &  &  &  &  &  &  \\
-\midrule
-\makecell{100} & \makecell{0.31\\(0.02, 1.21)} & \makecell{0.40\\(0.02, 2.05)} & \makecell{0.51\\(0.01, 2.69)} & \makecell{0.43\\(0.01, 2.33)} & \makecell{0.53\\(0.01, 2.76)} & \makecell{3.92\\(1.74, 10.06)} & \makecell{2.37\\(0.03, 5.63)} & \makecell{0.50\\(0.01, 2.50)} & \makecell{0.50\\(0.01, 2.49)} \\
-\makecell{200} & \makecell{8.38\\(0.25, 126.02)} & \makecell{13.56\\(0.20, 193.29)} & \makecell{7.15\\(0.10, 93.77)} & \makecell{6.63\\(0.18, 83.31)} & \makecell{7.24\\(0.10, 94.73)} & \makecell{5.76\\(2.15, 32.44)} & \makecell{11.21\\(1.80, 140.99)} & \makecell{22.95\\(0.10, 299.35)} & \makecell{22.84\\(0.10, 297.74)} \\
-\makecell{300} & \makecell{27.56\\(0.36, 143.56)} & \makecell{46.65\\(0.32, 259.42)} & \makecell{66.18\\(0.22, 545.91)} & \makecell{56.65\\(0.27, 414.39)} & \makecell{66.65\\(0.22, 552.79)} & \makecell{32.55\\(3.14, 208.97)} & \makecell{49.19\\(1.63, 362.41)} & \makecell{84.55\\(0.18, 569.67)} & \makecell{83.34\\(0.18, 559.12)} \\
-\makecell{400} & \makecell{6.42\\(0.52, 49.18)} & \makecell{9.18\\(0.50, 77.48)} & \makecell{7.59\\(0.14, 53.58)} & \makecell{5.94\\(0.26, 51.72)} & \makecell{7.76\\(0.15, 55.90)} & \makecell{11.11\\(2.78, 57.11)} & \makecell{9.26\\(1.71, 59.87)} & \makecell{36.02\\(0.27, 273.44)} & \makecell{36.22\\(0.27, 271.87)} \\
-\makecell{500} & \makecell{40.92\\(0.39, 534.00)} & \makecell{54.20\\(0.51, 347.89)} & \makecell{55.87\\(0.21, 496.94)} & \makecell{46.15\\(0.43, 295.56)} & \makecell{56.47\\(0.22, 501.75)} & \makecell{75.73\\(4.30, 564.11)} & \makecell{56.32\\(1.62, 470.89)} & \makecell{129.31\\(0.17, 494.79)} & \makecell{128.88\\(0.17, 497.51)} \\
-\bottomrule
-\end{tabular}
-\caption{Mean (lowest, highest) runtime for version 1 solvers (SAT)}
-\label{tab:mean_low_high_SAT_v1}
-\end{table}
+% \begin{table}[htbp]
+% \fontsize{4}{4}\selectfont
+% \centering
+% \setlength{\tabcolsep}{2pt}
+% \renewcommand{\arraystretch}{3} % Increase row spacing
+% \begin{tabular}{llllllllll}
+% \toprule
+% \makecell{vertices} & \makecell{Cadical103} & \makecell{Cadical153} & \makecell{Glucose4} & \makecell{Glucose42} & \makecell{Gluecard4} & \makecell{MapleChrono} & \makecell{MergeSat3} & \makecell{Minicard} & \makecell{Minisat22} \\
+% % vertices &  &  &  &  &  &  &  &  &  \\
+% \midrule
+% \makecell{100} & \makecell{0.31\\(0.02, 1.21)} & \makecell{0.40\\(0.02, 2.05)} & \makecell{0.51\\(0.01, 2.69)} & \makecell{0.43\\(0.01, 2.33)} & \makecell{0.53\\(0.01, 2.76)} & \makecell{3.92\\(1.74, 10.06)} & \makecell{2.37\\(0.03, 5.63)} & \makecell{0.50\\(0.01, 2.50)} & \makecell{0.50\\(0.01, 2.49)} \\
+% \makecell{200} & \makecell{8.38\\(0.25, 126.02)} & \makecell{13.56\\(0.20, 193.29)} & \makecell{7.15\\(0.10, 93.77)} & \makecell{6.63\\(0.18, 83.31)} & \makecell{7.24\\(0.10, 94.73)} & \makecell{5.76\\(2.15, 32.44)} & \makecell{11.21\\(1.80, 140.99)} & \makecell{22.95\\(0.10, 299.35)} & \makecell{22.84\\(0.10, 297.74)} \\
+% \makecell{300} & \makecell{27.56\\(0.36, 143.56)} & \makecell{46.65\\(0.32, 259.42)} & \makecell{66.18\\(0.22, 545.91)} & \makecell{56.65\\(0.27, 414.39)} & \makecell{66.65\\(0.22, 552.79)} & \makecell{32.55\\(3.14, 208.97)} & \makecell{49.19\\(1.63, 362.41)} & \makecell{84.55\\(0.18, 569.67)} & \makecell{83.34\\(0.18, 559.12)} \\
+% \makecell{400} & \makecell{6.42\\(0.52, 49.18)} & \makecell{9.18\\(0.50, 77.48)} & \makecell{7.59\\(0.14, 53.58)} & \makecell{5.94\\(0.26, 51.72)} & \makecell{7.76\\(0.15, 55.90)} & \makecell{11.11\\(2.78, 57.11)} & \makecell{9.26\\(1.71, 59.87)} & \makecell{36.02\\(0.27, 273.44)} & \makecell{36.22\\(0.27, 271.87)} \\
+% \makecell{500} & \makecell{40.92\\(0.39, 534.00)} & \makecell{54.20\\(0.51, 347.89)} & \makecell{55.87\\(0.21, 496.94)} & \makecell{46.15\\(0.43, 295.56)} & \makecell{56.47\\(0.22, 501.75)} & \makecell{75.73\\(4.30, 564.11)} & \makecell{56.32\\(1.62, 470.89)} & \makecell{129.31\\(0.17, 494.79)} & \makecell{128.88\\(0.17, 497.51)} \\
+% \bottomrule
+% \end{tabular}
+% \caption{Mean (lowest, highest) runtime for version 1 solvers (SAT)}
+% \label{tab:mean_low_high_SAT_v1}
+% \end{table}
 
 \begin{table}[htbp]
 \fontsize{4}{4}\selectfont
 \centering
 \setlength{\tabcolsep}{2pt}
 \renewcommand{\arraystretch}{3} % Increase row spacing
-\begin{tabular}{llllllllll}
+\begin{tabular}{llllll}
 \toprule
-\makecell{vertices} & \makecell{Cadical103} & \makecell{Cadical153} & \makecell{Glucose4} & \makecell{Glucose42} & \makecell{Gluecard4} & \makecell{MapleChrono} & \makecell{MergeSat3} & \makecell{Minicard} & \makecell{Minisat22} \\
-% vertices &  &  &  &  &  &  &  &  &  \\
+\makecell{vertices} & \makecell{100} & \makecell{200} & \makecell{300} & \makecell{400} & \makecell{500} \\
+% vertices &  &  &  &  &  \\
 \midrule
-\makecell{100} & \makecell{0.39\\(0.02, 1.69)} & \makecell{0.41\\(0.01, 1.73)} & \makecell{0.52\\(0.01, 2.72)} & \makecell{0.45\\(0.01, 2.56)} & \makecell{0.53\\(0.01, 2.93)} & \makecell{3.77\\(1.52, 8.33)} & \makecell{2.25\\(0.04, 5.34)} & \makecell{0.76\\(0.01, 4.67)} & \makecell{0.79\\(0.01, 4.21)} \\
-\makecell{200} & \makecell{7.72\\(0.19, 99.53)} & \makecell{14.48\\(0.12, 201.02)} & \makecell{7.37\\(0.13, 103.08)} & \makecell{7.21\\(0.17, 92.67)} & \makecell{7.41\\(0.05, 95.68)} & \makecell{4.95\\(2.26, 9.65)} & \makecell{10.14\\(1.86, 112.24)} & \makecell{22.26\\(0.11, 261.22)} & \makecell{30.03\\(0.11, 407.12)} \\
-\makecell{300} & \makecell{32.44\\(0.56, 249.32)} & \makecell{60.42\\(0.30, 325.82)} & \makecell{38.91\\(0.26, 340.05)} & \makecell{67.42\\(0.25, 398.85)} & \makecell{50.69\\(0.25, 459.07)} & \makecell{56.29\\(3.07, 362.71)} & \makecell{67.10\\(1.61, 574.59)} & \makecell{70.06\\(0.10, 425.06)} & \makecell{64.40\\(0.10, 403.78)} \\
-\makecell{400} & \makecell{6.88\\(0.38, 59.87)} & \makecell{10.60\\(0.42, 79.02)} & \makecell{8.49\\(0.18, 70.39)} & \makecell{6.04\\(0.17, 56.54)} & \makecell{7.88\\(0.10, 62.81)} & \makecell{12.80\\(2.92, 52.04)} & \makecell{10.83\\(1.40, 73.03)} & \makecell{38.65\\(0.44, 231.27)} & \makecell{55.98\\(0.44, 367.16)} \\
-\makecell{500} & \makecell{32.75\\(0.37, 399.83)} & \makecell{55.10\\(0.50, 437.00)} & \makecell{50.85\\(0.31, 384.77)} & \makecell{45.95\\(0.55, 376.85)} & \makecell{42.20\\(0.23, 430.87)} & \makecell{89.58\\(2.04, 561.99)} & \makecell{31.85\\(1.23, 218.04)} & \makecell{101.84\\(0.83, 336.29)} & \makecell{129.58\\(0.68, 476.19)} \\
+\makecell{Cadical103} & \makecell{0.31\\(0.02, 1.21)} & \makecell{8.38\\(0.25, 126.02)} & \makecell{27.56\\(0.36, 143.56)} & \makecell{6.42\\(0.52, 49.18)} & \makecell{40.92\\(0.39, 534.00)} \\
+\makecell{Cadical153} & \makecell{0.40\\(0.02, 2.05)} & \makecell{13.56\\(0.20, 193.29)} & \makecell{46.65\\(0.32, 259.42)} & \makecell{9.18\\(0.50, 77.48)} & \makecell{54.20\\(0.51, 347.89)} \\
+\makecell{Glucose4} & \makecell{0.51\\(0.01, 2.69)} & \makecell{7.15\\(0.10, 93.77)} & \makecell{66.18\\(0.22, 545.91)} & \makecell{7.59\\(0.14, 53.58)} & \makecell{55.87\\(0.21, 496.94)} \\
+\makecell{Glucose42} & \makecell{0.43\\(0.01, 2.33)} & \makecell{6.63\\(0.18, 83.31)} & \makecell{56.65\\(0.27, 414.39)} & \makecell{5.94\\(0.26, 51.72)} & \makecell{46.15\\(0.43, 295.56)} \\
+\makecell{Gluecard4} & \makecell{0.53\\(0.01, 2.76)} & \makecell{7.24\\(0.10, 94.73)} & \makecell{66.65\\(0.22, 552.79)} & \makecell{7.76\\(0.15, 55.90)} & \makecell{56.47\\(0.22, 501.75)} \\
+\makecell{MapleChrono} & \makecell{3.92\\(1.74, 10.06)} & \makecell{5.76\\(2.15, 32.44)} & \makecell{32.55\\(3.14, 208.97)} & \makecell{11.11\\(2.78, 57.11)} & \makecell{75.73\\(4.30, 564.11)} \\
+\makecell{MergeSat3} & \makecell{2.37\\(0.03, 5.63)} & \makecell{11.21\\(1.80, 140.99)} & \makecell{49.19\\(1.63, 362.41)} & \makecell{9.26\\(1.71, 59.87)} & \makecell{56.32\\(1.62, 470.89)} \\
+\makecell{Minicard} & \makecell{0.50\\(0.01, 2.50)} & \makecell{22.95\\(0.10, 299.35)} & \makecell{84.55\\(0.18, 569.67)} & \makecell{36.02\\(0.27, 273.44)} & \makecell{129.31\\(0.17, 494.79)} \\
+\makecell{Minisat22} & \makecell{0.50\\(0.01, 2.49)} & \makecell{22.84\\(0.10, 297.74)} & \makecell{83.34\\(0.18, 559.12)} & \makecell{36.22\\(0.27, 271.87)} & \makecell{128.88\\(0.17, 497.51)} \\
+\bottomrule
+\end{tabular}
+\caption{Mean (lowest, highest) runtime for version 1 solvers (SAT)}
+\label{tab:mean_low_high_SAT_v1}
+\end{table}
+
+% \begin{table}[htbp]
+% \fontsize{4}{4}\selectfont
+% \centering
+% \setlength{\tabcolsep}{2pt}
+% \renewcommand{\arraystretch}{3} % Increase row spacing
+% \begin{tabular}{llllllllll}
+% \toprule
+% \makecell{vertices} & \makecell{Cadical103} & \makecell{Cadical153} & \makecell{Glucose4} & \makecell{Glucose42} & \makecell{Gluecard4} & \makecell{MapleChrono} & \makecell{MergeSat3} & \makecell{Minicard} & \makecell{Minisat22} \\
+% % vertices &  &  &  &  &  &  &  &  &  \\
+% \midrule
+% \makecell{100} & \makecell{0.39\\(0.02, 1.69)} & \makecell{0.41\\(0.01, 1.73)} & \makecell{0.52\\(0.01, 2.72)} & \makecell{0.45\\(0.01, 2.56)} & \makecell{0.53\\(0.01, 2.93)} & \makecell{3.77\\(1.52, 8.33)} & \makecell{2.25\\(0.04, 5.34)} & \makecell{0.76\\(0.01, 4.67)} & \makecell{0.79\\(0.01, 4.21)} \\
+% \makecell{200} & \makecell{7.72\\(0.19, 99.53)} & \makecell{14.48\\(0.12, 201.02)} & \makecell{7.37\\(0.13, 103.08)} & \makecell{7.21\\(0.17, 92.67)} & \makecell{7.41\\(0.05, 95.68)} & \makecell{4.95\\(2.26, 9.65)} & \makecell{10.14\\(1.86, 112.24)} & \makecell{22.26\\(0.11, 261.22)} & \makecell{30.03\\(0.11, 407.12)} \\
+% \makecell{300} & \makecell{32.44\\(0.56, 249.32)} & \makecell{60.42\\(0.30, 325.82)} & \makecell{38.91\\(0.26, 340.05)} & \makecell{67.42\\(0.25, 398.85)} & \makecell{50.69\\(0.25, 459.07)} & \makecell{56.29\\(3.07, 362.71)} & \makecell{67.10\\(1.61, 574.59)} & \makecell{70.06\\(0.10, 425.06)} & \makecell{64.40\\(0.10, 403.78)} \\
+% \makecell{400} & \makecell{6.88\\(0.38, 59.87)} & \makecell{10.60\\(0.42, 79.02)} & \makecell{8.49\\(0.18, 70.39)} & \makecell{6.04\\(0.17, 56.54)} & \makecell{7.88\\(0.10, 62.81)} & \makecell{12.80\\(2.92, 52.04)} & \makecell{10.83\\(1.40, 73.03)} & \makecell{38.65\\(0.44, 231.27)} & \makecell{55.98\\(0.44, 367.16)} \\
+% \makecell{500} & \makecell{32.75\\(0.37, 399.83)} & \makecell{55.10\\(0.50, 437.00)} & \makecell{50.85\\(0.31, 384.77)} & \makecell{45.95\\(0.55, 376.85)} & \makecell{42.20\\(0.23, 430.87)} & \makecell{89.58\\(2.04, 561.99)} & \makecell{31.85\\(1.23, 218.04)} & \makecell{101.84\\(0.83, 336.29)} & \makecell{129.58\\(0.68, 476.19)} \\
+% \bottomrule
+% \end{tabular}
+% \caption{Mean (lowest, highest) runtime for version 2 solvers (SAT)}
+% \label{tab:mean_low_high_SAT_v2}
+% \end{table}
+
+\begin{table}[htbp]
+\fontsize{4}{4}\selectfont
+\centering
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{3} % Increase row spacing
+\begin{tabular}{llllll}
+\toprule
+\makecell{vertices} & \makecell{100} & \makecell{200} & \makecell{300} & \makecell{400} & \makecell{500} \\
+% vertices &  &  &  &  &  \\
+\midrule
+\makecell{Cadical103} & \makecell{0.39\\(0.02, 1.69)} & \makecell{7.72\\(0.19, 99.53)} & \makecell{32.44\\(0.56, 249.32)} & \makecell{6.88\\(0.38, 59.87)} & \makecell{32.75\\(0.37, 399.83)} \\
+\makecell{Cadical153} & \makecell{0.41\\(0.01, 1.73)} & \makecell{14.48\\(0.12, 201.02)} & \makecell{60.42\\(0.30, 325.82)} & \makecell{10.60\\(0.42, 79.02)} & \makecell{55.10\\(0.50, 437.00)} \\
+\makecell{Glucose4} & \makecell{0.52\\(0.01, 2.72)} & \makecell{7.37\\(0.13, 103.08)} & \makecell{38.91\\(0.26, 340.05)} & \makecell{8.49\\(0.18, 70.39)} & \makecell{50.85\\(0.31, 384.77)} \\
+\makecell{Glucose42} & \makecell{0.45\\(0.01, 2.56)} & \makecell{7.21\\(0.17, 92.67)} & \makecell{67.42\\(0.25, 398.85)} & \makecell{6.04\\(0.17, 56.54)} & \makecell{45.95\\(0.55, 376.85)} \\
+\makecell{Gluecard4} & \makecell{0.53\\(0.01, 2.93)} & \makecell{7.41\\(0.05, 95.68)} & \makecell{50.69\\(0.25, 459.07)} & \makecell{7.88\\(0.10, 62.81)} & \makecell{42.20\\(0.23, 430.87)} \\
+\makecell{MapleChrono} & \makecell{3.77\\(1.52, 8.33)} & \makecell{4.95\\(2.26, 9.65)} & \makecell{56.29\\(3.07, 362.71)} & \makecell{12.80\\(2.92, 52.04)} & \makecell{89.58\\(2.04, 561.99)} \\
+\makecell{MergeSat3} & \makecell{2.25\\(0.04, 5.34)} & \makecell{10.14\\(1.86, 112.24)} & \makecell{67.10\\(1.61, 574.59)} & \makecell{10.83\\(1.40, 73.03)} & \makecell{31.85\\(1.23, 218.04)} \\
+\makecell{Minicard} & \makecell{0.76\\(0.01, 4.67)} & \makecell{22.26\\(0.11, 261.22)} & \makecell{70.06\\(0.10, 425.06)} & \makecell{38.65\\(0.44, 231.27)} & \makecell{101.84\\(0.83, 336.29)} \\
+\makecell{Minisat22} & \makecell{0.79\\(0.01, 4.21)} & \makecell{30.03\\(0.11, 407.12)} & \makecell{64.40\\(0.10, 403.78)} & \makecell{55.98\\(0.44, 367.16)} & \makecell{129.58\\(0.68, 476.19)} \\
 \bottomrule
 \end{tabular}
 \caption{Mean (lowest, highest) runtime for version 2 solvers (SAT)}
