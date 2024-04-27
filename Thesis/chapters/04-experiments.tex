@@ -480,4 +480,4 @@ In this section, we will test our newly introduced MIP and SAT formulations for 
 
 \section{Threats to Validity}
 SAT solvers are required to call a deletion function to clean up the process after usage. If this function is not called, it can potentially corrupt the process. For this reason, we call this function as soon as the solver finishes solving. Additionally, we check the validity of the solution afterward. For the CAGP, we check whether the subgraphs of the visibility graph $G_{vis}$ induced by a guard subset of each color of the solution contains no edges. For the CFCAGP, we check for each witness in all\_witness\_to\_guards whether its guard subset has a guard with a unique color among them given the color assignment of the solution.\\
-Another 
+Another consideration one has to b
