@@ -285,6 +285,7 @@ As for the algorithm, we generate K-many different clique edge covers, K being t
 
 \begin{algorithm}
 \caption{Generate Clique Edge Covers}
+\fontsize{10}{12}\selectfont
 \begin{algorithmic}[1]
 \Procedure{Generate Clique Edge Covers}{$G$, $K$}
 \State Initialize empty lists: matching, edge\_clique\_covers
@@ -349,13 +350,14 @@ As mentioned in the SAT formulation section, when solving SAT problems, we check
     \State missing\_witnesses $\gets$ check\_coverage(solution)
     \While{missing\_witnesses}
         \For{witness in missing\_witnesses}
-            \State subset $\gets \{\}$
-            \For{guard in witness\_to\_guards[witness]}
-                \For{$k$ in range($K$)}
-                    \State subset $\gets$ subset $\cup$ \{(guard, $k$)\}
-                \EndFor
-            \EndFor
-            \State solver.add\_clause([guard\_to\_var[guard][color] for (guard, color) in subset])
+            % \State subset $\gets \{\}$
+            % \For{guard in witness\_to\_guards[witness]}
+            %     \For{$k$ in range($K$)}
+            %         \State subset $\gets$ subset $\cup$ \{(guard, $k$)\}
+            %     \EndFor
+            % \EndFor
+            % \State solver.add\_clause([guard\_to\_var[guard][color] for (guard, color) in subset])
+            \State Add witness covering clauses to SATsolver model
         \EndFor
         \State color\_lim, solution $\gets$ Linear Ascent(color\_lim)
         \State missing\_witnesses $\gets$ check\_coverage(solution)
