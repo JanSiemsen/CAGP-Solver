@@ -294,7 +294,14 @@ When plotting the solvers in a cactus plot, we can see that both version 1 and v
 \clearpage
 \subsection{CP-SAT Formulation Comparison}
 In this section, we will compare using the MIP formulation against the SAT formulation with and without the clauses \cref{eq_SAT:f.3}(CAGP) for the CP-SAT solver. For the comparison, we use the same instances as for the SAT Solver Choice section~\cite{wireless-localization-instances-page}.\par\noindent
+All solver variations were able to solve all of the instances. Looking at the cactus plot, there is no clear best variation (\cref{fig:cactus_CP-SAT}). The SAT formulations perform better on a large number of instances, but on the other hand, the MIP formulation has less variance in runtimes and also a lower maximum runtime over all instances ().
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[scale=0.7]{Thesis/figures/minibenchmark_cactus_plot_runtime_CPSAT_with_holes.png}
+\caption{Cactus Plot Comparing the CP-SAT Solver Performance}
+\label{fig:cactus_CP-SAT}
+\end{figure}
 
 \begin{table}[htbp]
 \fontsize{6}{6}\selectfont
@@ -316,13 +323,6 @@ In this section, we will compare using the MIP formulation against the SAT formu
 \caption{Mean (lowest, highest) runtime for solvers (CP-SAT)}
 \label{tab:mean_low_high_CPSAT}
 \end{table}
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[scale=0.7]{Thesis/figures/minibenchmark_cactus_plot_runtime_CPSAT_with_holes.png}
-\caption{Cactus Plot Comparing the CP-SAT Solver Performance}
-\label{fig:cactus_CP-SAT}
-\end{figure}
 
 \subsection{MIP Parameter Set}
 Gurobi allows us to set various parameters, which can help improve the runtime of the solver depending on the model. During testing, we used the model.tune() function on a few handpicked instances to determine a good parameter set. Note that setting the parameters drastically improves the runtime of the solver and one might want to further improve them in the future. In the following, we will list the parameters used for the CAGP MIP solver:
@@ -479,4 +479,5 @@ In this section, we will test our newly introduced MIP and SAT formulations for 
 \subsection{SAT Solver on Simple Polygons with Holes}
 
 \section{Threats to Validity}
-SAT solvers are required to call a deletion function to clean up the process after usage. If this function is not called, it can potentially corrupt the process. For this reason, we call this function as soon as the solver finishes solving. Additionally, we check the validity of the solution afterward. For the CAGP, we check whether the subgraphs of the visibility graph $G_{vis}$ induced by a guard subset of each color of the solution contains no edges. For the CFCAGP, we check for each witness in all\_witness\_to\_guards whether its guard subset has a guard with a unique color among them given the color assignment of the solution.
+SAT solvers are required to call a deletion function to clean up the process after usage. If this function is not called, it can potentially corrupt the process. For this reason, we call this function as soon as the solver finishes solving. Additionally, we check the validity of the solution afterward. For the CAGP, we check whether the subgraphs of the visibility graph $G_{vis}$ induced by a guard subset of each color of the solution contains no edges. For the CFCAGP, we check for each witness in all\_witness\_to\_guards whether its guard subset has a guard with a unique color among them given the color assignment of the solution.\\
+Another 
