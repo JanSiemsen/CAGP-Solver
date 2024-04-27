@@ -19,7 +19,7 @@ The guard subset of a light polygon is formed by all the guards whose visibility
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[scale=1.3]{Thesis/figures/conflict-free_witnesses.pdf}
+\includegraphics[scale=1.3]{Thesis/figures/conflict-free_witnesses_updated.pdf}
 \caption{Illustration for the proof of \cref{thm:conflict-free_witnesses}.}
 \label{fig:conflict-free_witnesses}
 \end{figure}
@@ -27,7 +27,7 @@ The guard subset of a light polygon is formed by all the guards whose visibility
 Lastly, we will prove that, unlike the CAGP, we cannot restrict ourselves to either shadow or light witness set to check the conflict-freeness for the CFCAGP.
 
 \begin{theorem}\label{thm:conflict-free_witnesses}
-For a polygon $P$ and a guard set $G$, neither conflict-freeness of all shadow witnesses nor all light witnesses guarantees conflict-freeness within all AVPs.
+For a polygon $P$ and a guard set $G$, neither conflict-freeness of all shadow witnesses nor all light witnesses guarantees conflict-freeness within all AVPs even if restricted to an optimal number of colors.
 \end{theorem}
 \begin{proof}
 To prove this theorem, we present a simple example in \cref{fig:conflict-free_witnesses}. In the figure $A_{1}$, $A_{2}$ and $A_{3}$ are shadow AVPs and $A_{4}$ is a light AVP. Each of them is covered by a guard of unique color. On the other hand, $A_{5}$ is neither shadow nor light and is covered by two guards of the same color, thus, it is not conflict-free.
