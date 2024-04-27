@@ -69,7 +69,7 @@ As CP-SAT solvers allow for both MIP and SAT constraints, we use both the MIP an
 
 \chapter{Conflict-free Chromatic Art Gallery Problem Formulations}
 
-In the following sections, we introduce a MIP, a SAT, and a CP-SAT formulation of the Conflict-free Chromatic Art Gallery Problem.
+In the following sections, we introduce a MIP and a SAT formulation of the Conflict-free Chromatic Art Gallery Problem.
 
 \section{MIP Formulation}
 
@@ -369,7 +369,7 @@ As mentioned in the SAT formulation section, when solving SAT problems, we check
     \State optimal\_solution $\gets$ None
     \While{lower $<$ upper}
         \State mid $\gets \lfloor$(lower + upper)$/2\rfloor$
-        \State solution $\gets$ SATSolver.solve(deactivate\_guards(mid))
+        \State solution $\gets$ SATsolver.solve(deactivate\_guards(mid))
         \If{solution}
             \State optimal\_solution $\gets$ solution
             \State upper $\gets$ mid
@@ -378,15 +378,15 @@ As mentioned in the SAT formulation section, when solving SAT problems, we check
         \EndIf
     \EndWhile
     \If{optimal\_solution is None}
-        \State optimal\_solution $\gets$ SATSolver.solve(deactivate\_guards(upper))
+        \State optimal\_solution $\gets$ SATsolver.solve(deactivate\_guards(upper))
     \EndIf
     \State \Return lower, optimal\_solution
 \EndProcedure
 \Procedure{Linear Ascent}{color\_lim}
-    \State solution $\gets$ SATSolver.solve(deactivate\_guards(color\_lim))
+    \State solution $\gets$ SATsolver.solve(deactivate\_guards(color\_lim))
     \While{not solution and color\_lim $\leq K$}
         \State color\_lim $\gets$ color\_lim + $1$
-        \State solution $\gets$ SATSolver.solve(deactivate\_guards(color\_lim))
+        \State solution $\gets$ SATsolver.solve(deactivate\_guards(color\_lim))
     \EndWhile
     \State \Return color\_lim, solution
 \EndProcedure
