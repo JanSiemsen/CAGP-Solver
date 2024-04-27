@@ -261,7 +261,7 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 \While{uncovered is not empty}
     \State Initialize empty list: weights
     \For{(guard, witnesses) in guard\_to\_shadow\_witnesses}
-        \State weights.append((guard, |witnesses $\cap$ uncovered|))
+        \State weights.append((guard, $|$witnesses $\cap$ uncovered$|$))
     \EndFor
     \State solver $\gets$ WIS\_Solver(weights, $G_{vis}$)
     \State independent\_set $\gets$ solver.solve()
@@ -331,8 +331,8 @@ As for the algorithm, we generate K-many different clique edge covers, K being t
 \State candidates $\gets N(u)\cup N(v)$
 \While{candidates is not empty}
     \State $v\gets v$ from candidates with max($\delta(v)$)
-    \State candidates $\gets$ candidates $\cup N(v)$
-    \State clique $\gets$ clique $\cup \{v\}$
+    \State candidates $\gets$ candidates $\cup$ $N(v)$
+    \State clique $\gets$ clique $\cup$ $\{v\}$
 \EndWhile
 \State \Return clique
 \EndProcedure
