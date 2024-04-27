@@ -41,11 +41,11 @@ In the following sections, we introduce a MIP, a SAT, and a CP-SAT formulation o
 
 \begin{align}
 \label{eq_MIP:f.0} \mbox{minimize}~& \;\sum_{k\in \{1,\ldots,K\}} c_{k}& \\
-\label{eq_MIP:f.1} \mbox{s.t. } &\sum_{g \in H}x_{gk} <= c_{k} & \forall H \in \mathcal{H}, \forall k\in \{1,\ldots,K\}\\
-\label{eq_MIP:f.2}&\sum_{g\in N(w), k\in \{1,\ldots,K\}}x_{gk}>=1 & \forall w\in W\\
-\label{eq_MIP:f.3}&\sum_{k\in \{1,\ldots,K\}}x_{gk}<=1 & \forall g\in G\\
-\label{eq_MIP:f.4}&c_{k} - c_{k+1} >= 0 & \forall k\in \{1,\ldots,K-1\}\\
-\label{eq_MIP:f.5}&\sum_{g\in G}x_{gk} - \sum_{g\in G}x_{g(k+1)} >= 0 & \forall k\in \{1,\ldots,K-1\}\\
+\label{eq_MIP:f.1} \mbox{s.t. } &\sum_{g \in H}x_{gk} \leq c_{k} & \forall H \in \mathcal{H}, \forall k\in \{1,\ldots,K\}\\
+\label{eq_MIP:f.2}&\sum_{g\in N(w), k\in \{1,\ldots,K\}}x_{gk}\geq 1 & \forall w\in W\\
+\label{eq_MIP:f.3}&\sum_{k\in \{1,\ldots,K\}}x_{gk}\leq1 & \forall g\in G\\
+\label{eq_MIP:f.4}&c_{k} - c_{k+1} \geq 0 & \forall k\in \{1,\ldots,K-1\}\\
+\label{eq_MIP:f.5}&\sum_{g\in G}x_{gk} - \sum_{g\in G}x_{g(k+1)} \geq 0 & \forall k\in \{1,\ldots,K-1\}\\
 \label{eq_MIP:f.6}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,\ldots,K\}\\
 \label{eq_MIP:f.7}& c_{k}\in \{0,1\} & \forall k\in \{1,\ldots,K\}
 \end{align}
@@ -75,14 +75,14 @@ In the following sections, we introduce a MIP and a SAT formulation of the Confl
 
 \begin{align}
 \label{eq_MIP_cf:f.0} \mbox{minimize}~& \;\sum_{k\in \{1,\ldots,K\}} c_{k}& \\
-\label{eq_MIP_cf:f.1} \mbox{s.t. } &\sum_{g \in G}x_{gk} >= c_{k} & \forall k\in \{1,\ldots,K\}\\
-\label{eq_MIP_cf:f.2}&\sum_{g\in G}x_{gk} <= |G|\cdot  c_{k} & \forall k\in \{1,\ldots,K\}\\
-\label{eq_MIP_cf:f.3}&\sum_{g\in N(w)}x_{gk} >= u_{wk} & \forall w\in W, \forall k\in \{1,\ldots,K\}\\
-\label{eq_MIP_cf:f.4}&\sum_{g\in N(w)}x_{gk} <= 1 + |N(w)|\cdot  (1-u_{wk}) & \forall w\in W, \forall k\in \{1,\ldots,K\}\\
-\label{eq_MIP_cf:f.5}&\sum_{k\in \{1,\ldots,K\}}u_{wk} >= 1 & \forall w\in W\\
-\label{eq_MIP_cf:f.6}&\sum_{k\in \{1,\ldots,K\}}x_{gk} <= 1 & \forall g\in G\\
-\label{eq_MIP_cf:f.7}&c_{k} - c_{k+1} >= 0 & \forall k\in \{1,\ldots,K-1\}\\
-\label{eq_MIP_cf:f.8}&\sum_{g\in G}x_{gk} - \sum_{g\in G}x_{g(k+1)} >= 0 & \forall k\in \{1,\ldots,K-1\}\\
+\label{eq_MIP_cf:f.1} \mbox{s.t. } &\sum_{g \in G}x_{gk} \geq c_{k} & \forall k\in \{1,\ldots,K\}\\
+\label{eq_MIP_cf:f.2}&\sum_{g\in G}x_{gk} \leq |G|\cdot  c_{k} & \forall k\in \{1,\ldots,K\}\\
+\label{eq_MIP_cf:f.3}&\sum_{g\in N(w)}x_{gk} \geq u_{wk} & \forall w\in W, \forall k\in \{1,\ldots,K\}\\
+\label{eq_MIP_cf:f.4}&\sum_{g\in N(w)}x_{gk} \leq 1 + |N(w)|\cdot  (1-u_{wk}) & \forall w\in W, \forall k\in \{1,\ldots,K\}\\
+\label{eq_MIP_cf:f.5}&\sum_{k\in \{1,\ldots,K\}}u_{wk} \geq 1 & \forall w\in W\\
+\label{eq_MIP_cf:f.6}&\sum_{k\in \{1,\ldots,K\}}x_{gk} \leq 1 & \forall g\in G\\
+\label{eq_MIP_cf:f.7}&c_{k} - c_{k+1} \geq 0 & \forall k\in \{1,\ldots,K-1\}\\
+\label{eq_MIP_cf:f.8}&\sum_{g\in G}x_{gk} - \sum_{g\in G}x_{g(k+1)} \geq 0 & \forall k\in \{1,\ldots,K-1\}\\
 \label{eq_MIP_cf:f.10}& u_{wk} \in \{0,1\} & \forall w\in W, \forall k\in \{1,\ldots,K\}\\
 \label{eq_MIP_cf:f.11}& x_{gk} \in \{0,1\} & \forall g\in G, \forall k\in \{1,\ldots,K\}\\
 \label{eq_MIP_cf:f.12}& c_{k}\in \{0,1\} & \forall k\in \{1,\ldots,K\}
@@ -113,6 +113,7 @@ The instances are given as lists of points, which represent the outer boundaries
 
 \begin{algorithm}
 \caption{AVP Generation}\label{alg:AVP_generation}
+\fontsize{10}{12}\selectfont
 \begin{algorithmic} 
 \Procedure{Generate AVP Recursive}{guards}
 \If{len(guards) = $1$}
@@ -183,6 +184,7 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
 
 \begin{algorithm}
 \caption{AVP Processing (CAGP)}\label{alg:AVP_processing}
+\fontsize{10}{12}\selectfont
 \begin{algorithmic}[1]
 \Procedure{Get shadow witnesses and light guard sets}{AVP arrangement}
 \State Initialize empty maps: shadow\_witness\_to\_guards, guard\_to\_shadow\_witnesses
@@ -225,6 +227,7 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
 
 \begin{algorithm}
 \caption{AVP Processing (CFCAGP)}\label{alg:AVP_processing_cf}
+\fontsize{10}{12}\selectfont
 \begin{algorithmic}[1]
 \Procedure{Get all witnesses}{AVP arrangement}
 \State Initialize empty maps: all\_witness\_to\_guards, guard\_to\_all\_witnesses
@@ -249,6 +252,7 @@ Calculating a low initial upper bound is vital for efficiently solving the CAGP 
 
 \begin{algorithm}
 \caption{Greedy Algorithm}\label{alg:greedy}
+\fontsize{10}{12}\selectfont
 \begin{algorithmic}[1]
 \Procedure{Greedy}{guard\_to\_shadow\_witnesses, all\_shadow\_witnesses, $G_{vis}$}
 \State Initialize empty set: solution
@@ -290,10 +294,10 @@ As for the algorithm, we generate K-many different clique edge covers, K being t
 \Procedure{Generate Clique Edge Covers}{$G$, $K$}
 \State Initialize empty lists: matching, edge\_clique\_covers
 \State Initialize empty set: covered\_vertices
-\State edge\_queue $\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
+\State edge\_queue $\gets$ priority queue with edges from $G$ and\\\hspace{2.7cm} priority negative sum of degrees of the vertices
 \For{$i=0$, $i{+}{+}$, $K$}
     \State $(u, v)\gets$ pop edge with highest priority from edge\_queue
-    \While{$\{u, v\} \cap$ covered\_vertices is not empty}
+    \While{$\{u, v\}$ $\cap$ covered\_vertices is not empty}
         \State $(u, v)\gets$ pop edge with highest priority from edge\_queue
     \EndWhile
     \State edge $\gets (u, v)$
@@ -311,7 +315,7 @@ As for the algorithm, we generate K-many different clique edge covers, K being t
 \State clique $\gets$ Build Clique($G$, edge)
 \State edge\_clique\_cover $\gets$ \{clique\}
 \State Remove edges from uncovered\_graph that are in clique
-\State edge\_queue $\gets$ priority queue with edges from $G$ and priority negative sum of degrees of the vertices
+\State edge\_queue $\gets$ priority queue with edges from $G$ and\\\hspace{2.7cm} priority negative sum of degrees of the vertices
 \While{uncovered\_graph has edges}
     \State edge $\gets$ pop edge with highest priority from edge\_queue
     \State clique $\gets$ Build Clique($G$, edge)
@@ -344,6 +348,7 @@ As mentioned in the SAT formulation section, when solving SAT problems, we check
 
 \begin{algorithm}
 \caption{SAT Color Optimization}\label{alg:SAT_color_opt}
+\fontsize{10}{12}\selectfont
 \begin{algorithmic}[1]
 \Procedure{solve}{$K$}
     \State color\_lim, solution $\gets$ Binary Search(K)
