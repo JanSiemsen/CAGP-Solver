@@ -30,7 +30,7 @@ Lastly, we will prove that, unlike the CAGP, we cannot restrict ourselves to eit
 For a polygon $P$ and a guard set $G$, neither conflict-freeness of all shadow witnesses nor all light witnesses guarantees conflict-freeness within all AVPs even if restricted to an optimal number of colors.
 \end{theorem}
 \begin{proof}
-To prove this theorem, we present a simple example in \cref{fig:conflict-free_witnesses}. In the figure $A_{1}$, $A_{2}$ and $A_{3}$ are shadow AVPs and $A_{4}$ is a light AVP. Each of them is covered by a guard of unique color. On the other hand, $A_{5}$ is neither shadow nor light and is covered by two guards of the same color, thus, it is not conflict-free.
+To prove this theorem, we present a simple example in \cref{fig:conflict-free_witnesses}. By placing a witness in the center of $A_{1}$ and $A_{5}$, we get two independent witnesses, meaning we need at least two guards to cover the entire polygon. As for any guard set with two or more vertices, there exists at least one pair of guards whose visibilities intersect, we require at least two colors. $A_{1}$, $A_{3}$ and $A_{5}$ are shadow AVPs and $A_{2}$ and $A_{4}$ are light AVPs. Each of them is covered by at least one guard of unique color. On the other hand, $A_{6}$ is neither shadow nor light and is only covered by two guards of the same color, thus, it is not conflict-free.
 \end{proof}
 
 \chapter{Chromatic Art Gallery Problem Formulations}
