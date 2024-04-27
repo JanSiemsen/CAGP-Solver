@@ -7,7 +7,7 @@ The benchmarks were run in WSL2 (Windows 11, version 22H2) using an AMD Ryzen 7 
 In this section, we will explore optimally solving the Chromatic Art Gallery Problem using SAT, MIP, and CP-Sat solvers.
 
 \subsection{SAT Solver Choice}
-PySAT provides several different SAT solvers. That is why in this section, we will compare them against each other to determine, which one performs the best on our model. Additionally, we will compare using the clauses \cref{eq_SAT:f.3}(version 2) against leaving them out and filtering the solution afterward as described in the SAT Color Optimization chapter (version 1). Note that for the card solvers (Gluecard3, Gluecard4, Minicard), we used the natively provided add\_atmost(variables, 1) clauses to model \cref{eq_SAT:f.3}. Due to the parameter sets becoming quite large when comparing all of the SAT solvers, we filtered out a few that performed poorly during testing beforehand. The testing was done using random simple polygons from 100 to 500 vertices and from 10 to 50 holes and each instance size had 30 polygons~\cite{wireless-localization-instances-page}.\par\noindent 
+PySAT provides several different SAT solvers. That is why in this section, we will compare them against each other to determine, which one performs the best on our model. Additionally, we will compare using the clauses \cref{eq_SAT:f.3}(version 2) against leaving them out and filtering the solution afterward as described in the SAT Color Optimization chapter (version 1). Note that for the card solvers (Gluecard3, Gluecard4, Minicard), we used the natively provided add\_atmost(variables, 1) clauses to model \cref{eq_SAT:f.3}. Due to the parameter sets becoming quite large when comparing all of the SAT solvers, we filtered out a few that performed poorly during testing beforehand. The testing was done using random simple polygons from 100 to 500 vertices with hole/vertices ratio of 1/10 and 30 polygons for each instance size~\cite{wireless-localization-instances-page}.\par\noindent 
 When plotting the solvers in a cactus plot, we can see that both version 1 and version 2 with CaDiCaL103 perform well compared to the other solvers (\cref{fig:cactus_SAT}). Indeed, they both were able to solve all instances (\cref{tab:SAT_num_solved}) as well as have the most lowest runtimes across all solvers (\cref{tab:SAT_small_time}). But looking at the mean runtimes one cannot determine a clear best solver (\cref{tab:mean_low_high_SAT_v1}/\cref{tab:mean_low_high_SAT_v1}). One can also notice that even between instances of the same size there can be a big variance between the lowest and highest runtime. As most SAT solvers run on a single core, we can run multiple of them at the same time on a multi-core system and stop as soon as one of them finds a solution. First up, we choose CaDiCaL103 version 1 and version 2. Additionally, by looking at the 3 best alternatives for the 20 worst instances for CaDiCaL103, we choose Glucose42 version 1 and version 2 as well as Glucose4 version 2. These five solvers will be used in parallel in the comparison between MIP, SAT, and CP-SAT.
 
 \begin{figure}[htbp]
@@ -324,12 +324,12 @@ Gurobi allows us to set various parameters, which can help improve the runtime o
 In this section, we will compare the performance of the MIP, SAT, and CP-SAT solver against each other on random simple polygons with and without holes.
 
 \subsubsection{Simple Polygons without Holes}
-In this section, we will 
+For reference purposes, we use the same random simple polygon without holes instances between 100 and 2500 vertices and 30 polygons for each instance size as Zambon et al.~\cite{art-gallery-instances-page}.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[scale=0.7]{Thesis/figures/final_benchmark_cactus_plot_runtime_MIP_SAT_CPSAT_without_holes.png}
-\caption{Cactus Plot Comparing the MIP, SAT and CP-SAT Solver Performance on simple polygons without holes}
+\caption{Cactus Plot Comparing the MIP, SAT, and CP-SAT Solver Performance on simple polygons without holes}
 \label{fig:cactus_all_simple_no_holes}
 \end{figure}
 
@@ -366,6 +366,7 @@ In this section, we will
 \end{table}
 
 \subsubsection{Simple Polygons with Holes}
+For reference purposes, we use the same random simple polygon with holes instances between 100 and 1000 vertices with a hole/vertices ratio of 1/10 and 30 polygons for each instance size as Zambon et al.~\cite{art-gallery-instances-page}.
 
 \begin{figure}[htbp]
 \centering
