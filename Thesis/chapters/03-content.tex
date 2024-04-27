@@ -131,17 +131,64 @@ The instances are given as lists of points, which represent the outer boundaries
 \end{algorithmic}
 \end{algorithm}
 
-For the CAGP, we calculate the shadow witness set. As geometric operations are expensive, instead of saving the shadow witness set as a set of points, we store each witness as an integer together with the set of guards that covers the witness as well as each guard together with the set of witnesses that the guard covers. Additionally, we store a list of the set of guards for each light AVP. For the CFCAGP, we calculate the witness set as well. But because of \cref{thm:conflict-free_witnesses} just using shadow or light witnesses is not sufficient, thus we use a witness for every AVP instead. To calculate all of the above, we use \cref{alg:AVP_processing}. Afterward, we can use the light guard sets to create the visibility graph $G_{vis}$ by adding edges between guards within each set (\cref{thm:light_covers}). As for the covering graph $G_{cov}$, there is no need to create the overhead of an additional graph. Instead, we can simply check the corresponding guard set of a witness, whenever we need the neighborhood of that witness in $G_{vis}$. Lastly, we can sort the witnesses by the size of their guard sets and use the $|G|$ smallest witnesses as our initial witnesses.
+For the CAGP, we calculate the shadow witness set. As geometric operations are expensive, instead of saving the shadow witness set as a set of points, we store each witness as an integer together with the set of guards that covers the witness as well as each guard together with the set of witnesses that the guard covers. Additionally, we store a list of the set of guards for each light AVP (\cref{alg:AVP_processing}). For the CFCAGP, we calculate the witness set as well. But because of \cref{thm:conflict-free_witnesses} just using shadow or light witnesses is not sufficient, thus we use a witness for every AVP instead (\cref{alg:AVP_processing_cf}). Afterward, we can use the light guard sets to create the visibility graph $G_{vis}$ by adding edges between guards within each set (\cref{thm:light_covers}). As for the covering graph $G_{cov}$, there is no need to create the overhead of an additional graph. Instead, we can simply check the corresponding guard set of a witness, whenever we need the neighborhood of that witness in $G_{vis}$. Lastly, we can sort the witnesses by the size of their guard sets and use the $|G|$ smallest witnesses as our initial witnesses.
+
+% \begin{algorithm}
+% \caption{Calculate witness sets and light guard sets}\label{alg:AVP_processing}
+% \begin{algorithmic}[1]
+% \Procedure{AVP Processing}{faces of the AVP arrangement}
+% \State Initialize empty maps: shadow\_witness\_to\_guards, guard\_to\_shadow\_witnesses, all\_witness\_to\_guards, guard\_to\_all\_witnesses
+% \State Initialize empty list: light\_guard\_sets
+% \State shadow\_index $\gets 0$
+% \State all\_index $\gets 0$
+% \For{face in faces}
+%     \State g\_data $\gets$ guard set of the face
+%     \If{g\_data is empty}
+%         \State Continue
+%     \EndIf
+%     \State is\_shadow $\gets$ true
+%     \State is\_light $\gets$ true
+%     \For{half\_edge in face}
+%         \State twin\_g\_data $\gets$ guard set of the twin face of the half\_edge
+%         \If{twin\_g\_data is empty}
+%             \State Continue
+%         \EndIf
+%         \If{g\_data $\subset$ twin\_g\_data}
+%             \State is\_shadow $\gets$ false
+%         \EndIf
+%         \If{twin\_g\_data $\subset$ g\_data}
+%             \State is\_light $\gets$ false
+%         \EndIf
+%     \EndFor
+%     \State all\_witness\_to\_guards[all\_index] $\gets$ g\_data
+%     \For{g in g\_data}
+%         \State guard\_to\_all\_witnesses[g] $\gets$ guard\_to\_all\_witnesses[g] $\cup$ all\_index
+%     \EndFor
+%     \State all\_index $\gets$ all\_index + $1$
+%     \If{is\_shadow}
+%         \State shadow\_witness\_to\_guards[index] $\gets$ g\_data
+%         \For{g in g\_data}
+%             \State guard\_to\_shadow\_witnesses[g] $\gets$ guard\_to\_shadow\_witnesses[g] $\cup$ index
+%         \EndFor
+%         \State shadow\_index $\gets$ shadow\_index + $1$
+%     \EndIf
+%     \If{is\_light}
+%         \State light\_guard\_sets.append(g\_data)
+%     \EndIf
+% \EndFor
+% \State \Return shadow\_witness\_to\_guards, guard\_to\_shadow\_witnesses, light\_guard\_sets, all\_witness\_to\_guards, guard\_to\_all\_witnesses
+% \EndProcedure
+% \end{algorithmic}
+% \end{algorithm}
 
 \begin{algorithm}
-\caption{Calculate witness sets and light guard sets}\label{alg:AVP_processing}
+\caption{AVP Processing (CAGP)}\label{alg:AVP_processing}
 \begin{algorithmic}[1]
-\Procedure{AVP Processing}{faces of the AVP arrangement}
-\State Initialize empty maps: shadow\_witness\_to\_guards, guard\_to\_shadow\_witnesses, all\_witness\_to\_guards, guard\_to\_all\_witnesses
+\Procedure{Get shadow witnesses and light guard sets}{AVP arrangement}
+\State Initialize empty maps: shadow\_witness\_to\_guards, guard\_to\_shadow\_witnesses
 \State Initialize empty list: light\_guard\_sets
 \State shadow\_index $\gets 0$
-\State all\_index $\gets 0$
-\For{face in faces}
+\For{face in faces of the AVP arrangement}
     \State g\_data $\gets$ guard set of the face
     \If{g\_data is empty}
         \State Continue
@@ -160,11 +207,6 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
             \State is\_light $\gets$ false
         \EndIf
     \EndFor
-    \State all\_witness\_to\_guards[all\_index] $\gets$ g\_data
-    \For{g in g\_data}
-        \State guard\_to\_all\_witnesses[g] $\gets$ guard\_to\_all\_witnesses[g] $\cup$ all\_index
-    \EndFor
-    \State all\_index $\gets$ all\_index + $1$
     \If{is\_shadow}
         \State shadow\_witness\_to\_guards[index] $\gets$ g\_data
         \For{g in g\_data}
@@ -176,7 +218,28 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
         \State light\_guard\_sets.append(g\_data)
     \EndIf
 \EndFor
-\State \Return shadow\_witness\_to\_guards, guard\_to\_shadow\_witnesses, light\_guard\_sets, all\_witness\_to\_guards, guard\_to\_all\_witnesses
+\State \Return shadow\_witness\_to\_guards, guard\_to\_shadow\_witnesses, light\_guard\_sets
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{AVP Processing (CFCAGP)}\label{alg:AVP_processing_cf}
+\begin{algorithmic}[1]
+\Procedure{Get all witnesses}{AVP arrangement}
+\State Initialize empty maps: all\_witness\_to\_guards, guard\_to\_all\_witnesses
+\For{face in faces of the AVP arrangement}
+    \State g\_data $\gets$ guard set of the face
+    \If{g\_data is empty}
+        \State Continue
+    \EndIf
+    \State all\_witness\_to\_guards[all\_index] $\gets$ g\_data
+    \For{g in g\_data}
+        \State guard\_to\_all\_witnesses[g] $\gets$ guard\_to\_all\_witnesses[g] $\cup$ all\_index
+    \EndFor
+    \State all\_index $\gets$ all\_index + $1$
+\EndFor
+\State \Return all\_witness\_to\_guards, guard\_to\_all\_witnesses
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
