@@ -36,72 +36,141 @@ PySAT provides several different SAT solvers. That is why in this section, we wi
 \label{tab:SAT_num_solved_v1}
 \end{table}
 
+% \begin{table}[htbp]
+% \fontsize{4}{4}\selectfont
+% \centering
+% \setlength{\tabcolsep}{2pt}
+% \renewcommand{\arraystretch}{3} % Increase row spacing
+% \begin{tabular}{lrrrrrrrrr}
+% \toprule
+% \makecell{vertices} & \makecell{Cadical103} & \makecell{Cadical153} & \makecell{Glucose4} & \makecell{Glucose42} & \makecell{Gluecard4} & \makecell{MapleChrono} & \makecell{MergeSat3} & \makecell{Minicard} & \makecell{Minisat22} \\
+% % vertices &  &  &  &  &  &  &  &  &  \\
+% \midrule
+% \makecell{100} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} \\
+% \makecell{200} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{27} & \makecell{30} & \makecell{30} & \makecell{30} \\
+% \makecell{300} & \makecell{30} & \makecell{30} & \makecell{29} & \makecell{30} & \makecell{29} & \makecell{20} & \makecell{30} & \makecell{27} & \makecell{27} \\
+% \makecell{400} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{29} & \makecell{30} \\
+% \makecell{500} & \makecell{30} & \makecell{30} & \makecell{28} & \makecell{29} & \makecell{28} & \makecell{21} & \makecell{28} & \makecell{27} & \makecell{28} \\
+% \bottomrule
+% \end{tabular}
+% \caption{Number of instances solved by the version 2 solvers}
+% \label{tab:SAT_num_solved_v2}
+% \end{table}
+
 \begin{table}[htbp]
 \fontsize{4}{4}\selectfont
 \centering
 \setlength{\tabcolsep}{2pt}
 \renewcommand{\arraystretch}{3} % Increase row spacing
-\begin{tabular}{lrrrrrrrrr}
+\begin{tabular}{lrrrrr}
 \toprule
-\makecell{vertices} & \makecell{Cadical103} & \makecell{Cadical153} & \makecell{Glucose4} & \makecell{Glucose42} & \makecell{Gluecard4} & \makecell{MapleChrono} & \makecell{MergeSat3} & \makecell{Minicard} & \makecell{Minisat22} \\
-% vertices &  &  &  &  &  &  &  &  &  \\
+\makecell{vertices} & \makecell{100} & \makecell{200} & \makecell{300} & \makecell{400} & \makecell{500} \\
+% vertices &  &  &  &  &  \\
 \midrule
-\makecell{100} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} \\
-\makecell{200} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{27} & \makecell{30} & \makecell{30} & \makecell{30} \\
-\makecell{300} & \makecell{30} & \makecell{30} & \makecell{29} & \makecell{30} & \makecell{29} & \makecell{20} & \makecell{30} & \makecell{27} & \makecell{27} \\
-\makecell{400} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{29} & \makecell{30} \\
-\makecell{500} & \makecell{30} & \makecell{30} & \makecell{28} & \makecell{29} & \makecell{28} & \makecell{21} & \makecell{28} & \makecell{27} & \makecell{28} \\
+\makecell{Cadical103} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} \\
+\makecell{Cadical153} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} \\
+\makecell{Glucose4} & \makecell{30} & \makecell{30} & \makecell{29} & \makecell{30} & \makecell{28} \\
+\makecell{Glucose42} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{29} \\
+\makecell{Gluecard4} & \makecell{30} & \makecell{30} & \makecell{29} & \makecell{30} & \makecell{28} \\
+\makecell{MapleChrono} & \makecell{30} & \makecell{27} & \makecell{20} & \makecell{30} & \makecell{21} \\
+\makecell{MergeSat3} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{30} & \makecell{28} \\
+\makecell{Minicard} & \makecell{30} & \makecell{30} & \makecell{27} & \makecell{30} & \makecell{27} \\
+\makecell{Minisat22} & \makecell{30} & \makecell{30} & \makecell{27} & \makecell{30} & \makecell{28} \\
 \bottomrule
 \end{tabular}
 \caption{Number of instances solved by the version 2 solvers}
 \label{tab:SAT_num_solved_v2}
 \end{table}
 
+% \begin{table}[htbp]
+% \fontsize{4}{4}\selectfont
+% \centering
+% \setlength{\tabcolsep}{2pt}
+% \renewcommand{\arraystretch}{3} % Increase row spacing
+% \begin{tabular}{lrrrrrrr}
+% \toprule
+% \makecell{vertices} & \makecell{Cadical103} & \makecell{Cadical153} & \makecell{Glucose4} & \makecell{Glucose42} & \makecell{MergeSat3} & \makecell{Minicard} & \makecell{Minisat22} \\
+% % vertices &  &  &  &  &  &  &  \\
+% \midrule
+% \makecell{100} & \makecell{4} & \makecell{0} & \makecell{1} & \makecell{3} & \makecell{0} & \makecell{2} & \makecell{1} \\
+% \makecell{200} & \makecell{2} & \makecell{2} & \makecell{4} & \makecell{6} & \makecell{0} & \makecell{1} & \makecell{1} \\
+% \makecell{300} & \makecell{7} & \makecell{3} & \makecell{0} & \makecell{2} & \makecell{1} & \makecell{1} & \makecell{0} \\
+% \makecell{400} & \makecell{5} & \makecell{1} & \makecell{3} & \makecell{6} & \makecell{0} & \makecell{0} & \makecell{0} \\
+% \makecell{500} & \makecell{4} & \makecell{0} & \makecell{1} & \makecell{3} & \makecell{0} & \makecell{2} & \makecell{0} \\
+% \bottomrule
+% \end{tabular}
+% \caption{Number of instances with the lowest runtime for version 1 solvers}
+% \label{tab:SAT_small_time_v1}
+% \end{table}
 
 \begin{table}[htbp]
 \fontsize{4}{4}\selectfont
 \centering
 \setlength{\tabcolsep}{2pt}
 \renewcommand{\arraystretch}{3} % Increase row spacing
-\begin{tabular}{lrrrrrrr}
+\begin{tabular}{lrrrrr}
 \toprule
-\makecell{vertices} & \makecell{Cadical103} & \makecell{Cadical153} & \makecell{Glucose4} & \makecell{Glucose42} & \makecell{MergeSat3} & \makecell{Minicard} & \makecell{Minisat22} \\
-% vertices &  &  &  &  &  &  &  \\
+\makecell{vertices} & \makecell{100} & \makecell{200} & \makecell{300} & \makecell{400} & \makecell{500} \\
+% vertices &  &  &  &  &  \\
 \midrule
-\makecell{100} & \makecell{4} & \makecell{0} & \makecell{1} & \makecell{3} & \makecell{0} & \makecell{2} & \makecell{1} \\
-\makecell{200} & \makecell{2} & \makecell{2} & \makecell{4} & \makecell{6} & \makecell{0} & \makecell{1} & \makecell{1} \\
-\makecell{300} & \makecell{7} & \makecell{3} & \makecell{0} & \makecell{2} & \makecell{1} & \makecell{1} & \makecell{0} \\
-\makecell{400} & \makecell{5} & \makecell{1} & \makecell{3} & \makecell{6} & \makecell{0} & \makecell{0} & \makecell{0} \\
-\makecell{500} & \makecell{4} & \makecell{0} & \makecell{1} & \makecell{3} & \makecell{0} & \makecell{2} & \makecell{0} \\
+\makecell{Cadical103} & \makecell{4} & \makecell{2} & \makecell{7} & \makecell{5} & \makecell{4} \\
+\makecell{Cadical153} & \makecell{0} & \makecell{2} & \makecell{3} & \makecell{1} & \makecell{0} \\
+\makecell{Glucose4} & \makecell{1} & \makecell{4} & \makecell{0} & \makecell{3} & \makecell{1} \\
+\makecell{Glucose42} & \makecell{3} & \makecell{6} & \makecell{2} & \makecell{6} & \makecell{3} \\
+\makecell{MergeSat3} & \makecell{0} & \makecell{0} & \makecell{1} & \makecell{0} & \makecell{0} \\
+\makecell{Minicard} & \makecell{2} & \makecell{1} & \makecell{1} & \makecell{0} & \makecell{2} \\
+\makecell{Minisat22} & \makecell{1} & \makecell{1} & \makecell{0} & \makecell{0} & \makecell{0} \\
 \bottomrule
 \end{tabular}
 \caption{Number of instances with the lowest runtime for version 1 solvers}
 \label{tab:SAT_small_time_v1}
 \end{table}
 
+% \begin{table}[htbp]
+% \fontsize{4}{4}\selectfont
+% \centering
+% \setlength{\tabcolsep}{2pt}
+% \renewcommand{\arraystretch}{3} % Increase row spacing
+% \begin{tabular}{lrrrrrrrrr}
+% \toprule
+% \makecell{vertices} & \makecell{Cadical103} & \makecell{Cadical153} & \makecell{Glucose4} & \makecell{Glucose42} & \makecell{Gluecard4} & \makecell{MapleChrono} & \makecell{MergeSat3} & \makecell{Minicard} & \makecell{Minisat22} \\
+% % vertices &  &  &  &  &  &  &  &  &  \\
+% \midrule
+% \makecell{100} & \makecell{3} & \makecell{2} & \makecell{0} & \makecell{4} & \makecell{2} & \makecell{0} & \makecell{0} & \makecell{3} & \makecell{5} \\
+% \makecell{200} & \makecell{6} & \makecell{1} & \makecell{1} & \makecell{2} & \makecell{2} & \makecell{0} & \makecell{1} & \makecell{0} & \makecell{1} \\
+% \makecell{300} & \makecell{9} & \makecell{2} & \makecell{1} & \makecell{2} & \makecell{1} & \makecell{0} & \makecell{0} & \makecell{0} & \makecell{1} \\
+% \makecell{400} & \makecell{3} & \makecell{3} & \makecell{1} & \makecell{3} & \makecell{4} & \makecell{0} & \makecell{0} & \makecell{1} & \makecell{0} \\
+% \makecell{500} & \makecell{10} & \makecell{0} & \makecell{1} & \makecell{4} & \makecell{1} & \makecell{2} & \makecell{1} & \makecell{0} & \makecell{1} \\
+% \bottomrule
+% \end{tabular}
+% \caption{Number of instances with the lowest runtime for version 2 solvers}
+% \label{tab:SAT_small_time_v2}
+% \end{table}
 
 \begin{table}[htbp]
 \fontsize{4}{4}\selectfont
 \centering
 \setlength{\tabcolsep}{2pt}
 \renewcommand{\arraystretch}{3} % Increase row spacing
-\begin{tabular}{lrrrrrrrrr}
+\begin{tabular}{lrrrrr}
 \toprule
-\makecell{vertices} & \makecell{Cadical103} & \makecell{Cadical153} & \makecell{Glucose4} & \makecell{Glucose42} & \makecell{Gluecard4} & \makecell{MapleChrono} & \makecell{MergeSat3} & \makecell{Minicard} & \makecell{Minisat22} \\
-% vertices &  &  &  &  &  &  &  &  &  \\
+\makecell{vertices} & \makecell{100} & \makecell{200} & \makecell{300} & \makecell{400} & \makecell{500} \\
+% vertices &  &  &  &  &  \\
 \midrule
-\makecell{100} & \makecell{3} & \makecell{2} & \makecell{0} & \makecell{4} & \makecell{2} & \makecell{0} & \makecell{0} & \makecell{3} & \makecell{5} \\
-\makecell{200} & \makecell{6} & \makecell{1} & \makecell{1} & \makecell{2} & \makecell{2} & \makecell{0} & \makecell{1} & \makecell{0} & \makecell{1} \\
-\makecell{300} & \makecell{9} & \makecell{2} & \makecell{1} & \makecell{2} & \makecell{1} & \makecell{0} & \makecell{0} & \makecell{0} & \makecell{1} \\
-\makecell{400} & \makecell{3} & \makecell{3} & \makecell{1} & \makecell{3} & \makecell{4} & \makecell{0} & \makecell{0} & \makecell{1} & \makecell{0} \\
-\makecell{500} & \makecell{10} & \makecell{0} & \makecell{1} & \makecell{4} & \makecell{1} & \makecell{2} & \makecell{1} & \makecell{0} & \makecell{1} \\
+\makecell{Cadical103} & \makecell{3} & \makecell{6} & \makecell{9} & \makecell{3} & \makecell{10} \\
+\makecell{Cadical153} & \makecell{2} & \makecell{1} & \makecell{2} & \makecell{3} & \makecell{0} \\
+\makecell{Glucose4} & \makecell{0} & \makecell{1} & \makecell{1} & \makecell{1} & \makecell{1} \\
+\makecell{Glucose42} & \makecell{4} & \makecell{2} & \makecell{2} & \makecell{3} & \makecell{4} \\
+\makecell{Gluecard4} & \makecell{2} & \makecell{2} & \makecell{1} & \makecell{4} & \makecell{1} \\
+\makecell{MapleChrono} & \makecell{0} & \makecell{0} & \makecell{0} & \makecell{0} & \makecell{2} \\
+\makecell{MergeSat3} & \makecell{0} & \makecell{1} & \makecell{0} & \makecell{0} & \makecell{1} \\
+\makecell{Minicard} & \makecell{3} & \makecell{0} & \makecell{0} & \makecell{1} & \makecell{0} \\
+\makecell{Minisat22} & \makecell{5} & \makecell{1} & \makecell{1} & \makecell{0} & \makecell{1} \\
 \bottomrule
 \end{tabular}
 \caption{Number of instances with the lowest runtime for version 2 solvers}
 \label{tab:SAT_small_time_v2}
 \end{table}
-
-
 
 % \begin{table}[htbp]
 % \fontsize{4}{4}\selectfont
