@@ -4,7 +4,8 @@ The Chromatic Art Gallery Problem (CAGP) was first introduced by Erickson and La
 
 \section{Results}
 Both for the Chromatic Art Gallery Problem and its conflict-free variation, we show that SAT solvers are highly efficient compared to MIP solvers. For the CAGP, they allow us to solve random simple polygons without holes of up to 30,000 vertices as well as most random simple polygons of up to 1000 vertices with 100 holes. In the case of random simple polygons without holes, they provide faster runtimes than MIP for all tested instances. In the case of random simple polygons with holes, SAT is faster for most instances and overall can solve more of the test instances within a 600-second time limit.
-For the CFAGP, solving even small instances turned out to be much harder. Using SAT solvers, we are still able to solve random simple polygons without holes of up to 2500 vertices, but 
+For the CFAGP, solving even small instances turned out to be much harder.
+Using a MIP solver, we were not even able to solve all random simple polygons without holes with 300 vertices and below. On the other hand with SAT solvers, we are still able to solve random simple polygons without holes of up to 2500 vertices, but for random simple polygons with holes, even instances with 300 vertices and 30 holes and less proved to be a challenge. 
 
 \section{Related Work}
 The complexity of the chromatic art gallery problem has been the subject of several papers covering different classes of polygons.
