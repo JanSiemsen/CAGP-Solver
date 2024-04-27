@@ -35,7 +35,7 @@ To prove this theorem, we present a simple example in \cref{fig:conflict-free_wi
 
 \chapter{Chromatic Art Gallery Problem Formulations}
 
-In the following sections, we introduce a MIP, a SAT, and a CP-SAT formulation of the Chromatic Art Gallery Problem. The MIP formulation is the one proposed by Zambon et al. ~\cite{zambon2014exact}, which gets modified and turned into a SAT formula for the SAT and the CP-SAT formulation.
+In the following sections, we introduce a MIP, a SAT, and a CP-SAT formulation of the Chromatic Art Gallery Problem. The MIP formulation is the one proposed by Zambon et al.~\cite{zambon2014exact}, which gets modified and turned into a SAT formula for the SAT and the CP-SAT formulation.
 
 \section{MIP Formulation}
 
@@ -248,7 +248,7 @@ For the CAGP, we calculate the shadow witness set. As geometric operations are e
 \end{algorithm}
 
 \section{Initial Upper Bound}
-Calculating a low initial upper bound is vital for efficiently solving the CAGP and CFCAGP, as the possible number of colors K directly affects the size of the problem formulation. To achieve this, we implement the approach used by Zambon et al. ~\cite{zambon2014exact} to solve the CAGP, for which the greedy number of colors $K$ was on average only 1.7 larger than the number of colors used by the optimal solution (\cref{alg:greedy}). As the optimal solution for the CAGP is a feasible solution for the CFCAGP, we can also use the procedure for an upper bound of the CFCAGP. In the approach, we calculate weighted independent guard sets in $G_{vis}$ for as long as there are uncovered witnesses left and assign each independent guard set a different color. The weight of each guard is determined by the number of witnesses that the guard covers in the uncovered witnesses. To solve the weighted independent set formulation, we use a MIP solver.
+Calculating a low initial upper bound is vital for efficiently solving the CAGP and CFCAGP, as the possible number of colors K directly affects the size of the problem formulation. To achieve this, we implement the approach used by Zambon et al.~\cite{zambon2014exact} to solve the CAGP, for which the greedy number of colors $K$ was on average only 1.7 larger than the number of colors used by the optimal solution (\cref{alg:greedy}). As the optimal solution for the CAGP is a feasible solution for the CFCAGP, we can also use the procedure for an upper bound of the CFCAGP. In the approach, we calculate weighted independent guard sets in $G_{vis}$ for as long as there are uncovered witnesses left and assign each independent guard set a different color. The weight of each guard is determined by the number of witnesses that the guard covers in the uncovered witnesses. To solve the weighted independent set formulation, we use a MIP solver.
 
 \begin{algorithm}
 \caption{Greedy Algorithm}\label{alg:greedy}
