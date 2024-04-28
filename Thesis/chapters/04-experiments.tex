@@ -369,7 +369,7 @@ When looking at the cactus plot, one can easily identify SAT as the faster solve
 \label{tab:mean_low_high_all_simple_no_holes}
 \end{table}
 
-Due to the SAT solver being so fast for random simple polygons without holes, one might wonder what the maximum size instance size is that we can solve. To test this, we take instances fro
+Due to the SAT solver being so fast for random simple polygons without holes, one might wonder what the maximum size instance size is that we can solve. To test this, we use random fpg (fast polygon generator) instances from the Salzburg Database of Polygonal Data. These instances were generated using triangulation perturbation \cite{phdthesis-mayer-philipp}. When processing large polygon instances, the processing time can be much longer than the actual solving time. Because of this, we restrict ourselves to using one instance at each size. Additionally, we will integralize the coordinates by multiplying them with a factor of 1000 and cutting off the non-integral part. This can help . Note that after integralizing one has to check if the polygon with the new coordinates is still valid.
 
 \subsubsection{Simple Polygons with Holes}
 For reference purposes, we use the same random simple polygon with holes instances between 100 and 1000 vertices with a hole/vertices ratio of 1/10 and 30 polygons for each instance size as Zambon et al.~\cite{art-gallery-instances-page}.
