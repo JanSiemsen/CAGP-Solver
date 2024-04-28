@@ -353,6 +353,51 @@ In this section, we will test our newly introduced MIP and SAT formulations for 
 \toprule
 \makecell{vertices} & \makecell{100} & \makecell{200} & \makecell{300} \\
 \midrule
+\makecell{Cadical103} & \makecell{30} & \makecell{28} & \makecell{20} \\
+\makecell{Cadical153} & \makecell{30} & \makecell{29} & \makecell{24} \\
+\makecell{Glucose3} & \makecell{30} & \makecell{29} & \makecell{19} \\
+\makecell{Glucose4} & \makecell{30} & \makecell{29} & \makecell{16} \\
+\makecell{Glucose42} & \makecell{30} & \makecell{28} & \makecell{18} \\
+\makecell{Gluecard3} & \makecell{30} & \makecell{30} & \makecell{19} \\
+\makecell{Gluecard4} & \makecell{30} & \makecell{27} & \makecell{15} \\
+\makecell{MapleCM} & \makecell{30} & \makecell{27} & \makecell{23} \\
+\makecell{MapleChrono} & \makecell{30} & \makecell{30} & \makecell{27} \\
+\makecell{Maplesat} & \makecell{30} & \makecell{29} & \makecell{25} \\
+\makecell{MergeSat3} & \makecell{30} & \makecell{30} & \makecell{26} \\
+\makecell{Minicard} & \makecell{30} & \makecell{30} & \makecell{27} \\
+\makecell{Minisat22} & \makecell{30} & \makecell{30} & \makecell{27} \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{llll}
+\toprule
+\makecell{vertices} & \makecell{100} & \makecell{200} & \makecell{300} \\
+\midrule
+\makecell{Cadical153} & \makecell{0} & \makecell{0} & \makecell{1} \\
+\makecell{Glucose3} & \makecell{4} & \makecell{8} & \makecell{0} \\
+\makecell{Glucose4} & \makecell{6} & \makecell{1} & \makecell{0} \\
+\makecell{Glucose42} & \makecell{1} & \makecell{1} & \makecell{1} \\
+\makecell{Gluecard3} & \makecell{1} & \makecell{4} & \makecell{4} \\
+\makecell{Gluecard4} & \makecell{5} & \makecell{4} & \makecell{1} \\
+\makecell{Maplesat} & \makecell{0} & \makecell{1} & \makecell{0} \\
+\makecell{MergeSat3} & \makecell{1} & \makecell{1} & \makecell{2} \\
+\makecell{Minicard} & \makecell{5} & \makecell{5} & \makecell{11} \\
+\makecell{Minisat22} & \makecell{7} & \makecell{5} & \makecell{8} \\
+\bottomrule
+\end{tabular}
+\caption{Number of instances solved (left) and number of instances with the minimum runtime (right) for SAT solvers}
+\label{tab:SAT_solved_min_time_cf}
+\end{table}
+
+
+\begin{table}[htbp]
+\fontsize{8}{8}\selectfont
+\centering
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{3} % Increase row spacing
+\begin{tabular}{llll}
+\toprule
+\makecell{vertices} & \makecell{100} & \makecell{200} & \makecell{300} \\
+\midrule
 \makecell{Cadical103} & \makecell{9.01\\(0.46, 77.41)} & \makecell{98.95\\(3.51, 401.36)} & \makecell{143.31\\(9.97, 365.80)} \\
 \makecell{Cadical153} & \makecell{15.56\\(0.20, 288.02)} & \makecell{88.63\\(2.30, 364.30)} & \makecell{220.41\\(9.53, 561.07)} \\
 \makecell{Glucose3} & \makecell{12.55\\(0.09, 331.70)} & \makecell{40.48\\(0.54, 442.48)} & \makecell{110.21\\(1.75, 383.95)} \\
