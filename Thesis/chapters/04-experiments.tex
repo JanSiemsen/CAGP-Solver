@@ -326,6 +326,7 @@ Gurobi allows us to set various parameters, which can help improve the runtime o
 In this section, we will compare the performance of the MIP, SAT, and CP-SAT solver against each other on random simple polygons with and without holes.
 
 \subsubsection{Simple Polygons without Holes}
+First, let us take a look at solving simple polygons without holes.
 For reference purposes, we use the same random simple polygon without holes instances between 100 and 2500 vertices and 30 polygons for each instance size as Zambon et al.~\cite{art-gallery-instances-page}.
 
 When looking at the cactus plot, one can easily identify SAT as the faster solver with the plot being close to a vertical line from the origin \cref{fig:cactus_all_simple_no_holes}. Next, the MIP and CP-SAT SAT solver perform very similarly, although version 1 has a noticeably higher maximum runtime peak compared to the other two. Lastly, the CP-SAT MIP solver performs much poorer on random simple polygons than the other solvers. Note that all solvers were able to solve all of the instances. By looking at \cref{tab:mean_low_high_all_simple_no_holes}, we can see that for the SAT solver even the highest runtime at each size is still lower than the lowest runtime among all other solvers, with the highest runtime across all sizes being below half a second.
@@ -372,9 +373,10 @@ When looking at the cactus plot, one can easily identify SAT as the faster solve
 Due to the SAT solver being so fast for random simple polygons without holes, one might wonder what the maximum size instance size is that we can solve. To test this, we use random fpg (fast polygon generator) instances from the Salzburg Database of Polygonal Data. These instances were generated using triangulation perturbation \cite{phdthesis-mayer-philipp}. When processing large polygon instances, the processing time can be much longer than the actual solving time. Because of this, we restrict ourselves to using one instance at each size. Additionally, we integralize the coordinates by multiplying them with a factor of 1000 and cutting off the non-integral part. This makes computations for CGAL easier reducing the processing time as well as the RAM usage. Note that after integralization one has to check if the polygon with the new coordinates is still valid.
 
 \subsubsection{Simple Polygons with Holes}
-For reference purposes, we use the same random simple polygon with holes instances between 100 and 1000 vertices with a hole/vertices ratio of 1/10 and 30 polygons for each instance size as Zambon et al.~\cite{art-gallery-instances-page}.
+Now, let us take a look at solving simple polygons with holes.
+For reference purposes, we again use the same random simple polygon with holes instances between 100 and 1000 vertices with a hole/vertices ratio of 1/10 and 30 polygons for each instance size as Zambon et al.~\cite{art-gallery-instances-page}.
 
-
+Looking at the cactus plot, the SAT solver overall performs better than the other solvers, although the difference is not as drastic as for the simple polygons without holes. Next, the MIP solver performs better than the other three solvers on a lot of the instances but on the other hand is only able to solve noticeably fewer instances within the time limit. Both 
 
 \begin{figure}[htbp]
 \centering
