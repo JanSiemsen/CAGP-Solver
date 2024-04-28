@@ -344,6 +344,34 @@ In this section, we will test our newly introduced MIP and SAT formulations for 
 
 \subsection{SAT Solver Choice}
 
+\begin{table}[htbp]
+\fontsize{8}{8}\selectfont
+\centering
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{3} % Increase row spacing
+\begin{tabular}{llll}
+\toprule
+\makecell{vertices} & \makecell{100} & \makecell{200} & \makecell{300} \\
+% \makecell{vertices} &  &  &  \\
+\midrule
+\makecell{Cadical103} & \makecell{9.01\\(0.46, 77.41)} & \makecell{600*\\(3.51, 600)} & \makecell{600*\\(9.97, 600)} \\
+\makecell{Cadical153} & \makecell{15.56\\(0.20, 288.02)} & \makecell{600*\\(2.30, 600)} & \makecell{600*\\(9.53, 600)} \\
+\makecell{Glucose3} & \makecell{12.55\\(0.09, 331.7)} & \makecell{600*\\(0.54, 600)} & \makecell{600*\\(1.75, 600)} \\
+\makecell{Glucose4} & \makecell{15.3\\(0.09, 385.81)} & \makecell{600*\\(0.53, 600)} & \makecell{600*\\(2.89, 600)} \\
+\makecell{Glucose42} & \makecell{13.45\\(0.08, 346.3)} & \makecell{600*\\(0.65, 600)} & \makecell{600*\\(2.91, 600)} \\
+\makecell{Gluecard3} & \makecell{6.12\\(0.11, 135.77)} & \makecell{50.2\\(0.45, 454.38)} & \makecell{600*\\(1.48, 600)} \\
+\makecell{Gluecard4} & \makecell{10.7\\(0.15, 272.45)} & \makecell{600*\\(0.52, 600)} & \makecell{600*\\(2.67, 600)} \\
+\makecell{MapleCM} & \makecell{29.54\\(10.14, 220.01)} & \makecell{600*\\(11.65, 600)} & \makecell{600*\\(27.01, 600)} \\
+\makecell{MapleChrono} & \makecell{14.58\\(2.55, 155.01)} & \makecell{74.37\\(7.68, 377.56)} & \makecell{600*\\(25.22, 600)} \\
+\makecell{Maplesat} & \makecell{6.49\\(0.12, 74.37)} & \makecell{600*\\(1.05, 600)} & \makecell{600*\\(2.90, 600)} \\
+\makecell{MergeSat3} & \makecell{5.51\\(0.20, 32.37)} & \makecell{47.03\\(0.84, 275.37)} & \makecell{600*\\(11.47, 600)} \\
+\makecell{Minicard} & \makecell{2.21\\(0.10, 35.51)} & \makecell{30.26\\(0.43, 313.37)} & \makecell{600*\\(2.05, 600)} \\
+\makecell{Minisat22} & \makecell{2.69\\(0.10, 49.21)} & \makecell{23.95\\(0.42, 169.72)} & \makecell{600*\\(2.10, 600)} \\
+\bottomrule
+\end{tabular}
+\caption{Mean (lowest, highest) runtime for solvers (SAT)}
+\label{tab:mean_low_high_SAT_cf}
+\end{table}
 
 
 \subsection{MIP Solver on Simple Polygons without Holes}
