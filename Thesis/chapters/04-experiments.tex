@@ -121,7 +121,7 @@ When plotting the solvers in a cactus plot, we can see that both version 1 and v
 \makecell{Minisat22} & \makecell{0.50\\(0.01, 2.49)} & \makecell{22.84\\(0.10, 297.74)} & \makecell{83.34\\(0.18, 559.12)} & \makecell{36.22\\(0.27, 271.87)} & \makecell{128.88\\(0.17, 497.51)} \\
 \bottomrule
 \end{tabular}
-\caption{Mean (lowest, highest) runtime for version 1 solvers (SAT)}
+\caption{Mean (lowest, highest) runtime for optimally solved instances (SAT version 1)}
 \label{tab:mean_low_high_SAT_v1}
 \end{table}
 
@@ -146,7 +146,7 @@ When plotting the solvers in a cactus plot, we can see that both version 1 and v
 \makecell{Minisat22} & \makecell{0.79\\(0.01, 4.21)} & \makecell{30.03\\(0.11, 407.12)} & \makecell{64.40\\(0.10, 403.78)} & \makecell{55.98\\(0.44, 367.16)} & \makecell{129.58\\(0.68, 476.19)} \\
 \bottomrule
 \end{tabular}
-\caption{Mean (lowest, highest) runtime for version 2 solvers (SAT)}
+\caption{Mean (lowest, highest) runtime for optimally solved instances (SAT version 2)}
 \label{tab:mean_low_high_SAT_v2}
 \end{table}
 
@@ -180,7 +180,7 @@ All solver variations were able to solve all of the instances. Looking at the ca
 \makecell{500} & \makecell{69.27\\(16.03, 286.05)} & \makecell{67.91\\(4.67, 425.07)} & \makecell{64.40\\(2.78, 443.01)} \\
 \bottomrule
 \end{tabular}
-\caption{Mean (lowest, highest) runtime for solvers (CP-SAT)}
+\caption{Mean (lowest, highest) runtime for optimally solved instances (CP-SAT)}
 \label{tab:mean_low_high_CPSAT}
 \end{table}
 
@@ -240,7 +240,7 @@ When looking at the cactus plot, one can easily identify SAT as the faster solve
 \makecell{2500} & \makecell{68.61\\(29.46, 120.69)} & \makecell{6.64\\(3.50, 31.91)} & \makecell{6.43\\(2.97, 12.53)} & \makecell{7.81\\(3.26, 16.56)} & \makecell{0.07\\(0.04, 0.15)} \\
 \bottomrule
 \end{tabular}
-\caption{Mean (lowest, highest) runtime for MIP, SAT, and CP-SAT solvers on random simple polygons without holes}
+\caption{Mean (lowest, highest) runtime for optimally solved random simple polygons without holes (MIP, SAT, CP-SAT)}
 \label{tab:mean_low_high_all_simple_no_holes}
 \end{table}
 
@@ -335,7 +335,7 @@ Another thing to note is that the MIP solver had the lowest runtime across all s
 \makecell{1000} & \makecell{201.89 \\ (62.86, 518.47)} & \makecell{127.80 \\ (31.10, 453.32)} & \makecell{119.97 \\ (28.17, 553.33)} & \makecell{107.49 \\ (11.93, 417.70)} & \makecell{31.30 \\ (4.19, 181.87)} \\
 \bottomrule
 \end{tabular}
-\caption{Mean (lowest, highest) runtime for MIP, SAT, and CP-SAT solvers on random simple polygons with holes}
+\caption{Mean (lowest, highest) runtime for optimally solved random simple polygons with holes (MIP, SAT, CP-SAT)}
 \label{tab:min_low_high_all_simple_with_holes}
 \end{table}
 
@@ -352,24 +352,23 @@ In this section, we will test our newly introduced MIP and SAT formulations for 
 \begin{tabular}{llll}
 \toprule
 \makecell{vertices} & \makecell{100} & \makecell{200} & \makecell{300} \\
-% \makecell{vertices} &  &  &  \\
 \midrule
-\makecell{Cadical103} & \makecell{9.01\\(0.46, 77.41)} & \makecell{600*\\(3.51, 600*)} & \makecell{600*\\(9.97, 600*)} \\
-\makecell{Cadical153} & \makecell{15.56\\(0.20, 288.02)} & \makecell{600*\\(2.30, 600*)} & \makecell{600*\\(9.53, 600*)} \\
-\makecell{Glucose3} & \makecell{12.55\\(0.09, 331.7)} & \makecell{600*\\(0.54, 600*)} & \makecell{600*\\(1.75, 600*)} \\
-\makecell{Glucose4} & \makecell{15.3\\(0.09, 385.81)} & \makecell{600*\\(0.53, 600*)} & \makecell{600*\\(2.89, 600*)} \\
-\makecell{Glucose42} & \makecell{13.45\\(0.08, 346.3)} & \makecell{600*\\(0.65, 600*)} & \makecell{600*\\(2.91, 600*)} \\
-\makecell{Gluecard3} & \makecell{6.12\\(0.11, 135.77)} & \makecell{50.2\\(0.45, 454.38)} & \makecell{600*\\(1.48, 600*)} \\
-\makecell{Gluecard4} & \makecell{10.7\\(0.15, 272.45)} & \makecell{600*\\(0.52, 600*)} & \makecell{600*\\(2.67, 600*)} \\
-\makecell{MapleCM} & \makecell{29.54\\(10.14, 220.01)} & \makecell{600*\\(11.65, 600*)} & \makecell{600*\\(27.01, 600*)} \\
-\makecell{MapleChrono} & \makecell{14.58\\(2.55, 155.01)} & \makecell{74.37\\(7.68, 377.56)} & \makecell{600*\\(25.22, 600*)} \\
-\makecell{Maplesat} & \makecell{6.49\\(0.12, 74.37)} & \makecell{600*\\(1.05, 600*)} & \makecell{600*\\(2.90, 600*)} \\
-\makecell{MergeSat3} & \makecell{5.51\\(0.20, 32.37)} & \makecell{47.03\\(0.84, 275.37)} & \makecell{600*\\(11.47, 600*)} \\
-\makecell{Minicard} & \makecell{2.21\\(0.10, 35.51)} & \makecell{30.26\\(0.43, 313.37)} & \makecell{600*\\(2.05, 600*)} \\
-\makecell{Minisat22} & \makecell{2.69\\(0.10, 49.21)} & \makecell{23.95\\(0.42, 169.72)} & \makecell{600*\\(2.10, 600*)} \\
+\makecell{Cadical103} & \makecell{9.01\\(0.46, 77.41)} & \makecell{98.95\\(3.51, 401.36)} & \makecell{143.31\\(9.97, 365.80)} \\
+\makecell{Cadical153} & \makecell{15.56\\(0.20, 288.02)} & \makecell{88.63\\(2.30, 364.30)} & \makecell{220.41\\(9.53, 561.07)} \\
+\makecell{Glucose3} & \makecell{12.55\\(0.09, 331.70)} & \makecell{40.48\\(0.54, 442.48)} & \makecell{110.21\\(1.75, 383.95)} \\
+\makecell{Glucose4} & \makecell{15.30\\(0.09, 385.81)} & \makecell{106.59\\(0.53, 599.65)} & \makecell{192.69\\(2.89, 587.77)} \\
+\makecell{Glucose42} & \makecell{13.45\\(0.08, 346.30)} & \makecell{62.40\\(0.65, 297.98)} & \makecell{155.82\\(2.91, 588.94)} \\
+\makecell{Gluecard3} & \makecell{6.12\\(0.11, 135.77)} & \makecell{50.20\\(0.45, 454.38)} & \makecell{142.54\\(1.48, 509.50)} \\
+\makecell{Gluecard4} & \makecell{10.70\\(0.15, 272.45)} & \makecell{44.80\\(0.52, 398.36)} & \makecell{190.09\\(2.67, 598.52)} \\
+\makecell{MapleCM} & \makecell{29.54\\(10.14, 220.01)} & \makecell{79.59\\(11.65, 383.27)} & \makecell{182.67\\(27.01, 561.71)} \\
+\makecell{MapleChrono} & \makecell{14.58\\(2.55, 155.01)} & \makecell{74.37\\(7.68, 377.56)} & \makecell{130.38\\(25.22, 385.63)} \\
+\makecell{Maplesat} & \makecell{6.49\\(0.12, 74.37)} & \makecell{71.48\\(1.05, 438.61)} & \makecell{164.41\\(2.90, 543.88)} \\
+\makecell{MergeSat3} & \makecell{5.51\\(0.20, 32.37)} & \makecell{47.03\\(0.84, 275.37)} & \makecell{121.46\\(11.47, 370.12)} \\
+\makecell{Minicard} & \makecell{2.21\\(0.10, 35.51)} & \makecell{30.26\\(0.43, 313.37)} & \makecell{86.34\\(2.05, 496.67)} \\
+\makecell{Minisat22} & \makecell{2.69\\(0.10, 49.21)} & \makecell{23.95\\(0.42, 169.72)} & \makecell{63.90\\(2.10, 258.42)} \\
 \bottomrule
 \end{tabular}
-\caption{Mean (lowest, highest) runtime for solvers (SAT)}
+\caption{Mean (lowest, highest) runtime for optimally solved instances (SAT)}
 \label{tab:mean_low_high_SAT_cf}
 \end{table}
 
