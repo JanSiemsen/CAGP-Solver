@@ -328,7 +328,7 @@ In this section, we will compare the performance of the MIP, SAT, and CP-SAT sol
 \subsubsection{Simple Polygons without Holes}
 For reference purposes, we use the same random simple polygon without holes instances between 100 and 2500 vertices and 30 polygons for each instance size as Zambon et al.~\cite{art-gallery-instances-page}.
 
-When looking at the cactus plot, one can easily identify SAT as the faster solver with the plot being close to a vertical line from the origin \cref{fig:cactus_all_simple_no_holes}. Next, the MIP and CPSAT SAT solver perform very similarly. Lastly, the  Note that all solvers were able to solve all of the instances.
+When looking at the cactus plot, one can easily identify SAT as the faster solver with the plot being close to a vertical line from the origin \cref{fig:cactus_all_simple_no_holes}. Next, the MIP and CP-SAT SAT solver perform very similarly, although version 1 has a noticeably higher maximum runtime peak compared to the other two. Lastly, the CP-SAT MIP solver performs much poorer on random simple polygons than the other solvers. Note that all solvers were able to solve all of the instances. By looking at \cref{tab:mean_low_high_all_simple_no_holes}, we can see that for the SAT solver even the highest runtime at each size is still lower than the lowest runtime among all other solvers, with the highest runtime across all sizes being below half a second.
 
 \begin{figure}[htbp]
 \centering
