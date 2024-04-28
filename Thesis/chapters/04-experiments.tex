@@ -252,7 +252,7 @@ For reference purposes, we again use the same random simple polygon with holes i
 
 Looking at the cactus plot, the SAT solver overall performed better than the other solvers, although the difference is not as drastic as for the simple polygons without holes. Next, the MIP solver performed better than the other three solvers on a lot of the instances but on the other hand was only able to solve noticeably fewer instances within the time limit. Both CP-SAT SAT solver versions perform very similarly and outperform the CP-SAT MIP solver on most instances. Lastly, the CP-SAT performed the worst on a majority of the instances but overall was able to solve noticeably more instances than the MIP solver \cref{fig:cactus_all_simple_with_holes}.
 
-Another thing to note is that the MIP solver had the lowest runtime across all solvers on a considerable amount of instances, although the SAT solver still held the most lowest runtimes \cref{tab:lowest_runtime_all_simple_with_holes} and the MIP solver was able to solve one more instance than the SAT solver among the instances with 700 vertices \cref{tab:instances_solved_all_simple_with_holes}. Lastly, the MIP solver had the smallest mean runtime across the smaller half of the instances (100 to 500 vertices) and overall noticeably less variance in runtime. The SAT solver on the other hand held the 
+Another thing to note is that the MIP solver had the lowest runtime across all solvers on a considerable amount of instances, although the SAT solver still held the most lowest runtimes \cref{tab:lowest_runtime_all_simple_with_holes} and the MIP solver was able to solve one more instance than the SAT solver among the instances with 700 vertices \cref{tab:instances_solved_all_simple_with_holes}. Lastly, when looking at the instance sizes where both solvers solved all instances, the MIP solver had the smallest mean runtime for instances with 200, 300, and 400 vertices and overall noticeably less variance in runtime. The SAT solver on the other hand solved more instances whilst having a lower mean runtime for larger instance sizes with 700, 800, 900, and 1000 vertices.
 
 \begin{figure}[htbp]
 \centering
@@ -339,6 +339,7 @@ Another thing to note is that the MIP solver had the lowest runtime across all s
 \label{tab:min_low_high_all_simple_with_holes}
 \end{table}
 
+\clearpage
 \section{Conflict-free Chromatic Art Gallery Problem Experiments}
 In this section, we will test our newly introduced MIP and SAT formulations for the Conflict-free Chromatic Art Gallery Problem. As using CP-SAT solver did not provide a noticeable benefit over using SAT solver for the Chromatic Art Gallery Problem and due to the time constraints of this thesis, we omit benchmarks for a CP-SAT implementation and instead focus on testing the instances using MIP and SAT solvers. 
 
