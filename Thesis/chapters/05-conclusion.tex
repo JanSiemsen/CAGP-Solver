@@ -1,19 +1,23 @@
 \chapter{Conclusion (and Future Work)}
 
--designed SAT formulation and color optimization scheme
--implemented MIP, SAT, and CP-SAT for CAGP
--designed MIP and SAT formulation for CFCAGP
--implemented MIP and SAT for CFCAGP
+In conclusion, this thesis addressed optimally solving the Chromatic Art Gallery Problem (CAGP) and its conflict-free variant (CFCAGP) by employing SAT formulations and color optimization strategies, alongside the implementation of Mixed Integer Programming (MIP) and Constraint Programming (CP-SAT) techniques. Extensive testing on random simple polygons with and without holes demonstrated the superiority of SAT solvers over MIP solvers, particularly on polygons without holes. Specifically, SAT solvers enabled the solution of random simple polygons without holes of up to 30,000 vertices for CAGP and improved performance on instances with holes, allowing to solve most instances of up to 1000 vertices and up to 100 holes.
 
--did tests on random simple polygons with and without holes
--SAT turned out to be much better on simple polygons without holes as well as better on with holes
+Moving forward, there are several avenues for further research and improvement. Firstly, finding better heuristic methods for CFCAGP to achieve lower initial bounds could lead to better performances, especially for larger instances. Additionally, investigating the existence of a small atomic visibility polygon subset to use as a witness set that guarantees conflict-freeness, or proving its non-existence, could provide valuable insights into the problem's inherent complexity.
 
-Future Work:
--find a better Heuristic for CFCAGP for lower Initial Bound
--try to find a small AVP subset that guarantees conflict-freeness or prove that no such set exists
--potentially improve MIP or SAT formulation for the CFCAGP
+% -designed SAT formulation and color optimization scheme
+% -implemented MIP, SAT, and CP-SAT for CAGP
+% -designed MIP and SAT formulation for CFCAGP
+% -implemented MIP and SAT for CFCAGP
 
-This is the end of your thesis! 
-Give a summary of what you did.
+% -did tests on random simple polygons with and without holes
+% -SAT turned out to be much better on simple polygons without holes as well as better on with holes
 
-You can also write down possible future work you or other people could look at.
+% Future Work:
+% -find a better Heuristic for CFCAGP for lower Initial Bound
+% -try to find a small AVP subset that guarantees conflict-freeness or prove that no such set exists
+% -potentially improve MIP or SAT formulation for the CFCAGP
+
+% This is the end of your thesis! 
+% Give a summary of what you did.
+
+% You can also write down possible future work you or other people could look at.
