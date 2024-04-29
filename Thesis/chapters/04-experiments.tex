@@ -4,7 +4,7 @@ All geometric operations were implemented using the C++ library CGAL. The visibi
 The benchmarks were run in WSL2 (Windows 11, version 22H2) using an AMD Ryzen 7 7800X3D 8-Core Processor 4.20 GHz and the WSL was assigned 28 GB of RAM. All solvers were given a maximum time of 600 seconds.
 
 \section{Chromatic Art Gallery Problem Experiments}
-In this section, we will explore optimally solving the Chromatic Art Gallery Problem using SAT, MIP, and CP-Sat solvers.
+In this section, we will deal with optimally solving the Chromatic Art Gallery Problem using SAT, MIP, and CP-Sat solvers.
 
 \subsection{SAT Solver Choice}
 PySAT provides several different SAT solvers. That is why in this section, we will compare them against each other to determine, which one performs the best on our model. Additionally, we will compare using the clauses \cref{eq_SAT:f.3}(version 2) against leaving them out and filtering the solution afterward as described in the SAT Color Optimization chapter (version 1). Note that for the card solvers (Gluecard3, Gluecard4, Minicard), we used the natively provided add\_atmost(variables, 1) clauses to model \cref{eq_SAT:f.3}. Due to the parameter sets becoming quite large when comparing all of the SAT solvers, we filtered out a few that performed poorly during testing beforehand. The testing was done using random simple polygons from 100 to 500 vertices with hole/vertices ratio of 1/10 and 30 polygons for each instance size~\cite{wireless-localization-instances-page}.
@@ -152,7 +152,7 @@ When plotting the solvers in a cactus plot, we can see that both version 1 and v
 
 \clearpage
 \subsection{CP-SAT Formulation Comparison}
-In this section, we will compare using the MIP formulation against the SAT formulation with and without the clauses \cref{eq_SAT:f.3}(CAGP) for the CP-SAT solver. For the comparison, we use the same instances as for the SAT Solver Choice section~\cite{wireless-localization-instances-page}.
+In this section, we will compare using the MIP formulation against the SAT formulation with and without the clauses \cref{eq_SAT:f.3}(CAGP) for the CP-SAT solver. For comparison, we use the same instances as for the SAT Solver Choice section~\cite{wireless-localization-instances-page}.
 
 All solver variations were able to solve all of the instances. Looking at the cactus plot, there is no clear best variation (\cref{fig:cactus_CP-SAT}). The SAT formulations perform better on a large number of instances, but on the other hand, the MIP formulation has less variance in runtimes and also a lower maximum runtime over all instances (\cref{tab:mean_low_high_CPSAT}). Because of this, we will use all three variations in the comparison between MIP, SAT, and CP-SAT. Since they can use up multiple cores, unlike the SAT solvers, we will test them separately.
 
@@ -197,13 +197,13 @@ Gurobi allows us to set various parameters, which can help improve the runtime o
 \end{itemize}
 
 \subsection{MIP vs. SAT vs. CP-SAT}
-In this section, we will compare the performance of the MIP, SAT, and CP-SAT solver against each other on random simple polygons with and without holes.
+In this section, we will compare the performance of the MIP, SAT, and CP-SAT solver with each other on random simple polygons with and without holes.
 
 \subsubsection{Simple Polygons without Holes}
-First, let us take a look at solving simple polygons without holes.
+First, we will take a look at solving simple polygons without holes.
 For reference purposes, we use the same random simple polygon without holes instances between 100 and 2500 vertices and 30 polygons for each instance size as Zambon et al.~\cite{art-gallery-instances-page}.
 
-When looking at the cactus plot, one can easily identify SAT as the faster solver with the plot being close to a vertical line from the origin \cref{fig:cactus_all_simple_no_holes}. Next, the MIP and CP-SAT SAT solver perform very similarly, although version 1 has a noticeably higher maximum runtime peak compared to the other two. Lastly, the CP-SAT MIP solver performs much poorer on random simple polygons than the other solvers. Note that all solvers were able to solve all of the instances. By looking at \cref{tab:mean_low_high_all_simple_no_holes}, we can see that for the SAT solver even the highest runtime at each size is still lower than the lowest runtime among all other solvers, with the highest runtime across all sizes being below half a second.
+When looking at the cactus plot, one can easily identify SAT as the faster solver with the plot being close to a vertical line from the origin (\cref{fig:cactus_all_simple_no_holes}). Next, the MIP and CP-SAT SAT solver perform very similarly, although version 1 has a noticeably higher maximum runtime peak compared to the other two. Lastly, the CP-SAT MIP solver performs much poorer on random simple polygons than the other solvers. Note that all solvers were able to solve all of the instances. By looking at \cref{tab:mean_low_high_all_simple_no_holes}, we can see that for the SAT solver even the highest runtime at each size is still lower than the lowest runtime among all other solvers, with the highest runtime across all sizes being below half a second.
 
 \begin{figure}[htbp]
 \centering
@@ -244,7 +244,7 @@ When looking at the cactus plot, one can easily identify SAT as the faster solve
 \label{tab:mean_low_high_all_simple_no_holes}
 \end{table}
 
-Due to the SAT solver being so fast for random simple polygons without holes, one might wonder what the maximum size instance size is that we can solve. To test this, we use random fpg (fast polygon generator) instances from the Salzburg Database of Polygonal Data. These instances were generated using triangulation perturbation \cite{phdthesis-mayer-philipp}. When processing large polygon instances, the processing time can be much longer than the actual solving time. Because of this, we restrict ourselves to using one instance at each size. Note that this means that the runtimes are by no means representative and this test purely serves to find the limits of the solvers. Additionally, we integralize the coordinates by multiplying them with a factor of 1000 and cutting off the non-integral part. This makes computations for CGAL easier reducing the processing time as well as the RAM usage. Note that after integralization one has to check if the polygon with the new coordinates is still valid.
+Due to the SAT solver being so fast for random simple polygons without holes, one might ask what the maximum instance size is that we can solve. Therefore, we use random fpg (fast polygon generator) instances from the Salzburg Database of Polygonal Data. These instances were generated using triangulation perturbation \cite{phdthesis-mayer-philipp}. When processing large polygon instances, the processing time can be much longer than the actual solving time. Because of this, we restrict ourselves to using one instance at each size. Note that this means that the runtimes are by no means representative and this test purely serves to find the limits of the solvers. Additionally, we integralize the coordinates by multiplying them with a factor of 1000 and cutting off the non-integral part. This makes computations for CGAL easier reducing the processing time as well as the RAM usage. Note that after integralization one has to check if the polygon with the new coordinates is still valid.
 
 \subsubsection{Simple Polygons with Holes}
 Now, let us take a look at solving simple polygons with holes.
@@ -478,6 +478,6 @@ In this section, we will test our newly introduced MIP and SAT formulations for 
 % \subsection{SAT Solver on Simple Polygons with Holes}
 
 \section{Threats to Validity}
-SAT solvers are required to call a deletion function to clean up the process after usage. If this function is not called, it can potentially corrupt the process. For this reason, we call this function as soon as the solver finishes solving. Additionally, we check the validity of the solution afterward. For the CAGP, we check whether the subgraphs of the visibility graph $G_{vis}$ induced by a guard subset of each color of the solution contains no edges. For the CFCAGP, we check for each witness in all\_witness\_to\_guards whether its guard subset has a guard with a unique color among them given the color assignment of the solution.
+SAT solvers are required to call a deletion function to clean up the process after usage. If this function is not called, it can potentially corrupt the process. For this reason, we call this function as soon as the solver finishes solving. Additionally, we check the validity of the solution afterwards. For the CAGP, we check whether the subgraphs of the visibility graph $G_{vis}$ induced by a guard subset of each color of the solution contains no edges. For the CFCAGP, we check for each witness in all\_witness\_to\_guards whether its guard subset has a guard with a unique color among them given the color assignment of the solution.
 
 Another consideration one has to bear in mind is that there can be fluctuations in runtime between different runs of the same solver on the same instance. This is especially the case for MIP and CP-SAT as they can use multiple cores. While conducting multiple runs and averaging the results could decrease these fluctuations, we decided against it because it would significantly extend the overall runtime of the benchmarks.
