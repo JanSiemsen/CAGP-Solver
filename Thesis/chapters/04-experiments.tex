@@ -475,6 +475,42 @@ In this section, we will test our newly introduced MIP and SAT formulations for 
 
 \subsection{SAT Solver on Simple Polygons without Holes}
 
+\begin{table}[htbp]
+\fontsize{8}{8}\selectfont
+\centering
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{3} % Increase row spacing
+\begin{tabular}{llll}
+\toprule
+\makecell{vertices} & \makecell{all} & \makecell{ascending} & \makecell{descending} \\
+% vertices &  &  &  \\
+\midrule
+20 & \makecell{0.00 \\ (0.00, 0.00)} & \makecell{0.00 \\ (0.00, 0.01)} & \makecell{0.00 \\ (0.00, 0.01)} \\
+40 & \makecell{0.00 \\ (0.00, 0.01)} & \makecell{0.03 \\ (0.01, 0.12)} & \makecell{0.02 \\ (0.00, 0.06)} \\
+60 & \makecell{0.03 \\ (0.00, 0.44)} & \makecell{0.11 \\ (0.02, 0.73)} & \makecell{0.06 \\ (0.01, 0.38)} \\
+80 & \makecell{0.03 \\ (0.00, 0.16)} & \makecell{0.13 \\ (0.02, 0.47)} & \makecell{0.09 \\ (0.02, 0.24)} \\
+100 & \makecell{0.06 \\ (0.01, 0.49)} & \makecell{0.19 \\ (0.07, 0.74)} & \makecell{0.14 \\ (0.06, 0.48)} \\
+200 & \makecell{0.24 \\ (0.02, 1.76)} & \makecell{0.85 \\ (0.18, 3.59)} & \makecell{0.59 \\ (0.13, 2.33)} \\
+300 & \makecell{0.25 \\ (0.08, 1.43)} & \makecell{1.40 \\ (0.44, 4.78)} & \makecell{0.94 \\ (0.45, 2.12)} \\
+400 & \makecell{0.41 \\ (0.07, 1.53)} & \makecell{1.78 \\ (0.86, 3.95)} & \makecell{1.34 \\ (0.57, 2.67)} \\
+500 & \makecell{0.50 \\ (0.20, 1.36)} & \makecell{2.46 \\ (1.32, 4.73)} & \makecell{1.93 \\ (1.17, 4.07)} \\
+600 & \makecell{0.55 \\ (0.29, 0.92)} & \makecell{3.47 \\ (1.66, 5.48)} & \makecell{2.58 \\ (1.22, 4.03)} \\
+700 & \makecell{0.65 \\ (0.27, 1.51)} & \makecell{3.63 \\ (1.72, 6.25)} & \makecell{2.94 \\ (1.41, 5.49)} \\
+800 & \makecell{0.74 \\ (0.30, 1.95)} & \makecell{3.90 \\ (2.02, 7.53)} & \makecell{3.05 \\ (1.75, 4.73)} \\
+900 & \makecell{0.95 \\ (0.28, 3.57)} & \makecell{4.90 \\ (2.84, 11.70)} & \makecell{4.14 \\ (1.91, 10.33)} \\
+1000 & \makecell{0.84 \\ (0.37, 1.74)} & \makecell{5.10 \\ (3.34, 7.44)} & \makecell{3.94 \\ (2.61, 6.02)} \\
+1250 & \makecell{1.23 \\ (0.56, 2.18)} & \makecell{6.80 \\ (3.77, 9.19)} & \makecell{5.73 \\ (2.63, 8.38)} \\
+1500 & \makecell{1.76 \\ (0.79, 3.25)} & \makecell{9.33 \\ (5.70, 18.13)} & \makecell{7.57 \\ (4.27, 15.61)} \\
+1750 & \makecell{2.11 \\ (1.30, 3.21)} & \makecell{11.87 \\ (7.19, 23.38)} & \makecell{10.03 \\ (6.07, 17.39)} \\
+2000 & \makecell{2.49 \\ (1.69, 4.71)} & \makecell{12.92 \\ (8.44, 25.52)} & \makecell{10.96 \\ (6.56, 19.10)} \\
+2250 & \makecell{2.79 \\ (1.76, 4.33)} & \makecell{14.39 \\ (8.77, 21.74)} & \makecell{12.30 \\ (7.07, 20.28)} \\
+2500 & \makecell{3.43 \\ (2.34, 5.22)} & \makecell{17.19 \\ (10.76, 26.18)} & \makecell{14.65 \\ (8.84, 20.22)} \\
+\bottomrule
+\end{tabular}
+\caption{Caption}
+\label{tab:my_label}
+\end{table}
+
 % \subsection{SAT Solver on Simple Polygons with Holes}
 
 \section{Threats to Validity}
