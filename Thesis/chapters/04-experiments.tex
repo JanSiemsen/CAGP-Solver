@@ -431,8 +431,24 @@ In this section, we will test our newly introduced MIP and SAT formulations for 
 
 \subsection{MIP Solver on Simple Polygons without Holes}
 
-\begin{table}[]
+\begin{table}[htbp]
+\fontsize{8}{8}\selectfont
 \centering
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{3} % Increase row spacing
+\begin{tabular}{lrr}
+\toprule
+\makecell{vertices} & \makecell{MIP} \\
+\midrule
+\makecell{20} & \makecell{30} \\
+\makecell{40} & \makecell{30} \\
+\makecell{60} & \makecell{29} \\
+\makecell{80} & \makecell{30} \\
+\makecell{100} & \makecell{29} \\
+\makecell{200} & \makecell{22} \\
+\makecell{300} & \makecell{10} \\
+\bottomrule
+\end{tabular}
 \begin{tabular}{lrl}
 \toprule
 \makecell{vertices} & \makecell{MIP} \\
