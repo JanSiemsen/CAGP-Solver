@@ -36,9 +36,18 @@ grouped_data = data_set.groupby('label')
 
 sns.set_theme(context="paper", style="whitegrid")
 
-fig, ax = plt.subplots(figsize=(8, 12))
+fig, ax = plt.subplots(figsize=(8, 4))
 
 updated_data_set = pd.DataFrame()
+
+# Find the overall maximum time
+xmax = data_set['time'].max()
+
+# Find the maximum number of instances solved
+ymax = data_set.groupby('label').size().max()
+
+ax.set_xlim([-1, xmax])
+ax.set_ylim([0, ymax])
 
 # For each group (i.e., each solver), plot a separate line
 for name, group in grouped_data:
@@ -50,14 +59,22 @@ for name, group in grouped_data:
     updated_data_set = pd.concat([updated_data_set, group_sorted])
     
 # Plot the data with Seaborn
-sns.lineplot(x='time', y='cumulative_count', hue='label', data=updated_data_set, style='label', markers=True, dashes=False, drawstyle='steps-post', ax=ax)
+plot = sns.lineplot(x='time', y='cumulative_count', hue='label', data=updated_data_set, style='label', markers=True, dashes=False, drawstyle='steps-post', ax=ax)
+
+# Set the marker edge width for all lines
+for line in plot.get_lines():
+    line.set_markeredgewidth(0.2)  # Set the marker edge width to 0.2
+    line.set_markersize(2)  # Set the marker size to 2
+
+# Set the font size of the legend and its location
+plot.legend(fontsize='x-small', loc='lower right')
 
 ax.set(#title="Cactus Plot Comparing Algorithm Performance",
        xlabel="CPU time (seconds)", ylabel="# of instances solved")
 
 fig.tight_layout()
 # plt.show()
-plt.savefig("plots/minibenchmark_cactus_plot_runtime_CPSAT_with_holes.png", dpi=600)
+plt.savefig("plots/minibenchmark_cactus_plot_runtime_CPSAT_with_holes.pdf", format="pdf", dpi=600)
 exit()
 
 #-----------------------------------------------------------------------------------------------------------------------

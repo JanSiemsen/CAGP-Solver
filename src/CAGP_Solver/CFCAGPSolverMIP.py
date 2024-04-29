@@ -1,15 +1,17 @@
 from collections import Counter
+import time
 import gurobipy as grb
 
 # This version of the solver takes in a precomputed visibility and covering graph to create its constraints
 # New witnesses are added whenever an optimal solution is found
 class CFCAGPSolverMIP:
 
-    def __init__(self, K: int, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], solution: list[list[int]]=None) -> list[tuple[int, int]]:
+    def __init__(self, K: int, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int]) -> list[tuple[int, int]]:
         self.K = K
         self.guard_to_witnesses = guard_to_witnesses
         self.witness_to_guards = witness_to_guards
         self.initial_witnesses = initial_witnesses
+        self.number_of_witnesses = len(initial_witnesses)
         self.all_witnesses = all_witnesses
         self.model = grb.Model()
 
@@ -89,31 +91,40 @@ class CFCAGPSolverMIP:
         return witnesses_without_unique_guard
 
     def solve(self):
-        self.iteration = 0
+        self.iteration = 1
         self.lazy_witnesses = 0
+        time_limit = 600
+        self.start = time.time()
+        self.model.Params.TimeLimit = 600
         self.model.optimize()
         if self.model.status != grb.GRB.OPTIMAL:
-            raise RuntimeError("Unexpected status after optimization!")
+            return self.model.objVal, [], self.iteration, self.number_of_witnesses, "timeout"
         
         missing_witnesses = self.__check_coverage()
 
         while(missing_witnesses):
             self.iteration += 1
+            self.number_of_witnesses += len(missing_witnesses)
 
             print('Adding new witnesses...')
             for witness in missing_witnesses:
                 for color in range(self.K):
                     self.witness_color_vars[witness, color] = self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY)
                     # If a witness_color_var is true, there is exactly one guard of that color
+                    M = len(self.witness_to_guards[witness])
                     self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.witness_to_guards[witness]) >= self.witness_color_vars[witness, color])
-                    self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.witness_to_guards[witness]) <= 1 + self.M * (1 - self.witness_color_vars[witness, color]))
+                    self.model.addConstr(sum(self.guard_vars[guard, color] for guard in self.witness_to_guards[witness]) <= 1 + M * (1 - self.witness_color_vars[witness, color]))
                     
                 # Ensure that each witness is covered by at least one guard with a unique color
                 self.model.addConstr(sum(self.witness_color_vars[witness, color] for color in range(self.K)) >= 1)
                 
                 self.lazy_witnesses += 1
 
+            self.model.Params.TimeLimit = time_limit - (time.time() - self.start)
             self.model.optimize()
+
+            if self.model.status != grb.GRB.OPTIMAL:
+                return self.model.objVal, [], self.iteration, self.number_of_witnesses, "timeout"
             
             self.model.params.BestObjStop = self.model.objVal
             missing_witnesses = self.__check_coverage()
@@ -122,4 +133,4 @@ class CFCAGPSolverMIP:
         print(f"[CAGP SOLVER]: Found the minimum amount of colors required: {obj_val}")
         print(f"[CAGP SOLVER]: Iterations: {self.iteration}")
         print(f"[CAGP SOLVER]: Lazy witnesses: {self.lazy_witnesses}")
-        return [(guard, color) for (guard, color), variable in self.guard_vars.items() if variable.x >= 0.5]
+        return obj_val, [(guard, color) for (guard, color), variable in self.guard_vars.items() if variable.x >= 0.5], self.iteration, self.number_of_witnesses, "success"

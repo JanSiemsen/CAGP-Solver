@@ -14,7 +14,7 @@ class ISSolverMIP:
         self.model.update()
 
     def __make_vars(self):
-        self.guard_vars = {guard: self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY) for guard, weight in self.weights}
+        self.guard_vars = {guard: self.model.addVar(lb=0, ub=1, vtype=grb.GRB.BINARY) for guard in self.G.node_indices()}
 
     def __add_conflicting_guards_constraints(self):
         for e in self.G.edge_index_map().values():

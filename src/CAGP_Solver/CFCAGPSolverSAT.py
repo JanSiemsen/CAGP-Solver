@@ -1,23 +1,28 @@
 from collections import Counter
 from itertools import combinations
+from threading import Timer
+import time
 from pysat.solvers import Solver
 
 # This version of the solver takes in a precomputed visibility and covering graph to create its constraints
 # New witnesses are added whenever an optimal solution is found
 class CFCAGPSolverSAT:
 
-    def __init__(self, K: int, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int]) -> list[tuple[int, int]]:
+    def __init__(self, K: int, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], solver_name="Cadical103") -> list[tuple[int, int]]:
         self.K = K
         self.guard_to_witnesses = guard_to_witnesses
         self.witness_to_guards = witness_to_guards
         self.initial_witnesses = initial_witnesses
+        self.number_of_witnesses = len(initial_witnesses)
         self.all_witnesses = all_witnesses
-        self.M = len(self.guard_to_witnesses)
-        self.solver = Solver(name='Gluecard4', with_proof=False)
+        self.solver = Solver(name=solver_name, with_proof=False)
 
         self.__make_vars()
-        self.__add_guard_coloring_constraints()
         self.__add_unique_color_constraints()
+        if (solver_name == "Gluecard3" or solver_name == "Gluecard4" or solver_name == "Minicard"):
+            self.__add_guard_coloring_constraints()
+        else:
+            self.__add_guard_coloring_constraints_alternative()
         
     def __make_vars(self):
         self.guard_to_var = dict()
@@ -42,6 +47,11 @@ class CFCAGPSolverSAT:
         for guard in self.guard_to_witnesses.keys():
             # Ensure that each guard is only assigned one color
             self.solver.add_atmost([self.guard_to_var[guard, color] for color in range(self.K)], 1)
+
+    def __add_guard_coloring_constraints_alternative(self):
+        for guard in self.guard_to_witnesses.keys():
+            for color1, color2 in combinations([self.guard_to_var[guard, color] for color in range(self.K)], 2):
+                self.solver.add_clause([-color1, -color2])
 
     def __add_unique_color_constraints(self):
         for witness in self.initial_witnesses:
@@ -79,29 +89,45 @@ class CFCAGPSolverSAT:
         return witnesses_without_unique_guard
 
     def __solve(self, assumptions=None):
-        self.solver.solve(assumptions=assumptions)
-        if not self.solver.solve(assumptions=assumptions):
+        passed_time = time.time() - self.start
+        if passed_time > self.time_limit:
+            self.interrupt()
+        print(self.time_limit - passed_time, 'seconds left')
+        timer = Timer(interval=(self.time_limit - passed_time), function=self.interrupt)
+        timer.start()
+
+        solution = self.solver.solve_limited(assumptions=assumptions, expect_interrupt=True)
+        if not solution:
             print('No solution found')
-            return None
+            timer.cancel()
+            return []
         print('Solution found')
+
+        timer.cancel()
         return [self.var_to_guard.get(var) for var in self.solver.get_model() if var > 0 and var in self.var_to_guard]
     
     def solve(self, color_lim: int=0):
+        self.start = time.time()
+        self.time_limit = 600
+        self.timeout = False
+        iteration = 1
+
         if color_lim == 0:
             print('Starting binary search')
             color_lim, solution = self.binary_search()
         else:
             solution = self.linear_search(color_lim)
 
-        current_witnesses = len(self.initial_witnesses)
-        print('current witnesses', current_witnesses)
+        if self.timeout:
+            print('Timeout')
+            return color_lim, solution, iteration, self.number_of_witnesses, "timeout"
+
         print('Checking coverage')
         missing_witnesses = self.__check_coverage(solution)
+        print('Number of missing witnesses:', len(missing_witnesses))
+        self.number_of_witnesses += len(missing_witnesses)
 
-        iteration = 0
         while(missing_witnesses):
-            current_witnesses += len(missing_witnesses)
-            print('current witnesses', current_witnesses)
             iteration += 1
             print(f'Adding new witnesses without a unique color ({iteration})')
 
@@ -123,19 +149,24 @@ class CFCAGPSolverSAT:
 
             print('Starting linear ascent')
             color_lim, solution = self.linear_ascent(color_lim)
+
+            if self.timeout:
+                print('Timeout')
+                return color_lim, solution, iteration, self.number_of_witnesses, "timeout"
+
             print('Checking coverage')
             missing_witnesses = self.__check_coverage(solution)
+            print('Number of missing witnesses:', len(missing_witnesses))
+            self.number_of_witnesses += len(missing_witnesses)
 
-        print('all witnesses:', len(self.all_witnesses))
-        return solution
+        return color_lim, solution, iteration, self.number_of_witnesses, "success"
 
     def binary_search(self):
         lower = 1
         upper = self.K
         optimal_solution = None
-        while lower < upper:
+        while lower < upper and not self.timeout:
             mid = (lower + upper) // 2
-            print(upper, mid, lower)
             print(f'Checking for {mid} colors')
             solution = self.__solve(assumptions=self.__deactivate_guards(mid))
             if solution:
@@ -150,7 +181,7 @@ class CFCAGPSolverSAT:
     
     def linear_ascent(self, color_lim: int):
         solution = self.__solve(assumptions=self.__deactivate_guards(color_lim))
-        while(not solution and color_lim <= self.K):
+        while not solution and color_lim <= self.K and not self.timeout:
             color_lim += 1
             print(f'Checking for {color_lim} colors')
             solution = self.__solve(assumptions=self.__deactivate_guards(color_lim))
@@ -160,16 +191,20 @@ class CFCAGPSolverSAT:
         print(f'Checking for {color_lim} colors')
         solution = self.__solve(assumptions=self.__deactivate_guards(color_lim))
         if solution:
-            while(solution and color_lim > 0):
+            while solution and color_lim > 0 and not self.timeout:
                 color_lim -= 1
                 print(f'Checking for {color_lim} colors')
                 solution = self.__solve(assumptions=self.__deactivate_guards(color_lim))
         else:
-            while(not solution and color_lim <= self.K):
+            while not solution and color_lim <= self.K and not self.timeout:
                 color_lim += 1
                 print(f'Checking for {color_lim} colors')
                 solution = self.__solve(assumptions=self.__deactivate_guards(color_lim))
-        return solution
+        return color_lim, solution
+    
+    def interrupt(self):
+        self.solver.interrupt()
+        self.timeout = True
 
     def __del__(self):
         """
@@ -178,4 +213,5 @@ class CFCAGPSolverSAT:
         There seem to occur resource leaks when you leave this out,
         so it should be sufficient to let the solvers clean up at the garbage collection.
         """
-        self.solver.delete()
+        if hasattr(self, 'solver') and self.solver is not None:
+            self.solver.delete()

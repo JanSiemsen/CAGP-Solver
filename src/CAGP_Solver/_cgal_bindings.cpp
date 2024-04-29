@@ -1,6 +1,6 @@
 /**
  * @file _cgal_bindings.cpp
- * @author Dominik Krupke (d.krupke@tu-bs.de)
+ * @author Dominik Krupke (d.krupke@tu-bs.de) (modified by Jan Siemsen for the purpose of his bachelor thesis)
  * @brief This file contains the pybind11 bindings for the CGAL library, which
  *      is used to compute visibility polygons. We need CGAL with it exact
  *      computations to ensure that the visibility polygons are computed
@@ -740,16 +740,16 @@ PYBIND11_MODULE(_cgal_bindings, m) {
             std::map<int, std::set<int>> all_guard_to_witnesses;
             std::vector<std::set<int>> light_guard_sets;
             std::vector<std::set<int>> all_guard_sets;
-            std::vector<Ex_arrangement::Face_handle> faces;
+            // std::vector<Ex_arrangement::Face_handle> faces;
 
-            for (auto fit = self.faces_begin(); fit != self.faces_end(); ++fit) {
-              faces.push_back(fit);
-            }
+            // for (auto fit = self.faces_begin(); fit != self.faces_end(); ++fit) {
+            //   faces.push_back(fit);
+            // }
 
             int index = guards;
             int all_index = guards;
 
-            for (auto f : faces) {
+            for (auto f = self.faces_begin(); f != self.faces_end(); ++f) {
               if (f->data().empty())
                 continue;
               bool is_shadow = true;

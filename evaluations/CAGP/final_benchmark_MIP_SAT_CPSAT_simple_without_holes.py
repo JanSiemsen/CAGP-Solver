@@ -2,7 +2,6 @@ import glob
 import os
 import time
 import concurrent.futures
-from turtle import st
 from CAGP_Solver import Point, PolygonWithHoles
 from algbench import Benchmark
 from CAGP_Solver import CAGPSolverMIP, CAGPSolverSAT, CAGPSolverCPSAT_MIP, CAGPSolverCPSAT_SAT

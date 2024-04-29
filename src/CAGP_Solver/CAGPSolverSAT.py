@@ -6,7 +6,7 @@ from threading import Timer
 
 class CAGPSolverSAT:
     
-    def __init__(self, K: int, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], GC: rx.PyGraph, guard_color_constraints: bool=False, solution: list[list[int]]=None, solver_name="Gluecard4") -> list[tuple[int, int]]:
+    def __init__(self, K: int, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], GC: rx.PyGraph, guard_color_constraints: bool=False, solver_name="Cadical103") -> list[tuple[int, int]]:
         self.GC = GC
         self.K = K
         self.guard_to_witnesses = guard_to_witnesses

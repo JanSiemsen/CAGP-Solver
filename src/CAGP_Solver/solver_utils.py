@@ -9,17 +9,58 @@ from tqdm import tqdm
 
 # This version uses the rustworkx library to create graphs
     
-def generate_AVP_recursive(guards: list[tuple[int, tuple[Point, PolygonWithHoles]]]) -> AVP_Arrangement:
+def generate_AVP_recursive(guards: list[tuple[int, tuple[Point, PolygonWithHoles]]], progress: tqdm) -> AVP_Arrangement:
     half = len(guards)//2
     leftHalf = guards[:half]
     rightHalf = guards[half:]
     if len(guards) == 1:
-        # progress.update(1)
+        progress.update(1)
         return AVP_Arrangement(guards[0][1][1], {guards[0][0]})
     else:
-        return generate_AVP_recursive(leftHalf).overlay(generate_AVP_recursive(rightHalf))
+        return generate_AVP_recursive(leftHalf, progress=progress).overlay(generate_AVP_recursive(rightHalf, progress=progress))
 
-def generate_solver_input(polygon: PolygonWithHoles, guards_on_holes: bool=True):
+def generate_solver_input(polygon: PolygonWithHoles):
+    GC = rx.PyGraph(multigraph=False)
+
+    print('Creating guard set...')
+    vis_calculator = VisibilityPolygonCalculator(polygon)
+    guards = {}
+    progress = tqdm(polygon.outer_boundary().boundary())
+    for point in polygon.outer_boundary().boundary():
+        index = GC.add_node(None)
+        guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
+        progress.update()
+    progress.close()
+    progress = tqdm(total=len(polygon.holes()))
+    for hole in polygon.holes():
+        for point in hole.boundary():
+            index = GC.add_node(None)
+            guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
+        progress.update()
+    progress.close()
+
+    print('Creating AVP arrangement...')
+    progress = tqdm(total=len(guards))
+    avp = generate_AVP_recursive(list(guards.items()), progress=progress)
+    progress.refresh()
+    progress.close()
+    witness_to_guards, guard_to_witnesses, light_guard_sets, witness_to_guards_cf, guard_to_witnesses_cf, all_guard_sets = avp.get_shadow_witnesses_and_light_guard_sets(len(guards))
+
+    print('Creating visibility graph...')
+    progress = tqdm(total=len(light_guard_sets))
+    for guard_set in light_guard_sets:
+        for g1, g2 in combinations(guard_set, 2):
+            GC.add_edge(g1, g2, None)
+        progress.update()
+    progress.close()
+
+    print('Creating witness set...')
+    all_witnesses = sorted(witness_to_guards.keys(), key=lambda x: len(witness_to_guards[x]))
+    initial_witnesses = all_witnesses[:len(guards)]
+
+    return guards, guard_to_witnesses, witness_to_guards, initial_witnesses, set(all_witnesses), GC
+
+def generate_solver_input_cf(polygon: PolygonWithHoles, guards_on_holes: bool=True):
     GC = rx.PyGraph(multigraph=False)
 
     # print('Creating guard set...')
@@ -31,14 +72,13 @@ def generate_solver_input(polygon: PolygonWithHoles, guards_on_holes: bool=True)
         guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
         # progress.update()
     # progress.close()
-    if guards_on_holes:
-        # progress = tqdm(total=len(polygon.holes()))
-        for hole in polygon.holes():
-            for point in hole.boundary():
-                index = GC.add_node(None)
-                guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
-            # progress.update()
-        # progress.close()
+    # progress = tqdm(total=len(polygon.holes()))
+    for hole in polygon.holes():
+        for point in hole.boundary():
+            index = GC.add_node(None)
+            guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
+        # progress.update()
+    # progress.close()
 
     # print('Creating AVP arrangement...')
     # progress = tqdm(total=len(guards))
@@ -55,47 +95,13 @@ def generate_solver_input(polygon: PolygonWithHoles, guards_on_holes: bool=True)
         # progress.update()
     # progress.close()
 
-    # print('Creating witness set...')
-    all_witnesses = sorted(witness_to_guards.keys(), key=lambda x: len(witness_to_guards[x]))
-    initial_witnesses = all_witnesses[:len(guards)]
-
-    return guards, guard_to_witnesses, witness_to_guards, initial_witnesses, set(all_witnesses), GC
-
-def generate_solver_input_cf(polygon: PolygonWithHoles, guards_on_holes: bool=True):
-
-    # print('Creating guard set...')
-    vis_calculator = VisibilityPolygonCalculator(polygon)
-    guards = {}
-    index = 0
-    # progress = tqdm(polygon.outer_boundary().boundary())
-    for point in polygon.outer_boundary().boundary():
-        guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
-        index += 1
-        # progress.update()
-    # progress.close()
-    if guards_on_holes:
-        # progress = tqdm(total=len(polygon.holes()))
-        for hole in polygon.holes():
-            for point in hole.boundary():
-                guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
-                index += 1
-            # progress.update()
-        # progress.close()
-
-    # print('Creating AVP arrangement...')
-    # progress = tqdm(total=len(guards))
-    avp = generate_AVP_recursive(list(guards.items()))
-    # progress.refresh()
-    # progress.close()
-    witness_to_guards, guard_to_witnesses, light_guard_sets, witness_to_guards_cf, guard_to_witnesses_cf, all_guard_sets = avp.get_shadow_witnesses_and_light_guard_sets(len(guards))
-
     # print('Creating initial witnesses and all witnesses for conflict-free...')
     all_witnesses_cf = sorted(witness_to_guards_cf.keys(), key=lambda x: len(witness_to_guards_cf[x]), reverse=True)
     initial_witnesses_cf_desc = all_witnesses_cf[:len(guards)]
     all_witnesses_cf = sorted(witness_to_guards_cf.keys(), key=lambda x: len(witness_to_guards_cf[x]), reverse=False)
     initial_witnesses_cf_asc = all_witnesses_cf[:len(guards)]
 
-    return guards, guard_to_witnesses_cf, witness_to_guards_cf, initial_witnesses_cf_desc, initial_witnesses_cf_asc, set(all_witnesses_cf)
+    return guards, guard_to_witnesses_cf, witness_to_guards_cf, initial_witnesses_cf_desc, initial_witnesses_cf_asc, set(all_witnesses_cf), guard_to_witnesses, set(list(witness_to_guards.keys())), GC
 
 def generate_shadow_and_light_polygons(polygon: PolygonWithHoles, guards_on_holes: bool=True):
     GC = rx.PyGraph(multigraph=False)
@@ -211,7 +217,7 @@ def build_clique(e: tuple[int, int], G: rx.PyGraph) -> list[int]:
     return clique
 
 # This function verifies if all the set of guards with the same color have no edge between them
-def verify_solver_solution(solution: list[(str, int)], G: rx.PyGraph) -> bool:
+def verify_solver_solution(solution: list[(int, int)], G: rx.PyGraph) -> bool:
 
     # Group the guards by color
     color_groups = defaultdict(list)
@@ -224,4 +230,12 @@ def verify_solver_solution(solution: list[(str, int)], G: rx.PyGraph) -> bool:
         if len(subgraph.edge_indices()) > 0:
             return False
 
+    return True
+
+def verify_solver_solution_cf(solution: list[(int, int)], witness_to_guards: dict) -> bool:
+    for witness, guards in witness_to_guards.items():
+        guard_colors = [color for g, color in solution if g in guards]
+        if any(guard_colors.count(color) == 1 for color in guard_colors):
+            continue
+        return False
     return True

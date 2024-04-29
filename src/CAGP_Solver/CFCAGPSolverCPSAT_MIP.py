@@ -1,8 +1,7 @@
 from collections import Counter
 import gurobipy as grb
 
-# This version of the solver takes in a precomputed visibility and covering graph to create its constraints
-# New witnesses are added whenever an optimal solution is found
+# DISCLAIMER: This solver is not fully implemented and is not used in the evaluation.
 class CFCAGPSolverCPSAT:
 
     def __init__(self, K: int, guard_to_witnesses: dict[int, set[int]], witness_to_guards: dict[int, set[int]], initial_witnesses: list[int], all_witnesses: set[int], solution: list[list[int]]=None) -> list[tuple[int, int]]:

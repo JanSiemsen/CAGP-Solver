@@ -42,64 +42,81 @@ data_set = data_set.loc[(data_set['status'] == 'success') & (data_set['time'] < 
 #         print(f"Entry {index} does not have a valid solution.")
 
 # Group by 'instance_name' and 'guard_color_constraints', get the smallest 'time' for each group
-grouped = data_set[(data_set['solver'] == 'Cadical103')].groupby(['instance_name']).time.min().reset_index()
+# grouped = data_set[(data_set['solver'] == 'Cadical103')].groupby(['instance_name']).time.min().reset_index()
 
 # Merge the grouped data with the original data to get the corresponding 'guard_color_constraints' values
-merged = pd.merge(grouped, data_set, on=['instance_name', 'time'], how='left')
+# merged = pd.merge(grouped, data_set, on=['instance_name', 'time'], how='left')
 
 # Sort by 'time' and get the largest 100
-entry = merged.nlargest(20, 'time')
+# entry = merged.nlargest(20, 'time')
 
 # Print the entry
-print(entry)
+# print(entry)
 
 # instances = list(dict.fromkeys(entry['instance_name'].values))
 # print(len(instances))
 
-for i in entry['instance_name'].values:
-    fastest = data_set[(data_set['instance_name'] == i)].nsmallest(3, 'time')
-    if fastest['solver'].values[0] == 'Cadical103':
-        continue
-    print(f"Instance: {i}")
-    print(entry[(entry['instance_name'] == i)][['solver', 'guard_color_constraints', 'time']].nsmallest(1, 'time'))
-    print(fastest[['solver', 'guard_color_constraints', 'time']])
+# for i in entry['instance_name'].values:
+#     fastest = data_set[(data_set['instance_name'] == i)].nsmallest(3, 'time')
+#     if fastest['solver'].values[0] == 'Cadical103':
+#         continue
+#     print(f"Instance: {i}")
+#     print(entry[(entry['instance_name'] == i)][['solver', 'guard_color_constraints', 'time']].nsmallest(1, 'time'))
+#     print(fastest[['solver', 'guard_color_constraints', 'time']])
 
-exit()
+# exit()
 
 # Create a new column for the label (solver and version)
 data_set['label'] = data_set.apply(lambda row: f"{row['solver']} (version 1)" if row['guard_color_constraints'] == False else f"{row['solver']} (version 2)", axis=1)
 
-# # Convert inf values to NaN before operating
-# data_set.replace([np.inf, -np.inf], np.nan, inplace=True)
+# Convert inf values to NaN before operating
+data_set.replace([np.inf, -np.inf], np.nan, inplace=True)
 
-# # Group the data by label
-# grouped_data = data_set.groupby('label')
+# Group the data by label
+grouped_data = data_set.groupby('label')
 
-# sns.set_theme(context="paper", style="whitegrid")
+sns.set_theme(context="paper", style="whitegrid")
 
-# fig, ax = plt.subplots(figsize=(8, 12))
+fig, ax = plt.subplots(figsize=(8, 4))
 
-# updated_data_set = pd.DataFrame()
+updated_data_set = pd.DataFrame()
 
-# # For each group (i.e., each solver), plot a separate line
-# for name, group in grouped_data:
-#     group_sorted = group.sort_values(by="time")
-#     group_sorted["cumulative_count"] = range(1, len(group_sorted) + 1)
-#     max_count = group_sorted["cumulative_count"].max()
-#     extra_row = pd.DataFrame({"time": [600], "cumulative_count": [max_count], "label": [name]})
-#     group_sorted = pd.concat([group_sorted, extra_row])
-#     updated_data_set = pd.concat([updated_data_set, group_sorted])
+# Find the overall maximum time
+xmax = data_set['time'].max()
+
+# Find the maximum number of instances solved
+ymax = data_set.groupby('label').size().max()
+
+ax.set_xlim([-1, xmax])
+ax.set_ylim([0, ymax])
+
+# For each group (i.e., each solver), plot a separate line
+for name, group in grouped_data:
+    group_sorted = group.sort_values(by="time")
+    group_sorted["cumulative_count"] = range(1, len(group_sorted) + 1)
+    max_count = group_sorted["cumulative_count"].max()
+    extra_row = pd.DataFrame({"time": [600], "cumulative_count": [max_count], "label": [name]})
+    group_sorted = pd.concat([group_sorted, extra_row])
+    updated_data_set = pd.concat([updated_data_set, group_sorted])
     
-# # Plot the data with Seaborn
-# sns.lineplot(x='time', y='cumulative_count', hue='label', data=updated_data_set, style='label', markers=True, dashes=False, drawstyle='steps-post', ax=ax)
+# Plot the data with Seaborn
+plot = sns.lineplot(x='time', y='cumulative_count', hue='label', data=updated_data_set, style='label', markers=True, dashes=False, drawstyle='steps-post', ax=ax)
 
-# ax.set(#title="Cactus Plot Comparing Algorithm Performance",
-#        xlabel="CPU time (seconds)", ylabel="# of instances solved")
+# Set the marker edge width for all lines
+for line in plot.get_lines():
+    line.set_markeredgewidth(0.2)  # Set the marker edge width to 0.2
+    line.set_markersize(2)  # Set the marker size to 2
 
-# fig.tight_layout()
+# Set the font size of the legend and its location
+plot.legend(fontsize='x-small', loc='lower right')
+
+ax.set(#title="Cactus Plot Comparing Algorithm Performance",
+       xlabel="CPU time (seconds)", ylabel="# of instances solved")
+
+fig.tight_layout()
 # plt.show()
-# plt.savefig("plots/minibenchmark_cactus_plot_runtime_SAT_with_holes.png", dpi=600)
-# exit()
+plt.savefig("plots/minibenchmark_cactus_plot_runtime_SAT_with_holes.pdf", format="pdf", dpi=600)
+exit()
 
 #-----------------------------------------------------------------------------------------------------------------------
 

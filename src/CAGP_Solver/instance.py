@@ -1,9 +1,8 @@
 import typing
 
-from pyvispoly import Point, Polygon, PolygonWithHoles
+from ._cgal_bindings import Point, Polygon, PolygonWithHoles
 
 Position = typing.Tuple[int, int]
-
 
 class Instance:
     def __init__(
