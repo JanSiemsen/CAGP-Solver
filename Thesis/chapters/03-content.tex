@@ -1,4 +1,4 @@
-\chapter{Theoretical Results}
+\chapter{Theoretical Results}\label{ch:theoretical_results}
 Based on the definitions in the previous chapter, we will prove a few theorems necessary for the implementation of the solvers. First of all, we will show that it suffices to check the coverage of the shadow witness set instead of all AVPs, which greatly reduces the size of the formulations for the CAGP.
 
 \begin{theorem}[Couto et al.~\cite{couto2011exact}]\label{thm:shadow_coverage}
@@ -106,7 +106,7 @@ For the SAT formulation of the CFCAGP, we test the feasibility of the SAT formul
 % \section{CP-SAT Formulation}
 % Similar to the Chromatic Art Gallery Problem, we use both the MIP and the SAT formulation for CP-SAT and compare them against each other in the Experiments chapter.
 
-\chapter{Implementation Details}
+\chapter{Implementation Details}\label{ch:implementation_details}
 
 \section{Instance Processing}
 The instances are given as lists of points, which represent the outer boundaries of the polygons and possible holes. First, we create a CGAL Polygon\_with\_holes\_2 using the instance input. Then, using the vertices of the polygon and its holes as the guard set $G$, we calculate the visibility regions as polygons for each guard using CGAL's ``Triangular\_expansion\_visibility\_2.h'' and save each guard together with its visibility polygon in a list. Afterward, we recursively overlay the visibility polygons using CGAL's ``Arr\_overlay\_2.h'' to obtain the AVP arrangement (\cref{alg:AVP_generation}). To be able to form the partial order over the AVPs, we overload the overlay function to save for every face a set of guards from which it was created. 

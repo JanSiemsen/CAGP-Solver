@@ -1,4 +1,4 @@
-\chapter{Experiments}
+\chapter{Experiments}\label{ch:experiments}
 \section{Experiment Environment}
 All geometric operations were implemented using the C++ library CGAL. The visibility graph creation as well as all solvers were implemented in Python (version 3.10.14). For the MIP solvers, we used Gurobi (gurobipy version 11.0.1). The SAT solvers were implemented using PySAT (python-sat version 0.1.8.dev9). Lastly, the CP-SAT solvers were implemented with OR-tools CP-SAT solver (ortools version 9.9.3963).
 The benchmarks were run in WSL2 (Windows 11, version 22H2) using an AMD Ryzen 7 7800X3D 8-Core Processor 4.20 GHz and the WSL was assigned 28 GB of RAM. All solvers were given a maximum time of 600 seconds.
@@ -478,6 +478,6 @@ In this section, we will test our newly introduced MIP and SAT formulations for 
 % \subsection{SAT Solver on Simple Polygons with Holes}
 
 \section{Threats to Validity}
-SAT solvers are required to call a deletion function to clean up the process after usage. If this function is not called, it can potentially corrupt the process. For this reason, we call this function as soon as the solver finishes solving. Additionally, we check the validity of the solution afterwards. For the CAGP, we check whether the subgraphs of the visibility graph $G_{vis}$ induced by a guard subset of each color of the solution contains no edges. For the CFCAGP, we check for each witness in all\_witness\_to\_guards whether its guard subset has a guard with a unique color among them given the color assignment of the solution.
+SAT solvers are required to call a deletion function to clean up the process after usage. If this function is not called, it can potentially corrupt the process. For this reason, we call this function as soon as the solver finishes solving. Additionally, we check the validity of the solution afterward. For the CAGP, we check whether the subgraphs of the visibility graph $G_{vis}$ induced by a guard subset of each color of the solution contains no edges. For the CFCAGP, we check for each witness in all\_witness\_to\_guards whether its guard subset has a guard with a unique color among them given the color assignment of the solution.
 
 Another consideration one has to bear in mind is that there can be fluctuations in runtime between different runs of the same solver on the same instance. This is especially the case for MIP and CP-SAT as they can use multiple cores. While conducting multiple runs and averaging the results could decrease these fluctuations, we decided against it because it would significantly extend the overall runtime of the benchmarks.
