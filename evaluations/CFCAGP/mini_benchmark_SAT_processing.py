@@ -12,6 +12,7 @@ data_set = read_as_pandas(
         "solver": instance["parameters"]["args"]["alg_params"]["solver"],
         "vertices": int(instance["parameters"]["args"]["metadata"]["vertices"]),
         "holes": instance["parameters"]["args"]["metadata"]["holes"],
+        "greedy_colors": instance["parameters"]["args"]["metadata"]["greedy_colors"],
         "colors": instance["result"]["colors"],
         "solution": instance["result"]["solution"],
         "number_of_guards": instance["result"]["number_of_guards"],
@@ -22,6 +23,8 @@ data_set = read_as_pandas(
         "time": instance["result"]["time_exact"],
     },
 )
+
+# describe("benchmarks/mini_benchmark_SAT_with_holes_cf")
 
 # data_set = data_set.loc[data_set['instance_name'] == 'g1_simple-simple_50:200v-20h_21']
 # print(data_set)
@@ -37,7 +40,50 @@ data_set = read_as_pandas(
 
 # exit()
 
+# # Group the data by 'instance_name' and check if 'success' exists in the 'status' column for each group
+# unsolved_instances = data_set.groupby('instance_name').apply(lambda x: not (x['time'] < 600).any(), include_groups=False)
+
+# # Get the 'instance_name' of the unsolved instances
+# unsolved_instance_names = unsolved_instances[unsolved_instances].index
+
+# # Print the 'instance_name' of the unsolved instances
+# print(unsolved_instance_names)
+
 data_set = data_set.loc[(data_set['status'] == 'success') & (data_set['time'] < 600)]
+
+# Find the entry with the largest 'colors'
+largest_colors_entry = data_set.nsmallest(1, 'colors')
+# Print the entry# Print the entry
+print(largest_colors_entry)
+
+exit()
+
+# Keep only the first occurrence of each 'instance_name'
+data_set = data_set.drop_duplicates(subset='instance_name')
+
+# Group the data by 'vertices' and calculate the mean of 'colors' and 'greedy_colors'
+grouped_data = data_set.groupby('vertices')[['colors', 'greedy_colors']].mean()
+
+# Round the numbers to two decimal places
+grouped_data = grouped_data.round(2).astype(str)
+
+# Remove trailing zeros
+grouped_data = grouped_data.applymap(lambda x: x.rstrip('0').rstrip('.') if '.' in x else x)
+
+# Convert the DataFrame to a LaTeX table
+latex_table = grouped_data.to_latex()
+
+# Print the LaTeX table
+print(latex_table)
+
+# Calculate the average gap between 'greedy_colors' and 'colors'
+average_gap = (data_set['greedy_colors'] - data_set['colors']).mean()
+
+# Print the average gap
+print(f"The average gap between 'greedy_colors' and 'colors' is {average_gap}")
+
+
+exit()
 
 # print(data_set)
 # exit()

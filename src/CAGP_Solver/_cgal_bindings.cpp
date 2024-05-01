@@ -647,15 +647,8 @@ PYBIND11_MODULE(_cgal_bindings, m) {
       .def("get_avps",
           [](Ex_arrangement &self) {
             std::vector<Polygon2WithHoles> avps;
-            std::vector<Ex_arrangement::Face_handle> faces;
 
-            for (auto fit = self.faces_begin(); fit != self.faces_end(); ++fit) {
-              faces.push_back(fit);
-            }
-
-            // std::cout << "Number of faces: " << faces.size() << std::endl;
-
-            for (auto f : faces) {
+            for (auto f = self.faces_begin(); f != self.faces_end(); ++f) {
               if (f->data().empty())
                 continue;
               avps.push_back(Polygon2WithHoles(_face_to_polygon(f)));
@@ -667,51 +660,28 @@ PYBIND11_MODULE(_cgal_bindings, m) {
           [](Ex_arrangement &self) {
             std::vector<Polygon2WithHoles> shadow_avps;
             std::vector<Polygon2WithHoles> light_avps;
-            std::vector<Ex_arrangement::Face_handle> faces;
 
-            for (auto fit = self.faces_begin(); fit != self.faces_end(); ++fit) {
-              faces.push_back(fit);
-            }
-
-            // std::cout << "Number of faces: " << faces.size() << std::endl;
-            // int counter = 0;
-            for (auto f : faces) {
+            for (auto f = self.faces_begin(); f != self.faces_end(); ++f) {
               if (f->data().empty())
                 continue;
               bool is_shadow = true;
               bool is_light = true;
-              // std::cout << "Face: " << counter << std::endl;
-              // std::cout << "Data of f: ";
-              // for (auto data : f->data()) {
-              //   std::cout << data << " ";
-              // }
-              // std::cout << std::endl;
 
-              // counter++;
               for (auto half_edge = f->outer_ccbs_begin(); half_edge != f->outer_ccbs_end(); ++half_edge) {
                 Ex_arrangement::Ccb_halfedge_circulator curr = *half_edge;
                 Ex_arrangement::Ccb_halfedge_circulator done = curr;
                 do {
                   if (curr->twin()->face()->data().empty()) {
-                    // std::cout << "empty twin" << std::endl;
                     ++curr;
                     continue;
                   }
                   if (!is_shadow && !is_light)
                     break;
 
-                  // std::cout << "Data of twin face: ";
-                  // for (auto data : curr->twin()->face()->data()) {
-                  //   std::cout << data << " ";
-                  // }
-
-                  // std::cout << std::endl;
                   if (std::includes(f->data().begin(), f->data().end(), curr->twin()->face()->data().begin(), curr->twin()->face()->data().end())) {
-                    // std::cout << "not_shadow" << std::endl;
                     is_shadow = false;
                   }
                   if (std::includes(curr->twin()->face()->data().begin(), curr->twin()->face()->data().end(), f->data().begin(), f->data().end())) {
-                    // std::cout << "not_light" << std::endl;
                     is_light = false;
                   }
                   ++curr;
@@ -719,11 +689,9 @@ PYBIND11_MODULE(_cgal_bindings, m) {
                 
               }
               if (is_shadow) {
-                // std::cout << "shadow" << std::endl;
                 shadow_avps.push_back(Polygon2WithHoles(_face_to_polygon(f)));
               }
               if (is_light) {
-                // std::cout << "light" << std::endl;
                 light_avps.push_back(Polygon2WithHoles(_face_to_polygon(f)));
               }
             }

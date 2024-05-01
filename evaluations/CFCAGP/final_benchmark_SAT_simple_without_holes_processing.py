@@ -7,11 +7,13 @@ import numpy as np
 
 data_set = read_as_pandas(
     "benchmarks/final_benchmark_SAT_simple_without_holes_cf",
+    # "benchmarks/salzburg_benchmark_SAT_fpg_without_holes_cf",
     lambda instance: {
         "instance_name": instance["parameters"]["args"]["metadata"]["instance_name"],
         "witness_mode": instance["parameters"]["args"]["alg_params"]["witness_mode"],
         "vertices": int(instance["parameters"]["args"]["metadata"]["vertices"]),
         "holes": instance["parameters"]["args"]["metadata"]["holes"],
+        "greedy_colors": instance["parameters"]["args"]["metadata"]["greedy_colors"],
         "colors": instance["result"]["colors"],
         "solution": instance["result"]["solution"],
         "number_of_guards": instance["result"]["number_of_guards"],
@@ -40,7 +42,38 @@ data_set = read_as_pandas(
 
 # exit()
 
-data_set = data_set.loc[(data_set['status'] == 'success') & (data_set['time'] < 600)]
+data_set = data_set.loc[(data_set['status'] == 'success') & (data_set['time'] < 600) & (data_set['vertices'] >= 100) & (data_set['witness_mode'] == 'all')]
+
+# Find the entry with the largest 'colors'
+largest_colors_entry = data_set.nlargest(1, 'colors')
+# Print the entry# Print the entry
+print(largest_colors_entry)
+
+exit()
+
+# Group the data by 'vertices' and calculate the mean of 'colors' and 'greedy_colors'
+grouped_data = data_set.groupby('vertices')[['colors', 'greedy_colors']].mean()
+
+# Round the numbers to two decimal places
+grouped_data = grouped_data.round(2).astype(str)
+
+# Remove trailing zeros
+grouped_data = grouped_data.applymap(lambda x: x.rstrip('0').rstrip('.') if '.' in x else x)
+
+# Convert the DataFrame to a LaTeX table
+latex_table = grouped_data.to_latex()
+
+# Print the LaTeX table
+print(latex_table)
+
+# Calculate the average gap between 'greedy_colors' and 'colors'
+average_gap = (data_set['greedy_colors'] - data_set['colors']).mean()
+
+# Print the average gap
+print(f"The average gap between 'greedy_colors' and 'colors' is {average_gap}")
+
+
+exit()
 
 # print(data_set)
 # exit()
@@ -60,8 +93,11 @@ data_set = data_set.loc[(data_set['status'] == 'success') & (data_set['time'] < 
 #         print(f"Entry {index} does not have a valid solution.")
 # exit()
 
-# Convert inf values to NaN before operating
-data_set.replace([np.inf, -np.inf], np.nan, inplace=True)
+# # Convert inf values to NaN before operating
+# data_set.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+# # Replace 'descending' with 'largest' and 'ascending' with 'smallest' in 'witness_mode'
+# data_set['witness_mode'] = data_set['witness_mode'].replace({'descending': 'largest', 'ascending': 'smallest'})
 
 # # Group the data by solver
 # grouped_data = data_set.groupby('witness_mode')
@@ -106,7 +142,7 @@ data_set.replace([np.inf, -np.inf], np.nan, inplace=True)
 
 # fig.tight_layout()
 # # plt.show()
-# plt.savefig("plots/final_cactus_plot_runtime_SAT_without_holes_cf.pdf", format="pdf", dpi=600)
+# plt.savefig("plots/final_cactus_plot_runtime_SAT_without_holes_cf_filtered.pdf", format="pdf", dpi=600)
 # exit()
 
 #-----------------------------------------------------------------------------------------------------------------------

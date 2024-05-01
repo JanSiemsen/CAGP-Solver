@@ -8,7 +8,7 @@ import numpy as np
 # describe("benchmarks/final_benchmark_MIP_SAT_CPSAT_simple_without_holes")
 
 data_set = read_as_pandas(
-    "benchmarks/final_benchmark_MIP_SAT_CPSAT_simple_without_holes",
+    "benchmarks/final_benchmark_MIP_SAT_CPSAT_simple_with_holes",
     lambda instance: {
         "instance_name": instance["parameters"]["args"]["metadata"]["instance_name"],
         "solver": instance["parameters"]["args"]["alg_params"]["solver"],
@@ -18,6 +18,7 @@ data_set = read_as_pandas(
         "guard_color_constraints_SAT": instance["result"]["guard_color_constraints"],
         "vertices": int(instance["parameters"]["args"]["metadata"]["vertices"]),
         "holes": instance["parameters"]["args"]["metadata"]["holes"],
+        "greedy_colors": instance["parameters"]["args"]["metadata"]["greedy_colors"],
         "colors": instance["result"]["colors"],
         "number_of_guards": instance["result"]["number_of_guards"],
         "number_of_witnesses": instance["result"]["number_of_witnesses"],
@@ -25,9 +26,69 @@ data_set = read_as_pandas(
         "iterations": instance["result"]["iterations"],
         "status": instance["result"]["status"],
         # "time": instance["runtime"],
-        "time_exact": instance["result"]["time_exact"],
+        "time": instance["result"]["time_exact"],
     },
 )
+
+data_set2 = read_as_pandas(
+    "benchmarks/mini_benchmark_SAT_with_holes_cf",
+    lambda instance: {
+        "instance_name": instance["parameters"]["args"]["metadata"]["instance_name"],
+        "solver": instance["parameters"]["args"]["alg_params"]["solver"],
+        "vertices": int(instance["parameters"]["args"]["metadata"]["vertices"]),
+        "holes": instance["parameters"]["args"]["metadata"]["holes"],
+        "greedy_colors": instance["parameters"]["args"]["metadata"]["greedy_colors"],
+        "colors": instance["result"]["colors"],
+        "solution": instance["result"]["solution"],
+        "number_of_guards": instance["result"]["number_of_guards"],
+        "number_of_witnesses": instance["result"]["number_of_witnesses"],
+        "number_total_witnesses": instance["parameters"]["args"]["metadata"]["number_total_witnesses"],
+        "iterations": instance["result"]["iterations"],
+        "status": instance["result"]["status"],
+        "time": instance["result"]["time_exact"],
+    },
+)
+ 
+data_set = data_set.loc[(data_set['status'] == 'success') & (data_set['time'] < 600) & (data_set['vertices'] <= 300) & (data_set['instance_name'] != 'g1_simple-simple_75:300v-30h_24') & (data_set['instance_name'] != 'g1_simple-simple_75:300v-30h_9') & (data_set['solver'] == 'SAT')]
+data_set2 = data_set2.loc[(data_set2['status'] == 'success') & (data_set2['time'] < 600) & (data_set2['vertices'] <= 300) & (data_set2['instance_name'] != 'g1_simple-simple_75:300v-30h_24') & (data_set2['instance_name'] != 'g1_simple-simple_75:300v-30h_9')]
+
+# Keep only the first occurrence of each 'instance_name'
+data_set = data_set.drop_duplicates(subset='instance_name')
+
+data_set2 = data_set2.drop_duplicates(subset='instance_name')
+
+# Merge the two datasets on 'instance_name'
+merged_data = pd.merge(data_set, data_set2, on='instance_name', suffixes=('_1', '_2'))
+
+# Find instances where 'greedy_colors' differ between the two datasets
+differing_instances = merged_data[merged_data['greedy_colors_1'] != merged_data['greedy_colors_2']]
+
+# Print the 'instance_name' of the instances where 'greedy_colors' differ
+print(differing_instances[['instance_name', 'greedy_colors_1', 'greedy_colors_2']])
+
+# Group the data by 'vertices' and calculate the mean of 'colors' and 'greedy_colors'
+grouped_data = data_set.groupby('vertices')[['colors', 'greedy_colors']].mean()
+
+# Round the numbers to two decimal places
+grouped_data = grouped_data.round(2).astype(str)
+
+# Remove trailing zeros
+grouped_data = grouped_data.applymap(lambda x: x.rstrip('0').rstrip('.') if '.' in x else x)
+
+# Convert the DataFrame to a LaTeX table
+latex_table = grouped_data.to_latex()
+
+# Print the LaTeX table
+print(latex_table)
+
+# Calculate the average gap between 'greedy_colors' and 'colors'
+average_gap = (data_set['greedy_colors'] - data_set['colors']).mean()
+
+# Print the average gap
+print(f"The average gap between 'greedy_colors' and 'colors' is {average_gap}")
+
+
+exit()
 
 # data_set = data_set.loc[(data_set['status'] == 'invalid')]
 
@@ -49,7 +110,30 @@ data_set = read_as_pandas(
 # else:
 #     print("Colors are not the same for all instance_name")
 
-data_set = data_set.loc[(data_set['status'] == 'success') & (data_set['time_exact'] < 600) & (data_set['vertices'] >= 100)]
+data_set = data_set.loc[(data_set['status'] == 'success') & (data_set['time_exact'] < 600) & (data_set['vertices'] >= 100) & (data_set['solver'] == 'SAT')]
+
+# Group the data by 'vertices' and calculate the mean of 'colors' and 'greedy_colors'
+grouped_data = data_set.groupby('vertices')[['colors', 'greedy_colors']].mean()
+
+# Round the numbers to two decimal places
+grouped_data = grouped_data.round(2).astype(str)
+
+# Remove trailing zeros
+grouped_data = grouped_data.applymap(lambda x: x.rstrip('0').rstrip('.') if '.' in x else x)
+
+# Convert the DataFrame to a LaTeX table
+latex_table = grouped_data.to_latex()
+
+# Print the LaTeX table
+print(latex_table)
+
+# Calculate the average gap between 'greedy_colors' and 'colors'
+average_gap = (data_set['greedy_colors'] - data_set['colors']).mean()
+
+# Print the average gap
+print(f"The average gap between 'greedy_colors' and 'colors' is {average_gap}")
+
+exit()
 
 # # Check if colors are the same for all instance_name
 # same_colors = data_set.groupby('instance_name')['colors'].nunique().eq(1).all()

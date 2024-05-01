@@ -12,6 +12,7 @@ data_set = read_as_pandas(
         "guard_color_constraints": instance["parameters"]["args"]["alg_params"]["guard_color_constraints"],
         "vertices": int(instance["parameters"]["args"]["metadata"]["vertices"]),
         "holes": instance["parameters"]["args"]["metadata"]["holes"],
+        "greedy_colors": instance["parameters"]["args"]["metadata"]["greedy_colors"],
         "colors": instance["result"]["colors"],
         "solution": instance["result"]["solution"],
         "number_of_guards": instance["result"]["number_of_guards"],
@@ -32,8 +33,6 @@ data_set = read_as_pandas(
 #     break
 
 # exit()
-
-data_set = data_set.loc[(data_set['status'] == 'success') & (data_set['time'] < 600)]
 
 # # Check if each entry has a non-empty solution
 # for index, row in data_set.iterrows():

@@ -63,39 +63,39 @@ def generate_solver_input(polygon: PolygonWithHoles):
 def generate_solver_input_cf(polygon: PolygonWithHoles, guards_on_holes: bool=True):
     GC = rx.PyGraph(multigraph=False)
 
-    # print('Creating guard set...')
+    print('Creating guard set...')
     vis_calculator = VisibilityPolygonCalculator(polygon)
     guards = {}
-    # progress = tqdm(polygon.outer_boundary().boundary())
+    progress = tqdm(polygon.outer_boundary().boundary())
     for point in polygon.outer_boundary().boundary():
         index = GC.add_node(None)
         guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
-        # progress.update()
-    # progress.close()
-    # progress = tqdm(total=len(polygon.holes()))
+        progress.update()
+    progress.close()
+    progress = tqdm(total=len(polygon.holes()))
     for hole in polygon.holes():
         for point in hole.boundary():
             index = GC.add_node(None)
             guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
-        # progress.update()
-    # progress.close()
+        progress.update()
+    progress.close()
 
-    # print('Creating AVP arrangement...')
-    # progress = tqdm(total=len(guards))
-    avp = generate_AVP_recursive(list(guards.items()))
-    # progress.refresh()
-    # progress.close()
+    print('Creating AVP arrangement...')
+    progress = tqdm(total=len(guards))
+    avp = generate_AVP_recursive(list(guards.items()), progress=progress)
+    progress.refresh()
+    progress.close()
     witness_to_guards, guard_to_witnesses, light_guard_sets, witness_to_guards_cf, guard_to_witnesses_cf, all_guard_sets = avp.get_shadow_witnesses_and_light_guard_sets(len(guards))
 
-    # print('Creating visibility graph...')
-    # progress = tqdm(total=len(light_guard_sets))
+    print('Creating visibility graph...')
+    progress = tqdm(total=len(light_guard_sets))
     for guard_set in light_guard_sets:
         for g1, g2 in combinations(guard_set, 2):
             GC.add_edge(g1, g2, None)
-        # progress.update()
-    # progress.close()
+        progress.update()
+    progress.close()
 
-    # print('Creating initial witnesses and all witnesses for conflict-free...')
+    print('Creating initial witnesses and all witnesses for conflict-free...')
     all_witnesses_cf = sorted(witness_to_guards_cf.keys(), key=lambda x: len(witness_to_guards_cf[x]), reverse=True)
     initial_witnesses_cf_desc = all_witnesses_cf[:len(guards)]
     all_witnesses_cf = sorted(witness_to_guards_cf.keys(), key=lambda x: len(witness_to_guards_cf[x]), reverse=False)
@@ -106,29 +106,29 @@ def generate_solver_input_cf(polygon: PolygonWithHoles, guards_on_holes: bool=Tr
 def generate_shadow_and_light_polygons(polygon: PolygonWithHoles, guards_on_holes: bool=True):
     GC = rx.PyGraph(multigraph=False)
 
-    # print('Creating guard set...')
+    print('Creating guard set...')
     vis_calculator = VisibilityPolygonCalculator(polygon)
     guards = {}
-    # progress = tqdm(polygon.outer_boundary().boundary())
+    progress = tqdm(polygon.outer_boundary().boundary())
     for point in polygon.outer_boundary().boundary():
         index = GC.add_node(None)
         guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
-        # progress.update()
-    # progress.close()
+        progress.update()
+    progress.close()
     if guards_on_holes:
-        # progress = tqdm(total=len(polygon.holes()))
+        progress = tqdm(total=len(polygon.holes()))
         for hole in polygon.holes():
             for point in hole.boundary():
                 index = GC.add_node(None)
                 guards[index] = (point, PolygonWithHoles(vis_calculator.compute_visibility_polygon(point)))
-            # progress.update()
-        # progress.close()
+            progress.update()
+        progress.close()
 
-    # print('Creating AVP arrangement...')
-    # progress = tqdm(total=len(guards))
-    avp = generate_AVP_recursive(list(guards.items()))
-    # progress.refresh()
-    # progress.close()
+    print('Creating AVP arrangement...')
+    progress = tqdm(total=len(guards))
+    avp = generate_AVP_recursive(list(guards.items()), progress=progress)
+    progress.refresh()
+    progress.close()
 
     shadow_avps, light_avps = avp.get_shadow_and_light_avps()
 

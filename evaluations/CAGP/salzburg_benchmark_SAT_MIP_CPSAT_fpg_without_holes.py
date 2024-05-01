@@ -10,16 +10,16 @@ from tqdm import tqdm
 benchmark = Benchmark("/home/yanyan/PythonProjects/CAGP-Solver/cagp_solver/benchmarks/salzburg_benchmark_MIP_SAT_CPSAT_fpg_without_holes")
 
 alg_params_to_evaluate = [
-    # {"solver": "MIP", "model": "MIP", "guard_color_constraints": None},
-    {"solver": "SAT", "model": "SAT", "guard_color_constraints": None},
-    # {"solver": "CPSAT", "model": "MIP", "guard_color_constraints": None},
-    {"solver": "CPSAT", "model": "SAT", "guard_color_constraints": False},
-    {"solver": "CPSAT", "model": "SAT", "guard_color_constraints": True},
+    {"solver": "MIP", "model": "MIP", "guard_color_constraints": None},
+    # {"solver": "SAT", "model": "SAT", "guard_color_constraints": None},
+    {"solver": "CPSAT", "model": "MIP", "guard_color_constraints": None},
+    # {"solver": "CPSAT", "model": "SAT", "guard_color_constraints": False},
+    # {"solver": "CPSAT", "model": "SAT", "guard_color_constraints": True},
 ]
 
 instance_list = [
-    "fpg-poly_0000040000",
-    "fpg-poly_0000030000",
+#     "fpg-poly_0000040000",
+#     "fpg-poly_0000030000",
     "fpg-poly_0000020000",
     "fpg-poly_0000010000",
     "fpg-poly_0000009500",
@@ -42,9 +42,36 @@ instance_list = [
     "fpg-poly_0000001000",
 ]
 
+# instance_list = [
+    # "fpg-poly_0000001000",
+    # "fpg-poly_0000001500",
+    # "fpg-poly_0000002000",
+    # "fpg-poly_0000002500",
+    # "fpg-poly_0000003000",
+    # "fpg-poly_0000003500",
+    # "fpg-poly_0000004000",
+    # "fpg-poly_0000004500",
+    # "fpg-poly_0000005000",
+    # "fpg-poly_0000005500",
+    # "fpg-poly_0000006000",
+    # "fpg-poly_0000006500",
+    # "fpg-poly_0000007000",
+    # "fpg-poly_0000007500",
+    # "fpg-poly_0000008000",
+    # "fpg-poly_0000008500",
+    # "fpg-poly_0000009000",
+    # "fpg-poly_0000009500",
+    # "fpg-poly_0000010000",
+    # "fpg-poly_0000020000",
+    # "fpg-poly_0000030000",
+    # "fpg-poly_0000040000",
+# ]
+
+path_to_plots = "/home/yanyan/PythonProjects/CAGP-Solver/cagp_solver/plots/instances/"
+
 def plot_solution(poly, solution, colors, path):
     print('Plotting...')
-    colors = distcolors.get_colors(colors)
+    colors = distcolors.get_colors(int(colors))
     fig, ax = plt.subplots()
     # Add this line to turn off the axes
     plt.axis('off')
@@ -53,7 +80,7 @@ def plot_solution(poly, solution, colors, path):
     for s in solution:
         (point, visibility) = guards[s[0]]
         plot_polygon(visibility, ax=ax, color=colors[s[1]], alpha=0.3, zorder=0, linewidth=0.0)
-        plt.scatter(point.x(), point.y(), color=colors[s[1]], s=1, zorder=1, edgecolors='none')
+        plt.scatter(point.x(), point.y(), color=colors[s[1]], s=3, zorder=1, edgecolors='none')
         progress.update()
     progress.close()
 
@@ -106,8 +133,8 @@ if __name__ == "__main__":
             if not status == "timeout" and not verify_solver_solution(solution, _instance[5]):
                 status = "invalid"
 
-            if status == "success":
-                plot_solution(_instance[7], solution, colors, f"plots/{metadata['instance_name']}_MIP.pdf")
+            if status == "success" and (end - start) < 600:
+                plot_solution(_instance[7], solution, colors, f"{path_to_plots}{metadata['instance_name']}_MIP.pdf")
             
             return {  # the returned values are saved to the database
                 "solver_name": None,
@@ -125,7 +152,7 @@ if __name__ == "__main__":
             # arguments starting with `_` are not saved.
 
             with multiprocessing.Pool() as pool:
-                results = [pool.apply_async(solve_and_verify, args=(solver_params, _instance)) for solver_params in [_solver1, _solver2, _solver3, _solver4, _solver5]]
+                results = [pool.apply_async(solve_and_verify, args=(solver_params, _instance[:6])) for solver_params in [_solver1, _solver2, _solver3, _solver4, _solver5]]
 
                 # Wait for any process to finish
                 while True:
@@ -135,8 +162,8 @@ if __name__ == "__main__":
                             finished_result = result.get()
                             # Terminate all other processes
                             pool.terminate()
-                            if finished_result['status'] == "success":
-                                plot_solution(_instance[7], finished_result['solution'], finished_result['colors'], f"plots/{metadata['instance_name']}_SAT.pdf")
+                            if finished_result['status'] == "success" and finished_result['time_exact'] < 600:
+                                plot_solution(_instance[7], finished_result['solution'], finished_result['colors'], f"{path_to_plots}{metadata['instance_name']}_SAT.pdf")
                             return finished_result
                 
         def eval_CPSAT(metadata, alg_params, _instance, _solver):
@@ -149,8 +176,8 @@ if __name__ == "__main__":
             if not status == "timeout" and not verify_solver_solution(solution, _instance[5]):
                 status = "invalid"
 
-            if status == "success":
-                plot_solution(_instance[7], solution, colors, f"plots/{metadata['instance_name']}_CPSAT_{alg_params['model']}_{alg_params['guard_color_constraints']}.pdf")
+            if status == "success" and (end - start) < 600:
+                plot_solution(_instance[7], solution, colors, f"{path_to_plots}{metadata['instance_name']}_CPSAT_{alg_params['model']}_{alg_params['guard_color_constraints']}.pdf")
             
             return {  # the returned values are saved to the database
                 "solver_name": None,
@@ -220,8 +247,8 @@ if __name__ == "__main__":
 
         greedyColors, greedySolution = get_greedy_solution(guard_to_witnesses, all_witnesses, GC)
 
-        # edge_clique_covers = generate_edge_clique_covers(GC, greedyColors)
-        edge_clique_covers = None
+        edge_clique_covers = generate_edge_clique_covers(GC, greedyColors)
+        # edge_clique_covers = None
 
         print(f"Processing {instance_name} took {time.time() - processing_start}")
 

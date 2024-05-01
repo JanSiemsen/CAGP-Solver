@@ -18,7 +18,7 @@ def plot_polygon(
     if type(polygon) == PolygonWithHoles:
         plot_polygon(polygon.outer_boundary(), color=color, ax=ax, **kwargs)
         for hole in polygon.holes():
-            plot_polygon(hole, color="white")
+            plot_polygon(hole, color="white", ax=ax, **kwargs)
     else:
         x = [float(p.x()) for p in polygon.boundary()]
         y = [float(p.y()) for p in polygon.boundary()]
