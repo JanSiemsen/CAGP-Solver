@@ -65,6 +65,8 @@ data_set = read_as_pandas(
 
 # exit()
 
+data_set = data_set.loc[(data_set['status'] == 'success') & (data_set['time'] < 600)]
+
 # Create a new column for the label (solver and version)
 data_set['label'] = data_set.apply(lambda row: f"{row['solver']} (version 1)" if row['guard_color_constraints'] == False else f"{row['solver']} (version 2)", axis=1)
 
@@ -86,8 +88,8 @@ xmax = data_set['time'].max()
 # Find the maximum number of instances solved
 ymax = data_set.groupby('label').size().max()
 
-ax.set_xlim([-1, xmax])
-ax.set_ylim([0, ymax])
+ax.set_xlim([-1, 600])
+ax.set_ylim([0, 160])
 
 # For each group (i.e., each solver), plot a separate line
 for name, group in grouped_data:
@@ -103,7 +105,7 @@ plot = sns.lineplot(x='time', y='cumulative_count', hue='label', data=updated_da
 
 # Set the marker edge width for all lines
 for line in plot.get_lines():
-    line.set_markeredgewidth(0.2)  # Set the marker edge width to 0.2
+    line.set_markeredgewidth(0.1)  # Set the marker edge width to 0.2
     line.set_markersize(2)  # Set the marker size to 2
 
 # Set the font size of the legend and its location
