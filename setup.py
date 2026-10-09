@@ -6,7 +6,7 @@ def readme():
     """
     :return: Content of README.md
     """
-    with open("README.md") as file:
+    with open("README.md", encoding="utf-8") as file:
         return file.read()
 
 
@@ -16,7 +16,7 @@ setup(
     name="CAGP_Solver",
     version="0.1.0",
     author="JAN SIEMSEN",
-    license="LICENSE",
+    license="GPL-3.0-or-later",
     description="Solver for the Chromatic Art Gallery Problem (CAGP) and Conflict-free Chromatic Art Gallery Problem (CFAGP).",
     long_description=readme(),
     long_description_content_type="text/markdown",
