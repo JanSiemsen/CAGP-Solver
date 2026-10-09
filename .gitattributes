@@ -1,0 +1,10 @@
+# Keep GitHub's language bar about the solver code.
+
+# Gurobi model export in MPS format. GitHub would count it as the JetBrains MPS language.
+*.mps linguist-generated
+
+# Third-party CMake script (CPM.cmake package manager).
+cmake/CPM.cmake linguist-vendored
+
+# LaTeX source of the thesis.
+Thesis/** linguist-documentation
